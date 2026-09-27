@@ -246,85 +246,147 @@
       opacity: .65;
     }
     /* ============================================================
-       iOS / Safari — BOTTOM NAVIGATION
-       Simple native-looking iOS bar. No Liquid Glass effects.
-       The bar itself stays fixed at the physical bottom; only its
-       internal padding respects the iPhone home-indicator safe area.
+       iOS / Safari — FLOATING MOBILE NAVIGATION
+       Native-feeling floating capsule inspired by modern iOS UI.
+       Desktop/iPad navigation is intentionally untouched.
        ============================================================ */
     .ios-bottom-tabbar {
       position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      width: 100%;
+      left: 12px;
+      right: 12px;
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      width: auto;
       box-sizing: border-box;
       overflow: visible;
-      background: rgba(248, 248, 250, 0.98);
-      border-top: 1px solid rgba(60, 60, 67, 0.18);
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
-      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding: 5px;
+      border: 1px solid rgba(255,255,255,.76);
+      border-radius: 34px;
+      background: rgba(248,248,250,.78);
+      box-shadow:
+        0 16px 38px rgba(0,0,0,.14),
+        0 5px 14px rgba(0,0,0,.07),
+        inset 0 1px 0 rgba(255,255,255,.92);
+      -webkit-backdrop-filter: blur(26px) saturate(155%);
+      backdrop-filter: blur(26px) saturate(155%);
       -webkit-transform: translateZ(0);
       transform: translateZ(0);
       z-index: 40;
+      transition: bottom .28s ease, box-shadow .25s ease;
     }
 
     .dark .ios-bottom-tabbar {
-      background: rgba(28, 28, 30, 0.98);
-      border-top-color: rgba(255, 255, 255, 0.14);
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.24);
+      background: rgba(28,28,30,.76);
+      border-color: rgba(255,255,255,.10);
+      box-shadow:
+        0 16px 38px rgba(0,0,0,.42),
+        0 5px 14px rgba(0,0,0,.22),
+        inset 0 1px 0 rgba(255,255,255,.07);
+    }
+
+    .ios-bottom-tabbar > .flex {
+      position: relative;
+      min-height: 58px;
+      align-items: stretch;
+      gap: 2px;
+      max-width: none;
+    }
+
+    .ios-bottom-tab-indicator {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      width: calc((100% - 8px) / 3);
+      border-radius: 28px;
+      background: rgba(0,122,255,.12);
+      border: 1px solid rgba(0,122,255,.10);
+      box-shadow:
+        0 4px 12px rgba(0,122,255,.08),
+        inset 0 1px 0 rgba(255,255,255,.72);
+      pointer-events: none;
+      z-index: 0;
+      transform: translateX(0);
+      transition: transform .48s cubic-bezier(.22,1,.36,1);
+    }
+
+    .dark .ios-bottom-tab-indicator {
+      background: rgba(0,122,255,.18);
+      border-color: rgba(100,170,255,.12);
+      box-shadow:
+        0 4px 14px rgba(0,0,0,.14),
+        inset 0 1px 0 rgba(255,255,255,.06);
     }
 
     @media (max-width: 679px) {
       .ios-bottom-tabbar {
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important;
-        padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
-        padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
-        padding-bottom: env(safe-area-inset-bottom, 0px);
+        left: 12px !important;
+        right: 12px !important;
+        width: auto !important;
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+
+      .ios-bottom-tabbar > .flex {
+        width: 100%;
       }
     }
 
     .ios-bottom-tab {
       position: relative;
+      z-index: 1;
       min-width: 0;
       flex: 1 1 0%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 3px;
-      min-height: 48px;
-      margin: 0 2px;
-      border-radius: 18px;
+      gap: 2px;
+      min-height: 58px;
+      margin: 0;
+      border-radius: 28px;
       color: rgb(142,142,147);
-      transition: color .18s ease, transform .16s cubic-bezier(.2,.8,.2,1), background .18s ease, box-shadow .18s ease;
+      background: transparent !important;
+      box-shadow: none !important;
+      transition:
+        color .28s ease,
+        transform .22s cubic-bezier(.2,.8,.2,1);
       -webkit-tap-highlight-color: transparent;
       user-select: none;
       overflow: hidden;
     }
+
     .ios-bottom-tab svg {
       width: 21px;
       height: 21px;
       stroke-width: 1.9;
-      transition: transform .18s cubic-bezier(.2,.8,.2,1);
+      transition:
+        transform .42s cubic-bezier(.22,1,.36,1),
+        stroke-width .28s ease;
     }
+
     .ios-bottom-tab span {
       font-size: 10px;
       line-height: 12px;
       font-weight: 600;
       letter-spacing: -.01em;
+      transition: transform .32s cubic-bezier(.22,1,.36,1);
     }
+
     .ios-bottom-tab.active {
       color: rgb(0,122,255);
-      background: rgba(0,122,255,.10);
-      box-shadow: inset 0 0 0 1px rgba(0,122,255,.08);
     }
+
     .ios-bottom-tab.active svg {
-      transform: translateY(-1px) scale(1.04);
+      transform: translateY(-1px) scale(1.05);
       stroke-width: 2.25;
     }
+
+    .ios-bottom-tab.active span {
+      transform: translateY(-.5px);
+      font-weight: 650;
+    }
+
     .ios-bottom-tab.active::after {
       content: '';
       position: absolute;
@@ -333,9 +395,29 @@
       height: 4px;
       border-radius: 9999px;
       background: currentColor;
+      animation: mobile-nav-dot-in .28s ease-out both;
     }
+
     .ios-bottom-tab:active {
       transform: scale(.94);
+    }
+
+    @keyframes mobile-nav-dot-in {
+      from { opacity: 0; transform: scale(.35); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Subtle number "roulette" / counting effect */
+    .number-rolling {
+      display: inline-block;
+      transform-origin: 50% 60%;
+      animation: number-roll-in .55s cubic-bezier(.22,1,.36,1);
+    }
+
+    @keyframes number-roll-in {
+      0% { opacity: .45; filter: blur(2px); transform: translateY(5px) scale(.985); }
+      55% { opacity: 1; filter: blur(0); transform: translateY(-1px) scale(1.01); }
+      100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
     }
 
     .table-scroll-shell {
@@ -973,7 +1055,7 @@
                 <h3 id="dossier-person-name" class="text-xl sm:text-2xl font-black text-apple-gray-900 dark:text-white">Selecciona una persona</h3>
                 <p id="dossier-person-subtitle" class="text-xs text-apple-gray-400">Historial discriminado de cobros y pagos</p>
               </div>
-              <button onclick="openModal('modal-add-loan')" class="ios-tap px-4 py-2 bg-apple-blue text-white rounded-2xl text-xs font-bold shadow-ios-sm flex items-center gap-1.5 self-start">
+              <button onclick="openLoanModal()" class="ios-tap px-4 py-2 bg-apple-blue text-white rounded-2xl text-xs font-bold shadow-ios-sm flex items-center gap-1.5 self-start">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 <span>Nuevo Movimiento</span>
               </button>
@@ -1038,7 +1120,7 @@
               <h3 class="text-sm sm:text-base font-bold text-apple-gray-900 dark:text-white">Libro de Operaciones de Préstamos</h3>
               <p class="text-xs text-apple-gray-400">Sincronizado en la tabla <code>prestamos</code> con tipo de cambio congelado</p>
             </div>
-            <button onclick="openModal('modal-add-loan')" class="ios-tap px-3.5 py-1.5 rounded-xl bg-apple-blue text-white text-xs font-semibold flex items-center gap-1.5 shadow-ios-sm self-start">
+            <button onclick="openLoanModal()" class="ios-tap px-3.5 py-1.5 rounded-xl bg-apple-blue text-white text-xs font-semibold flex items-center gap-1.5 shadow-ios-sm self-start">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>Registrar Flujo</span>
             </button>
@@ -1070,8 +1152,9 @@
     </main>
 
     <!-- iOS-style bottom tab bar (iPhone / Mobile) -->
-    <nav class="ipad:hidden ios-bottom-tabbar fixed bottom-0 left-0 right-0 z-40 border-t border-apple-gray-300/35 dark:border-apple-gray-700/45 px-2 pt-1.5" aria-label="Navegación principal">
+    <nav class="ipad:hidden ios-bottom-tabbar" aria-label="Navegación principal">
       <div class="flex items-stretch gap-1 max-w-md mx-auto w-full">
+        <div class="ios-bottom-tab-indicator" aria-hidden="true"></div>
         <button onclick="switchTab('airtm')" id="tab-mobile-airtm" class="ios-bottom-tab active" aria-label="Arqueos">
           <i data-lucide="wallet-cards"></i>
           <span>Arqueos</span>
@@ -1601,8 +1684,8 @@
     <div class="apple-card rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-ios-sheet">
       <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
         <div>
-          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Nuevo Movimiento de Préstamo</h3>
-          <p class="text-xs text-apple-gray-400">Verifica el tipo de cambio oficial antes de guardar</p>
+          <h3 id="loan-modal-title" class="text-base font-bold text-apple-gray-900 dark:text-white">Nuevo Movimiento de Préstamo</h3>
+          <p id="loan-modal-subtitle" class="text-xs text-apple-gray-400">Verifica el tipo de cambio oficial antes de guardar</p>
         </div>
         <button onclick="closeModal('modal-add-loan')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-700">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -1610,6 +1693,7 @@
       </div>
 
       <form id="form-loan" onsubmit="handleSaveLoan(event)" class="space-y-4">
+        <input type="hidden" name="editId" id="loan-edit-id" value="">
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-apple-gray-500 mb-1">Persona</label>
@@ -1678,7 +1762,7 @@
             Cancelar
           </button>
           <button type="submit" id="btn-save-loan-submit" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm flex items-center gap-1.5">
-            <span>Verificar FX &amp; Guardar</span>
+            <span id="btn-save-loan-label">Verificar FX &amp; Guardar</span>
           </button>
         </div>
       </form>
@@ -2348,25 +2432,25 @@
       const pendingFijos = calculatePendingFixedExpensesSum(cyc.activeKey);
 
       const statCap = document.getElementById('stat-airtm-capital-total');
-      if (statCap) statCap.innerText = formatEUR(capitalTotal);
+      if (statCap) animateNumericValue(statCap, capitalTotal, formatEUR);
 
       const statAirtm = document.getElementById('stat-airtm-balance');
-      if (statAirtm) statAirtm.innerText = formatEUR(airtm);
+      if (statAirtm) animateNumericValue(statAirtm, airtm, formatEUR);
 
       const statTotalBancos = document.getElementById('stat-total-bancos');
-      if (statTotalBancos) statTotalBancos.innerText = formatEUR(totalBancos);
+      if (statTotalBancos) animateNumericValue(statTotalBancos, totalBancos, formatEUR);
 
       const statBancosSoles = document.getElementById('stat-total-bancos-soles');
       if (statBancosSoles) statBancosSoles.innerText = formatPEN(bancosSoles);
 
       const statAcc = document.getElementById('stat-acciones');
-      if (statAcc) statAcc.innerText = formatEUR(state.acciones || 0);
+      if (statAcc) animateNumericValue(statAcc, state.acciones || 0, formatEUR);
 
       const statAccCount = document.getElementById('stat-acciones-count');
       if (statAccCount) statAccCount.innerText = `${(state.accionesLog || []).length} movs registrados`;
 
       const statLoans = document.getElementById('stat-loans-to-capital');
-      if (statLoans) statLoans.innerText = formatEUR(loansEur);
+      if (statLoans) animateNumericValue(statLoans, loansEur, formatEUR);
 
       const statCapSoles = document.getElementById('stat-capital-soles');
       if (statCapSoles) statCapSoles.innerText = formatPEN(capMadre);
@@ -3411,13 +3495,51 @@
       lucide.createIcons();
     }
 
+    function animateNumericValue(el, targetValue, formatter = formatEUR, duration = 620) {
+      if (!el) return;
+      const target = Number(targetValue) || 0;
+      const previous = Number(el.dataset.numericValue);
+      const start = Number.isFinite(previous) ? previous : 0;
+
+      if (Math.abs(start - target) < 0.005) {
+        el.dataset.numericValue = String(target);
+        el.innerHTML = formatter(target);
+        return;
+      }
+
+      const token = String(Date.now()) + Math.random();
+      el.dataset.animationToken = token;
+      el.classList.remove('number-rolling');
+      void el.offsetWidth;
+      el.classList.add('number-rolling');
+
+      const startTime = performance.now();
+      const ease = t => 1 - Math.pow(1 - t, 4);
+
+      const tick = now => {
+        if (el.dataset.animationToken !== token) return;
+        const progress = Math.min(1, (now - startTime) / duration);
+        const value = start + (target - start) * ease(progress);
+        el.dataset.numericValue = String(value);
+        el.innerHTML = formatter(value);
+        if (progress < 1) requestAnimationFrame(tick);
+        else {
+          el.dataset.numericValue = String(target);
+          el.innerHTML = formatter(target);
+          setTimeout(() => el.classList.remove('number-rolling'), 80);
+        }
+      };
+
+      requestAnimationFrame(tick);
+    }
+
     // ==========================================================
     // MODULE 3: LOANS & DEBTORS
     // ==========================================================
     function renderLoansModule() {
       const netEur = calculateConsolidatedLoansNetEUR();
       const prestNet = document.getElementById('prestamos-net-eur');
-      if (prestNet) prestNet.innerText = formatEUR(netEur);
+      if (prestNet) animateNumericValue(prestNet, netEur, formatEUR);
 
       let prestado = 0;
       let cobrado = 0;
@@ -3436,10 +3558,10 @@
       });
 
       const totPrest = document.getElementById('prestamos-total-prestado');
-      if (totPrest) totPrest.innerText = formatEUR(prestado);
+      if (totPrest) animateNumericValue(totPrest, prestado, formatEUR);
 
       const totCob = document.getElementById('prestamos-total-cobrado');
-      if (totCob) totCob.innerText = formatEUR(cobrado);
+      if (totCob) animateNumericValue(totCob, cobrado, formatEUR);
 
       renderDebtorsDirectory();
       renderLoansTable();
@@ -3604,20 +3726,20 @@
       const restaEquiv = equivPrestado - equivPagado;
 
       const dosTotPrest = document.getElementById('dossier-total-prestado');
-      if (dosTotPrest) dosTotPrest.innerText = formatEUR(equivPrestado);
+      if (dosTotPrest) animateNumericValue(dosTotPrest, equivPrestado, formatEUR);
 
       const dosPrestBreak = document.getElementById('dossier-prestado-breakdown');
       if (dosPrestBreak) dosPrestBreak.innerText = `${totalPrestadoEur > 0 ? formatEUR(totalPrestadoEur) : ''} ${totalPrestadoPen > 0 ? formatPEN(totalPrestadoPen) : ''}`;
 
       const dosTotPag = document.getElementById('dossier-total-pagado');
-      if (dosTotPag) dosTotPag.innerText = formatEUR(equivPagado);
+      if (dosTotPag) animateNumericValue(dosTotPag, equivPagado, formatEUR);
 
       const dosPagBreak = document.getElementById('dossier-pagado-breakdown');
       if (dosPagBreak) dosPagBreak.innerText = `${totalPagadoEur > 0 ? formatEUR(totalPagadoEur) : ''} ${totalPagadoPen > 0 ? formatPEN(totalPagadoPen) : ''}`;
 
       const elResta = document.getElementById('dossier-resta');
       if (elResta) {
-        elResta.innerText = formatEUR(restaEquiv);
+        animateNumericValue(elResta, restaEquiv, formatEUR);
         elResta.className = `text-sm sm:text-base font-black font-mono mt-0.5 ${restaEquiv >= 0 ? 'text-apple-blue' : 'text-apple-red'}`;
       }
 
@@ -3657,9 +3779,14 @@
           <td class="py-3 px-3 text-right font-mono font-bold">${amtFormatted}</td>
           <td class="py-3 px-3 text-right font-mono text-apple-gray-400">${formatEUR(eqEur)}</td>
           <td class="py-3 px-3 text-center">
-            <button onclick="deleteLoan('${l.id}')" class="p-1 rounded-lg text-apple-gray-400 hover:text-apple-red transition">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="openLoanModal('${l.id}')" class="p-1 rounded-lg text-apple-gray-400 hover:text-apple-blue transition" title="Editar movimiento" aria-label="Editar movimiento">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteLoan('${l.id}')" class="p-1 rounded-lg text-apple-gray-400 hover:text-apple-red transition" title="Eliminar movimiento" aria-label="Eliminar movimiento">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </td>
         `;
         tbody.appendChild(tr);
@@ -3692,6 +3819,25 @@
       update();
     }
 
+    function updateMobileNavIndicator(tabId) {
+      const nav = document.querySelector('.ios-bottom-tabbar');
+      const indicator = nav?.querySelector('.ios-bottom-tab-indicator');
+      const active = document.getElementById(`tab-mobile-${tabId}`);
+      if (!nav || !indicator || !active) return;
+
+      const buttons = Array.from(nav.querySelectorAll('.ios-bottom-tab'));
+      const index = Math.max(0, buttons.indexOf(active));
+      indicator.style.transform = `translateX(${index * 100}%)`;
+    }
+
+    window.addEventListener('resize', () => {
+      const active = document.querySelector('.ios-bottom-tab.active');
+      if (active) {
+        const id = active.id.replace('tab-mobile-', '');
+        updateMobileNavIndicator(id);
+      }
+    }, { passive: true });
+
     function switchTab(tabId) {
       document.getElementById('view-airtm').classList.add('hidden');
       document.getElementById('view-personal').classList.add('hidden');
@@ -3718,6 +3864,7 @@
       if (activeM) {
         activeM.className = 'ios-bottom-tab active';
       }
+      updateMobileNavIndicator(tabId);
 
       if (tabId === 'airtm') {
         renderAirtmModule();
@@ -3779,7 +3926,7 @@
         const dAccDate = document.getElementById('input-acc-delta-date');
         if (dAccDate) dAccDate.value = todayStr;
         const curAcc = document.getElementById('acciones-modal-current');
-        if (curAcc) curAcc.innerText = formatEUR(state.acciones || 0);
+        if (curAcc) animateNumericValue(curAcc, state.acciones || 0, formatEUR);
         updateAccionesProjectedPreview();
         renderAccionesHistoryLog();
       }
@@ -4038,7 +4185,7 @@
 
       const projected = type === 'RETIRO' ? Math.max(0, current - val) : (current + val);
       const prjElem = document.getElementById('acciones-modal-projected');
-      if (prjElem) prjElem.innerText = formatEUR(projected);
+      if (prjElem) animateNumericValue(prjElem, projected, formatEUR);
     }
 
     async function handleSaveAccionesDelta(e) {
@@ -4116,57 +4263,184 @@
       });
     }
 
+    function openLoanModal(id = null) {
+      const form = document.getElementById('form-loan');
+      const title = document.getElementById('loan-modal-title');
+      const subtitle = document.getElementById('loan-modal-subtitle');
+      const saveLabel = document.getElementById('btn-save-loan-label');
+      const editId = document.getElementById('loan-edit-id');
+      if (!form) return;
+
+      form.reset();
+      if (editId) editId.value = '';
+
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const dateInput = form.querySelector('[name="date"]');
+      if (dateInput) dateInput.value = todayStr;
+
+      if (id) {
+        const loan = (state.loans || []).find(item => String(item.id) === String(id));
+        if (!loan) {
+          showToast('Movimiento no encontrado', 'No se pudo localizar el préstamo para editar.', false);
+          return;
+        }
+
+        if (editId) editId.value = loan.id;
+        form.person.value = loan.person || '';
+        form.type.value = loan.type || 'YO_PRESTE';
+        form.currency.value = loan.currency || 'EUR';
+        form.amount.value = Number(loan.amount || 0);
+        form.notes.value = loan.notes || '';
+        form.date.value = loan.date || todayStr;
+
+        if (title) title.innerText = 'Editar Movimiento de Préstamo';
+        if (subtitle) subtitle.innerText = 'Corrige los datos y guarda los cambios.';
+        if (saveLabel) saveLabel.innerText = 'Guardar cambios';
+      } else {
+        if (title) title.innerText = 'Nuevo Movimiento de Préstamo';
+        if (subtitle) subtitle.innerText = 'Verifica el tipo de cambio oficial antes de guardar';
+        if (saveLabel) saveLabel.innerText = 'Verificar FX & Guardar';
+      }
+
+      openModal('modal-add-loan');
+    }
+
     async function handleSaveLoan(e) {
       e.preventDefault();
       const form = e.target;
+      const editId = form.editId?.value?.trim() || '';
       const btn = document.getElementById('btn-save-loan-submit');
+      const btnLabel = document.getElementById('btn-save-loan-label');
+
       if (btn) {
         btn.classList.add('opacity-75');
-        btn.innerText = 'Verificando FX en vivo...';
+        btn.disabled = true;
       }
+      if (btnLabel) btnLabel.innerText = editId ? 'Guardando cambios...' : 'Verificando FX...';
 
-      const rates = await fetchLiveFxRates();
+      try {
+        const rates = await fetchLiveFxRates();
 
-      const catMap = {
-        'YO_PRESTE': 'Yo presté',
-        'ME_PAGARON': 'Me pagaron',
-        'ME_PRESTARON': 'Me prestaron',
-        'YO_PAGUE': 'Yo pagué'
-      };
+        const catMap = {
+          'YO_PRESTE': 'Yo presté',
+          'ME_PAGARON': 'Me pagaron',
+          'ME_PRESTARON': 'Me prestaron',
+          'YO_PAGUE': 'Yo pagué'
+        };
 
-      const currency = form.currency.value;
-      const lockedRate = currency === 'PEN' ? rates.PEN : (currency === 'USD' ? rates.USD : 1);
+        const currency = form.currency.value;
+        const lockedRate = currency === 'PEN' ? rates.PEN : (currency === 'USD' ? rates.USD : 1);
 
-      const loanObj = {
-        id: 'p_' + Date.now(),
-        fecha: form.date.value,
-        persona: form.person.value.trim(),
-        asunto: form.notes.value.trim() || 'Préstamo',
-        categoria: catMap[form.type.value] || 'Yo presté',
-        moneda: currency,
-        monto: parseFloat(form.amount.value) || 0
-      };
+        const loanObj = {
+          fecha: form.date.value,
+          persona: form.person.value.trim(),
+          asunto: form.notes.value.trim() || 'Préstamo',
+          categoria: catMap[form.type.value] || 'Yo presté',
+          moneda: currency,
+          monto: parseFloat(form.amount.value) || 0
+        };
 
-      if (supabaseClient) {
-        await supabaseClient.from('prestamos').insert(loanObj);
+        if (!loanObj.persona || loanObj.monto <= 0) {
+          throw new Error('Completa la persona y un monto válido.');
+        }
+
+        if (supabaseClient) {
+          if (editId) {
+            const { error } = await supabaseClient
+              .from('prestamos')
+              .update(loanObj)
+              .eq('id', editId);
+            if (error) throw error;
+          } else {
+            const { error } = await supabaseClient
+              .from('prestamos')
+              .insert({
+                id: 'p_' + Date.now(),
+                ...loanObj
+              });
+            if (error) throw error;
+          }
+        } else {
+          // Fallback local para que el editor siga funcionando si la nube no está disponible.
+          if (editId) {
+            const idx = (state.loans || []).findIndex(item => String(item.id) === String(editId));
+            if (idx >= 0) {
+              state.loans[idx] = {
+                ...state.loans[idx],
+                id: editId,
+                date: loanObj.fecha,
+                person: loanObj.persona,
+                notes: loanObj.asunto,
+                type: form.type.value,
+                currency: loanObj.moneda,
+                amount: loanObj.monto,
+                lockedRate
+              };
+            }
+          } else {
+            state.loans.unshift({
+              id: 'p_' + Date.now(),
+              date: loanObj.fecha,
+              person: loanObj.persona,
+              notes: loanObj.asunto,
+              type: form.type.value,
+              currency: loanObj.moneda,
+              amount: loanObj.monto,
+              lockedRate
+            });
+          }
+        }
+
+        await syncAllFromCloud();
+
+        form.reset();
+        if (document.getElementById('loan-edit-id')) document.getElementById('loan-edit-id').value = '';
+        closeModal('modal-add-loan');
+
+        showToast(
+          editId ? 'Movimiento actualizado' : 'Préstamo guardado',
+          editId
+            ? `${loanObj.persona}: los datos fueron corregidos correctamente.`
+            : `${loanObj.persona}: ${loanObj.monto} ${loanObj.moneda} fijado a tasa ${lockedRate.toFixed(2)}`,
+          true
+        );
+      } catch (err) {
+        console.error('Error guardando préstamo:', err);
+        showToast('No se pudo guardar', err?.message || 'Supabase devolvió un error al guardar el movimiento.', false);
+      } finally {
+        if (btn) {
+          btn.classList.remove('opacity-75');
+          btn.disabled = false;
+        }
+        if (btnLabel) {
+          btnLabel.innerText = editId ? 'Guardar cambios' : 'Verificar FX & Guardar';
+        }
       }
-      await syncAllFromCloud();
-
-      if (btn) {
-        btn.classList.remove('opacity-75');
-        btn.innerText = 'Verificar FX & Guardar';
-      }
-
-      form.reset();
-      closeModal('modal-add-loan');
-      showToast('Préstamo Congelado', `${loanObj.persona}: ${loanObj.monto} ${loanObj.moneda} fijado a tasa ${lockedRate.toFixed(2)}`, true);
     }
 
     async function deleteLoan(id) {
-      if (supabaseClient) {
-        await supabaseClient.from('prestamos').delete().eq('id', id);
+      const loan = (state.loans || []).find(item => String(item.id) === String(id));
+      if (!loan) return;
+
+      if (!confirm(`¿Eliminar el movimiento de ${loan.person || 'esta persona'} por ${loan.amount} ${loan.currency}?\n\nEsta acción no se puede deshacer.`)) {
+        return;
       }
-      await syncAllFromCloud();
+
+      try {
+        if (supabaseClient) {
+          const { error } = await supabaseClient.from('prestamos').delete().eq('id', id);
+          if (error) throw error;
+        } else {
+          state.loans = (state.loans || []).filter(item => String(item.id) !== String(id));
+        }
+
+        await syncAllFromCloud();
+        showToast('Movimiento eliminado', 'El préstamo fue eliminado y los totales se actualizaron.', true);
+      } catch (err) {
+        console.error('Error eliminando préstamo:', err);
+        showToast('No se pudo eliminar', err?.message || 'Supabase devolvió un error.', false);
+      }
     }
 
     function toggleDarkMode() {
