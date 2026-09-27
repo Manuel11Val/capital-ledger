@@ -188,6 +188,9 @@
       transform: scale(0.965);
       opacity: 0.85;
     }
+    .ios-tap {
+      transform-origin: center;
+    }
     @keyframes pulse-cloud {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.4; transform: scale(0.92); }
@@ -418,6 +421,46 @@
       0% { opacity: .45; filter: blur(2px); transform: translateY(5px) scale(.985); }
       55% { opacity: 1; filter: blur(0); transform: translateY(-1px) scale(1.01); }
       100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
+    }
+
+    /* Final native-feel motion layer: restrained, fast and tactile. */
+    .view-native-enter {
+      animation: view-native-enter .26s cubic-bezier(.22,1,.36,1) both;
+      will-change: opacity, transform;
+    }
+
+    @keyframes view-native-enter {
+      from { opacity: .35; transform: translateY(7px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .bank-card-native-enter {
+      animation: bank-card-native-enter .34s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes bank-card-native-enter {
+      from { opacity: 0; transform: translateY(8px) scale(.985); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .sync-success {
+      animation: sync-success .42s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes sync-success {
+      0% { transform: rotate(0deg) scale(1); }
+      45% { transform: rotate(18deg) scale(1.16); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    .ios-bottom-tab-indicator {
+      will-change: transform;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .view-native-enter,
+      .bank-card-native-enter,
+      .sync-success,
+      .number-rolling { animation: none !important; }
+      .ios-bottom-tab-indicator { transition: none !important; }
     }
 
     .table-scroll-shell {
@@ -2335,6 +2378,12 @@
           showToast("Nube Actualizada", "Todos los datos están al día con Supabase.", true);
         }
 
+        if (manualTrigger && syncIcon) {
+          syncIcon.classList.remove('sync-success');
+          void syncIcon.offsetWidth;
+          syncIcon.classList.add('sync-success');
+          setTimeout(() => syncIcon.classList.remove('sync-success'), 500);
+        }
         return true;
       } catch (err) {
         console.warn("Sincronización fallback local:", err);
@@ -2530,7 +2579,7 @@
       if (statTotalBancos) animateNumericValue(statTotalBancos, totalBancos, formatEUR);
 
       const statBancosSoles = document.getElementById('stat-total-bancos-soles');
-      if (statBancosSoles) statBancosSoles.innerText = formatPEN(bancosSoles);
+      if (statBancosSoles) animateNumericValue(statBancosSoles, bancosSoles, formatPEN, 560);
 
       const statAcc = document.getElementById('stat-acciones');
       if (statAcc) animateNumericValue(statAcc, state.acciones || 0, formatEUR);
@@ -2542,7 +2591,7 @@
       if (statLoans) animateNumericValue(statLoans, loansEur, formatEUR);
 
       const statCapSoles = document.getElementById('stat-capital-soles');
-      if (statCapSoles) statCapSoles.innerText = formatPEN(capMadre);
+      if (statCapSoles) animateNumericValue(statCapSoles, capMadre, formatPEN, 560);
 
       const statMadreCount = document.getElementById('stat-madre-count');
       if (statMadreCount) statMadreCount.innerText = `${(state.capitalMadreLog || []).length} movs registrados`;
@@ -2658,6 +2707,8 @@
             </div>
           `;
           container.appendChild(card);
+        card.classList.add('bank-card-native-enter');
+        card.style.animationDelay = `${Math.min(container.children.length - 1, 5) * 35}ms`;
         }
       }
 
@@ -3289,7 +3340,7 @@
         }
 
         const dispEl = document.getElementById('personal-disp-eur');
-        if (dispEl) dispEl.innerText = formatEUR(cyc.availableVariable);
+        if (dispEl) animateNumericValue(dispEl, cyc.availableVariable, formatEUR, 520);
 
         const ringPct = document.getElementById('personal-ring-percent');
         if (ringPct) ringPct.innerText = `${formatEUR(cyc.availableTotal)} libre total`;
@@ -3303,10 +3354,10 @@
         if (dailyAllow) dailyAllow.innerText = `${formatEUR(cyc.dailyAllowance)} / día`;
 
         const budgetFix = document.getElementById('personal-budget-fixed');
-        if (budgetFix) budgetFix.innerText = formatEUR(cyc.budget);
+        if (budgetFix) animateNumericValue(budgetFix, cyc.budget, formatEUR, 520);
 
         const totFixedSpent = document.getElementById('personal-total-fixed-spent');
-        if (totFixedSpent) totFixedSpent.innerText = formatEUR(cyc.totalFixed);
+        if (totFixedSpent) animateNumericValue(totFixedSpent, cyc.totalFixed, formatEUR, 520);
 
         const fixedStatusMini = document.getElementById('personal-fixed-status-mini');
         if (fixedStatusMini) {
@@ -3314,7 +3365,7 @@
         }
 
         const totSpent = document.getElementById('personal-total-spent');
-        if (totSpent) totSpent.innerText = formatEUR(cyc.totalSpent);
+        if (totSpent) animateNumericValue(totSpent, cyc.totalSpent, formatEUR, 520);
 
         const varBudgetMini = document.getElementById('personal-var-budget-mini');
         if (varBudgetMini) {
@@ -3943,7 +3994,11 @@
         }
       });
 
-      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      const nextView = document.getElementById(`view-${tabId}`);
+      nextView.classList.remove('hidden');
+      nextView.classList.remove('view-native-enter');
+      void nextView.offsetWidth;
+      nextView.classList.add('view-native-enter');
 
       const activeD = document.getElementById(`tab-desktop-${tabId}`);
       if (activeD) {
