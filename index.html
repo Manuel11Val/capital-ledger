@@ -632,15 +632,48 @@
         -webkit-transform: translate3d(-50%, 0, 0) !important;
       }
 
-      /* Keep the app content from sitting underneath the floating capsule. */
+      /* The root container must reach the real PWA bottom. The previous
+         root padding created the visible white block under the app.
+         Reserve the navigation space inside main instead. */
       body > div:first-child {
-        padding-bottom: 96px !important;
+        padding-bottom: 0 !important;
+      }
+
+      main {
+        padding-bottom: 92px !important;
       }
 
       /* Move the whole header content slightly below Chrome's top blur. */
       body > div > header.sticky {
         top: 14px !important;
         margin-bottom: 14px !important;
+      }
+
+      /* iOS/Chrome installed web-app: the visual viewport can stop before
+         the home-indicator region. Paint that region with the app background
+         instead of leaving a detached white block. */
+      html,
+      body,
+      body > div:first-child {
+        min-height: 100dvh !important;
+        background-color: #f5f5f7 !important;
+      }
+
+      /* In standalone mode the fixed-position viewport may exclude the
+         bottom safe region. A small negative offset lets the floating pill
+         sit visually in the lower part of the real screen instead of hovering
+         above the blank PWA region. */
+      @media (display-mode: standalone) {
+        .ios-bottom-tabbar {
+          bottom: calc(10px - env(safe-area-inset-bottom, 0px)) !important;
+        }
+      }
+
+      @supports (-webkit-touch-callout: none) {
+        .ios-bottom-tabbar {
+          /* Keep a controlled offset for iOS standalone/PWA rendering. */
+          bottom: calc(10px - env(safe-area-inset-bottom, 0px)) !important;
+        }
       }
     }
 
