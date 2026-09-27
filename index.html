@@ -1188,11 +1188,11 @@
           </div>
           <div>
             <label class="block text-[11px] font-semibold text-apple-gray-500 mb-0.5">Gastos del Día (€)</label>
-            <input type="number" step="0.01" name="gastosDia" id="edit-arq-gastos" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-white dark:bg-apple-gray-700 border border-apple-gray-300 dark:border-apple-gray-600 focus:outline-none">
+            <input type="number" step="0.01" name="gastosDia" id="edit-arq-gastos" inputmode="decimal" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-white dark:bg-apple-gray-700 border border-apple-gray-300 dark:border-apple-gray-600 focus:outline-none">
           </div>
           <div>
             <label class="block text-[11px] font-semibold text-apple-gray-500 mb-0.5">Profit Diario (€)</label>
-            <input type="number" step="0.01" name="profitHoy" id="edit-arq-profit" readonly class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-600 focus:outline-none text-apple-green">
+            <input type="number" step="0.01" name="profitHoy" id="edit-arq-profit" inputmode="decimal" readonly class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-600 focus:outline-none text-apple-green">
             <span class="block text-[9px] text-apple-gray-400 mt-0.5">Variación + gastos del día</span>
           </div>
         </div>
@@ -1941,6 +1941,19 @@
       }
     }
 
+    // Orden visual fijo: Airtm siempre aparece primero en Bóvedas/Cuentas y editores.
+    const BANK_ORDER = [
+      'Airtm', 'N26', 'BBVA', 'Imagin', 'Santander', 'Bunq',
+      'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell', 'BCP', 'Interbank'
+    ];
+
+    function getOrderedBankNames(source = state.bancos) {
+      const data = source || {};
+      const known = BANK_ORDER.filter(name => Object.prototype.hasOwnProperty.call(data, name));
+      const extra = Object.keys(data).filter(name => !BANK_ORDER.includes(name));
+      return [...known, ...extra];
+    }
+
     async function syncAllFromCloud(manualTrigger = false) {
       if (!supabaseClient) {
         setCloudStatus(false, "Offline / Local");
@@ -2041,6 +2054,12 @@
             capitalSolesMadre: parseFloat(a.capital_soles) || 1365
           }));
         }
+
+        // Al cargar desde Supabase reconstruimos inmediatamente las métricas
+        // con la lógica del Excel. Así no hace falta registrar otro arqueo para
+        // que aparezca el cálculo corregido.
+        recalculateArqueoMetrics();
+        await persistArqueoMetrics();
 
         localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
         setCloudStatus(true, "En línea");
@@ -2201,6 +2220,25 @@
       return Number(sum.toFixed(2));
     }
 
+    // Gastos que deben quedar asociados al siguiente cierre registrado.
+    // Si hubo días sin Arqueo, los gastos de esos días no se pierden: se
+    // incorporan al siguiente cierre disponible. Si el cierre es del mismo
+    // día que el anterior, solo se toma ese día.
+    function getExpensesForArqueoClosure(dateStr, previousClosureDateStr = null) {
+      const target = String(dateStr || '').slice(0, 10);
+      const previous = previousClosureDateStr ? String(previousClosureDateStr).slice(0, 10) : '';
+      let sum = 0;
+
+      (state.personalExpenses || []).forEach(e => {
+        const expenseDate = String(e.date || '').slice(0, 10);
+        if (!expenseDate || expenseDate > target) return;
+        if (previous && expenseDate <= previous) return;
+        sum += Number(e.amount || 0);
+      });
+
+      return Number(sum.toFixed(2));
+    }
+
     // ==========================================================
     // MODULE 1: ARQUEOS & AIRTM
     // ==========================================================
@@ -2257,12 +2295,26 @@
 
       const nowLocal = new Date();
       const todayStr = `${nowLocal.getFullYear()}-${String(nowLocal.getMonth() + 1).padStart(2, '0')}-${String(nowLocal.getDate()).padStart(2, '0')}`;
-      const gastosHoy = getExpensesForDate(todayStr);
       let profitHoy = 0;
+      const historySorted = [...(state.arqueoHistory || [])]
+        .sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')));
+      const todaySnapshots = historySorted.filter(item => getArqueoDateOnly(item.timestamp) === todayStr);
       const previousDaySnap = getPreviousArqueoReference(todayStr);
+
       if (previousDaySnap) {
-        const delta = capitalTotal - Number(previousDaySnap.capitalTotal || 0);
-        profitHoy = Number((delta + gastosHoy).toFixed(2));
+        // Igual que el Excel: sumamos los DIF individuales de todos los arqueos
+        // de hoy y añadimos el movimiento desde el último arqueo hasta el capital
+        // actual (si todavía no se ha tomado un nuevo arqueo).
+        const difHoy = todaySnapshots.reduce((sum, item) => sum + Number(item.dif || 0), 0);
+        const lastToday = todaySnapshots[todaySnapshots.length - 1];
+        const movimientoPendiente = lastToday
+          ? Number((capitalTotal - Number(lastToday.capitalTotal || 0)).toFixed(2))
+          : Number((capitalTotal - Number(previousDaySnap.capitalTotal || 0)).toFixed(2));
+        const gastosHoy = getExpensesForArqueoClosure(
+          todayStr,
+          getArqueoDateOnly(previousDaySnap.timestamp)
+        );
+        profitHoy = Number((difHoy + movimientoPendiente + gastosHoy).toFixed(2));
       }
 
       const profitElem = document.getElementById('stat-profit-hoy');
@@ -2322,7 +2374,8 @@
           'Interbank': 'from-emerald-600 to-teal-800'
         };
 
-        for (const [name, balance] of Object.entries(state.bancos)) {
+        for (const name of getOrderedBankNames(state.bancos)) {
+          const balance = state.bancos[name];
           const isSoles = (name === 'BCP' || name === 'Interbank');
           const grad = bankGradients[name] || 'from-gray-500 to-gray-700';
           const card = document.createElement('div');
@@ -2502,21 +2555,33 @@
     // Recalcula toda la cadena de Variación/Profit después de editar o eliminar.
     // Así nunca queda un arqueo dependiendo de una cifra antigua.
     function recalculateArqueoMetrics() {
-      // MISMA LÓGICA DEL EXCEL:
-      // 1) tomar el último snapshot de cada día como cierre del día;
-      // 2) comparar ese cierre contra el último cierre de un día anterior;
-      // 3) sumar TODOS los gastos registrados para ese día;
-      // 4) Profit = Variación + Gastos del día.
+      // LÓGICA DEL EXCEL:
+      // 1) Cada arqueo calcula su DIF contra el arqueo inmediatamente anterior.
+      // 2) El resultado diario es la SUMA de TODOS los DIF realizados ese día.
+      // 3) Los gastos personales se asignan al cierre del día (incluyendo los
+      //    gastos de días sin arqueo desde el cierre anterior).
+      // 4) Profit = suma de DIF del día + gastos personales del cierre.
+      // 5) Solo el último arqueo de cada día muestra las métricas diarias.
       const sorted = [...(state.arqueoHistory || [])]
-        .sort((a, b) => {
-          const da = String(a.timestamp || '');
-          const db = String(b.timestamp || '');
-          return da.localeCompare(db);
-        });
+        .sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')));
 
       const lastByDate = new Map();
-      sorted.forEach(item => {
-        lastByDate.set(getArqueoDateOnly(item.timestamp), item);
+      const difByDate = new Map();
+
+      sorted.forEach((item, index) => {
+        const date = getArqueoDateOnly(item.timestamp);
+        lastByDate.set(date, item);
+
+        const previous = index > 0 ? sorted[index - 1] : null;
+        const dif = previous
+          ? Number((Number(item.capitalTotal || 0) - Number(previous.capitalTotal || 0)).toFixed(2))
+          : 0;
+
+        item.dif = dif;
+        item.gastosDia = 0;
+        item.profitHoy = 0;
+
+        difByDate.set(date, Number(((difByDate.get(date) || 0) + dif).toFixed(2)));
       });
 
       const dates = [...lastByDate.keys()].filter(Boolean).sort();
@@ -2524,30 +2589,22 @@
       dates.forEach((date, index) => {
         const item = lastByDate.get(date);
         const previousDate = index > 0 ? dates[index - 1] : null;
-        const reference = previousDate ? lastByDate.get(previousDate) : null;
-
-        const capitalActual = Number(item.capitalTotal || 0);
-        const capitalAnterior = reference ? Number(reference.capitalTotal || 0) : null;
-        const gastos = getExpensesForDate(date);
+        const gastos = getExpensesForArqueoClosure(date, previousDate);
+        const difDia = Number((difByDate.get(date) || 0).toFixed(2));
 
         item.gastosDia = gastos;
-        item.dif = reference
-          ? Number((capitalActual - capitalAnterior).toFixed(2))
-          : 0;
-        item.profitHoy = reference
-          ? Number((item.dif + gastos).toFixed(2))
-          : 0;
+        // Conservamos en item.dif el DIF REAL de ese arqueo (igual que AJ en Excel).
+        // El acumulado del día vive únicamente en profitHoy.
+        item.profitHoy = Number((difDia + gastos).toFixed(2));
       });
 
-      // IMPORTANTE: las métricas diarias pertenecen EXCLUSIVAMENTE al último
-      // snapshot de cada día. Los snapshots intermedios no son cierres y por
-      // tanto no deben mostrar ni variación, ni gastos acumulados, ni profit.
+      // Los arqueos intermedios conservan su DIF individual, pero las métricas
+      // de cierre (gastos y profit diario) solo aparecen en el último arqueo.
       sorted.forEach(item => {
         const date = getArqueoDateOnly(item.timestamp);
         const cierre = lastByDate.get(date);
         if (cierre && item.id !== cierre.id) {
           item.gastosDia = 0;
-          item.dif = 0;
           item.profitHoy = 0;
         }
       });
@@ -2586,16 +2643,17 @@
       const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       const todayDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
-      const referenceSnap = getPreviousArqueoReference(timeStr);
-      const dif = referenceSnap
-        ? Number((liveCap - Number(referenceSnap.capitalTotal || 0)).toFixed(2))
+      const previousSnap = [...(state.arqueoHistory || [])]
+        .sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')))
+        .at(-1);
+      const dif = previousSnap
+        ? Number((liveCap - Number(previousSnap.capitalTotal || 0)).toFixed(2))
         : 0;
 
-      // Los gastos salen del libro de gastos, igual que en Excel.
-      const gastosDia = getExpensesForDate(todayDate);
-      const profitHoy = referenceSnap
-        ? Number((dif + gastosDia).toFixed(2))
-        : 0;
+      // Los gastos y el profit diario se recalculan después de añadir el nuevo
+      // arqueo, exactamente con la lógica de la tabla del Excel.
+      const gastosDia = 0;
+      const profitHoy = 0;
       const snapId = 'arq_' + Date.now();
 
       const newSnap = {
@@ -2661,10 +2719,7 @@
       const grid = document.getElementById('edit-arq-bancos-grid');
       if (grid) {
         grid.innerHTML = '';
-        const banksList = [
-          'Airtm', 'N26', 'BBVA', 'Imagin', 'Santander', 'Bunq',
-          'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell', 'BCP', 'Interbank'
-        ];
+        const banksList = getOrderedBankNames(snap.bancos || state.bancos);
 
         banksList.forEach(bName => {
           const isSoles = (bName === 'BCP' || bName === 'Interbank');
@@ -2672,7 +2727,7 @@
           const col = document.createElement('div');
           col.innerHTML = `
             <label class="block text-[10px] font-semibold text-apple-gray-500 mb-0.5">${bName} (${isSoles ? 'S/.' : '€'})</label>
-            <input type="number" step="0.01" name="edit_b_${bName}" value="${val}" class="w-full px-2 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+            <input type="number" step="0.01" name="edit_b_${bName}" value="${val}" inputmode="decimal" class="w-full px-2 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
           `;
           grid.appendChild(col);
         });
@@ -2689,13 +2744,14 @@
       if (!snap) return;
 
       snap.timestamp = form.get('timestamp');
-      snap.gastosDia = getExpensesForDate(snap.timestamp);
+      const editReference = getPreviousArqueoReference(snap.timestamp, snap.id);
+      snap.gastosDia = getExpensesForArqueoClosure(
+        snap.timestamp,
+        editReference ? getArqueoDateOnly(editReference.timestamp) : null
+      );
 
       const updatedBanks = {};
-      const banksList = [
-        'Airtm', 'N26', 'BBVA', 'Imagin', 'Santander', 'Bunq',
-        'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell', 'BCP', 'Interbank'
-      ];
+      const banksList = getOrderedBankNames(snap.bancos || state.bancos);
       banksList.forEach(bName => {
         updatedBanks[bName] = parseFloat(form.get(`edit_b_${bName}`)) || 0;
       });
@@ -3602,12 +3658,13 @@
         const grid = document.getElementById('bank-inputs-container');
         if (grid && state.bancos) {
           grid.innerHTML = '';
-          for (const [name, val] of Object.entries(state.bancos)) {
+          for (const name of getOrderedBankNames(state.bancos)) {
+            const val = state.bancos[name];
             const isSoles = (name === 'BCP' || name === 'Interbank');
             const div = document.createElement('div');
             div.innerHTML = `
               <label class="block text-[11px] font-semibold text-apple-gray-500 mb-0.5">${name} (${isSoles ? 'S/.' : '€'})</label>
-              <input type="number" step="0.01" name="b_${name}" value="${val}" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+              <input type="number" step="0.01" name="b_${name}" value="${val}" inputmode="decimal" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
             `;
             grid.appendChild(div);
           }
@@ -3662,7 +3719,7 @@
     async function handleSaveBanks(e) {
       e.preventDefault();
       const form = new FormData(e.target);
-      for (const [name] of Object.entries(state.bancos)) {
+      for (const name of getOrderedBankNames(state.bancos)) {
         const val = form.get(`b_${name}`);
         if (val !== null) state.bancos[name] = parseFloat(val) || 0;
       }
