@@ -157,25 +157,6 @@
       padding-right: var(--sar);
     }
 
-    /* Safari iPhone: the visual viewport and the bottom safe-area can be
-       reported separately. Keep a dedicated glass floor attached to the
-       physical bottom so there can never be a white strip under navigation. */
-    body::after {
-      content: '';
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: var(--sab);
-      z-index: 39;
-      pointer-events: none;
-      background: rgba(242,242,245,.82);
-      -webkit-backdrop-filter: blur(30px) saturate(190%) contrast(1.04);
-      backdrop-filter: blur(30px) saturate(190%) contrast(1.04);
-    }
-    .dark body::after {
-      background: rgba(18,18,20,.82);
-    }
     .apple-glass {
       background: rgba(245, 245, 247, 0.88);
       backdrop-filter: blur(28px) saturate(190%);
@@ -265,96 +246,46 @@
       opacity: .65;
     }
     /* ============================================================
-       iOS / Safari — LIQUID GLASS BOTTOM BAR
-       The fixed element itself stays at bottom:0. Safari's home
-       indicator area is filled by a dedicated glass extension so the
-       navigation never appears to float above the physical bottom.
+       iOS / Safari — BOTTOM NAVIGATION
+       Simple native-looking iOS bar. No Liquid Glass effects.
+       The bar itself stays fixed at the physical bottom; only its
+       internal padding respects the iPhone home-indicator safe area.
        ============================================================ */
     .ios-bottom-tabbar {
       position: fixed;
-      isolation: isolate;
-      overflow: visible;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.72), rgba(248,248,250,.54) 55%, rgba(242,242,245,.66));
-      -webkit-backdrop-filter: blur(30px) saturate(190%) contrast(1.04);
-      backdrop-filter: blur(30px) saturate(190%) contrast(1.04);
-      box-shadow:
-        0 -1px 0 rgba(255,255,255,.78),
-        0 -12px 34px rgba(0,0,0,.055),
-        0 -1px 0 rgba(0,0,0,.055) inset,
-        0 1px 0 rgba(255,255,255,.62) inset;
-    }
-
-    /* Soft specular highlight, similar to Apple's translucent materials. */
-    .ios-bottom-tabbar::before {
-      content: '';
-      position: absolute;
-      z-index: -1;
-      left: 8%;
-      right: 8%;
-      top: 0;
-      height: 1px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.96) 18%, rgba(255,255,255,.96) 82%, transparent);
-      opacity: .9;
-      pointer-events: none;
-    }
-
-    /* This layer occupies only Safari's bottom safe-area inset.
-       It is intentionally NOT achieved by moving the whole nav downward. */
-    .ios-bottom-tabbar::after {
-      content: '';
-      position: absolute;
-      z-index: -1;
       left: 0;
       right: 0;
-      bottom: calc(-1 * var(--sab));
-      height: var(--sab);
-      background: inherit;
-      -webkit-backdrop-filter: blur(30px) saturate(190%) contrast(1.04);
-      backdrop-filter: blur(30px) saturate(190%) contrast(1.04);
-      pointer-events: none;
+      bottom: 0;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: visible;
+      background: rgba(248, 248, 250, 0.98);
+      border-top: 1px solid rgba(60, 60, 67, 0.18);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      z-index: 40;
     }
 
     .dark .ios-bottom-tabbar {
-      background:
-        linear-gradient(180deg, rgba(42,42,45,.72), rgba(28,28,30,.58) 55%, rgba(18,18,20,.72));
-      box-shadow:
-        0 -1px 0 rgba(255,255,255,.18),
-        0 -12px 34px rgba(0,0,0,.24),
-        0 -1px 0 rgba(255,255,255,.08) inset,
-        0 1px 0 rgba(255,255,255,.12) inset;
+      background: rgba(28, 28, 30, 0.98);
+      border-top-color: rgba(255, 255, 255, 0.14);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.24);
     }
 
-    /* Safari can report a zero safe-area on ordinary browser tabs; in that
-       case the extension simply has zero height and changes nothing. */
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    @media (max-width: 679px) {
       .ios-bottom-tabbar {
-        position: fixed !important;
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
         width: 100% !important;
-        padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px)) !important;
-        transform: translateZ(0);
+        padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+        padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
       }
     }
 
-    /* Safari/iPhone only: the navigation surface remains visually connected
-       to the bottom edge, while the Home Indicator gets its own glass floor. */
-    @media (max-width: 679px) {
-      .ios-bottom-tabbar {
-        bottom: 0 !important;
-        width: 100vw !important;
-        min-height: 64px;
-        padding-left: max(0.5rem, env(safe-area-inset-left, 0px)) !important;
-        padding-right: max(0.5rem, env(safe-area-inset-right, 0px)) !important;
-      }
-      .ios-bottom-tabbar::after {
-        bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
-        height: env(safe-area-inset-bottom, 0px);
-      }
-    }
     .ios-bottom-tab {
       position: relative;
       min-width: 0;
@@ -387,26 +318,8 @@
     }
     .ios-bottom-tab.active {
       color: rgb(0,122,255);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.58), rgba(0,122,255,.105));
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.72) inset,
-        0 -1px 0 rgba(0,122,255,.035) inset,
-        0 5px 16px rgba(0,122,255,.07);
-      -webkit-backdrop-filter: blur(18px) saturate(170%);
-      backdrop-filter: blur(18px) saturate(170%);
-    }
-
-    .ios-bottom-tab.active::before {
-      content: '';
-      position: absolute;
-      left: 18%;
-      right: 18%;
-      top: 0;
-      height: 1px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.88);
-      pointer-events: none;
+      background: rgba(0,122,255,.10);
+      box-shadow: inset 0 0 0 1px rgba(0,122,255,.08);
     }
     .ios-bottom-tab.active svg {
       transform: translateY(-1px) scale(1.04);
@@ -423,9 +336,6 @@
     }
     .ios-bottom-tab:active {
       transform: scale(.94);
-    }
-    @media (prefers-color-scheme: dark) {
-      .ios-bottom-tabbar { background: rgba(28, 28, 30, .78); }
     }
 
     .table-scroll-shell {
@@ -2076,6 +1986,18 @@
       return [...known, ...extra];
     }
 
+    let realtimeSyncTimer = null;
+    let isPersistingArqueoMetrics = false;
+
+    function scheduleRealtimeCloudSync() {
+      if (realtimeSyncTimer) clearTimeout(realtimeSyncTimer);
+      realtimeSyncTimer = setTimeout(() => {
+        realtimeSyncTimer = null;
+        if (isPersistingArqueoMetrics) return;
+        syncAllFromCloud().catch(err => console.warn('Sincronización Realtime:', err));
+      }, 450);
+    }
+
     async function syncAllFromCloud(manualTrigger = false) {
       if (!supabaseClient) {
         setCloudStatus(false, "Offline / Local");
@@ -2220,12 +2142,11 @@
           }
         }
 
-        // Al cargar desde Supabase reconstruimos inmediatamente las métricas
-        // con la lógica del Excel. Así no hace falta registrar otro arqueo para
-        // que aparezca el cálculo corregido.
+        // Primero reconstruimos y PINTAMOS el estado real de Supabase.
+        // No esperamos a actualizar fila por fila la tabla arqueos, porque eso
+        // hacía que en iPhone se viera el estado inicial/antiguo durante varios
+        // segundos y que pareciera que los datos aparecían solo al cambiar de pestaña.
         recalculateArqueoMetrics();
-        await persistArqueoMetrics();
-
         localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
         setCloudStatus(true, "En línea");
 
@@ -2233,12 +2154,19 @@
         renderPersonalModule();
         renderLoansModule();
 
+        // Las métricas se recalculan en memoria para mostrar el valor correcto.
+        // No escribimos de vuelta aquí: hacerlo en cada sincronización provoca
+        // un bucle Realtime (UPDATE -> sync -> UPDATE -> ...).
+
         if (manualTrigger) {
           showToast("Nube Actualizada", "Todos los datos están al día con Supabase.", true);
         }
+
+        return true;
       } catch (err) {
         console.warn("Sincronización fallback local:", err);
         setCloudStatus(false, "Desconectado");
+        return false;
       } finally {
         if (syncIcon) syncIcon.classList.remove('animate-spin');
       }
@@ -2277,10 +2205,10 @@
 
       supabaseClient
         .channel('schema-db-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'gastos' }, () => syncAllFromCloud())
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'prestamos' }, () => syncAllFromCloud())
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'arqueos' }, () => syncAllFromCloud())
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'app_config' }, () => syncAllFromCloud())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'gastos' }, scheduleRealtimeCloudSync)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'prestamos' }, scheduleRealtimeCloudSync)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'arqueos' }, scheduleRealtimeCloudSync)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'app_config' }, scheduleRealtimeCloudSync)
         .subscribe((status) => {
           if (status === 'SUBSCRIBED') {
             setCloudStatus(true, "En línea");
@@ -2781,15 +2709,21 @@
         localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
         return;
       }
-      for (const item of state.arqueoHistory || []) {
-        const { error } = await supabaseClient.from('arqueos').update({
-          dif: Number(item.dif || 0),
-          profit: Number(item.profitHoy || 0),
-          gasto_personal_dia: Number(item.gastosDia || 0)
-        }).eq('id', item.id);
-        if (error) throw error;
+
+      isPersistingArqueoMetrics = true;
+      try {
+        for (const item of state.arqueoHistory || []) {
+          const { error } = await supabaseClient.from('arqueos').update({
+            dif: Number(item.dif || 0),
+            profit: Number(item.profitHoy || 0),
+            gasto_personal_dia: Number(item.gastosDia || 0)
+          }).eq('id', item.id);
+          if (error) throw error;
+        }
+        localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
+      } finally {
+        isPersistingArqueoMetrics = false;
       }
-      localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
     }
 
     async function takeArqueoSnapshot() {
@@ -2808,9 +2742,9 @@
       const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       const todayDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
-      const previousSnap = [...(state.arqueoHistory || [])]
-        .sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')))
-        .at(-1);
+      const sortedSnapshots = [...(state.arqueoHistory || [])]
+        .sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')));
+      const previousSnap = sortedSnapshots.length ? sortedSnapshots[sortedSnapshots.length - 1] : null;
       const dif = previousSnap
         ? Number((liveCap - Number(previousSnap.capitalTotal || 0)).toFixed(2))
         : 0;
@@ -4427,14 +4361,28 @@
         }
       } catch (e) {}
 
-      renderAirtmModule();
-      renderPersonalModule();
-      renderLoansModule();
       lucide.createIcons();
 
       fetchLiveFxRates();
       setupSupabaseRealtime();
-      await syncAllFromCloud();
+
+      // En dispositivos nuevos NO pintamos primero los valores seed/locales.
+      // Esperamos a que Supabase entregue el estado real y así evitamos el
+      // efecto de “primero salen números cualquiera y al cambiar de pestaña se arreglan”.
+      if (supabaseClient) {
+        const synced = await syncAllFromCloud();
+        if (!synced) {
+          renderAirtmModule();
+          renderPersonalModule();
+          renderLoansModule();
+          lucide.createIcons();
+        }
+      } else {
+        renderAirtmModule();
+        renderPersonalModule();
+        renderLoansModule();
+        lucide.createIcons();
+      }
     });
   </script>
 </body>
