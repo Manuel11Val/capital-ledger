@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full antialiased">
+<html lang="es" class="antialiased">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -554,126 +554,87 @@
 
 
     /* ============================================================
-       FINAL iPHONE PWA POLISH
-       - Bottom navigation sits above the home-indicator area without
-         inheriting the oversized safe-area offset reported by some
-         Chrome/iOS installed web-app contexts.
-       - Header is lowered a few pixels so Chrome's top visual blur
-         does not sit directly over the brand/text.
+       MOBILE / INSTALLED PWA VIEWPORT FIX
+       Keep the app shell stretched to the actual CSS viewport and
+       remove the old root bottom-padding utility that left a dead zone.
        ============================================================ */
     @media (max-width: 679px) {
-      /* Floating navigation: truly detached from the bottom edge. */
-      .ios-bottom-tabbar {
-        left: 50% !important;
-        right: auto !important;
-        width: min(calc(100% - 32px), 620px) !important;
-        max-width: 620px !important;
-        bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) - 48px)) !important;
-        padding: 5px !important;
-        border-radius: 38px !important;
-        background: rgba(248,248,250,.86) !important;
-        border: 1px solid rgba(255,255,255,.90) !important;
-        box-shadow:
-          0 18px 42px rgba(0,0,0,.16),
-          0 5px 16px rgba(0,0,0,.08),
-          inset 0 1px 0 rgba(255,255,255,.98) !important;
-        transform: translateX(-50%) translateZ(0) !important;
-        -webkit-transform: translateX(-50%) translateZ(0) !important;
+      html {
+        height: 100%;
+        min-height: 100%;
+        background: #f5f5f7;
       }
 
-      .dark .ios-bottom-tabbar {
-        background: rgba(28,28,30,.84) !important;
-        border-color: rgba(255,255,255,.12) !important;
-        box-shadow:
-          0 18px 42px rgba(0,0,0,.46),
-          0 5px 16px rgba(0,0,0,.24),
-          inset 0 1px 0 rgba(255,255,255,.08) !important;
+      html.dark {
+        background: #000000;
       }
 
-      .ios-bottom-tabbar > .flex {
-        min-height: 60px !important;
-        height: 60px !important;
+      body {
+        height: auto !important;
+        min-height: 100vh !important;
+        min-height: 100dvh !important;
+        padding-bottom: 0 !important;
+        background: #f5f5f7 !important;
       }
 
-      .ios-bottom-tab {
-        min-height: 60px !important;
+      .dark body {
+        background: #000000 !important;
       }
 
-      /* Chrome/iOS top visual layer: move the app header away from the
-         browser's translucent/status area instead of letting the blur
-         overlap the first line of text. */
-      body > div > header.sticky {
-        top: 7px !important;
-        margin-bottom: 7px !important;
+      #app-shell {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: 100vh !important;
+        min-height: 100dvh !important;
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+        box-sizing: border-box !important;
+        background: #f5f5f7 !important;
       }
 
-      body > div > header.sticky > div {
-        position: relative;
-        z-index: 1;
+      .dark #app-shell {
+        background: #000000 !important;
       }
-    }
 
-  
-    /* FINAL MOBILE POSITION FIX — Chrome PWA / iOS
-       Do not use env(safe-area-inset-bottom) for the floating nav here.
-       In the installed Chrome/PWA viewport it can report an oversized
-       bottom inset, which visually lifts the capsule far above the edge. */
-    @media (max-width: 679px) {
+      main {
+        flex: 1 0 auto !important;
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+        margin-bottom: 0 !important;
+      }
+
       .ios-bottom-tabbar {
         position: fixed !important;
         top: auto !important;
         left: 50% !important;
         right: auto !important;
-        bottom: 10px !important;
+        bottom: 8px !important;
         width: calc(100% - 32px) !important;
         max-width: 620px !important;
         margin: 0 !important;
+        padding: 5px !important;
+        border-radius: 38px !important;
         transform: translate3d(-50%, 0, 0) !important;
         -webkit-transform: translate3d(-50%, 0, 0) !important;
+        z-index: 9999 !important;
       }
 
-      /* The root container must reach the real PWA bottom. The previous
-         root padding created the visible white block under the app.
-         Reserve the navigation space inside main instead. */
-      body > div:first-child {
-        padding-bottom: 0 !important;
+      .ios-bottom-tabbar > .flex {
+        width: 100% !important;
+        max-width: none !important;
       }
 
-      main {
-        padding-bottom: 92px !important;
-      }
-
-      /* Move the whole header content slightly below Chrome's top blur. */
-      body > div > header.sticky {
+      /* Move the header content below the top system blur. */
+      body > #app-shell > header.sticky {
         top: 14px !important;
         margin-bottom: 14px !important;
       }
+    }
 
-      /* iOS/Chrome installed web-app: the visual viewport can stop before
-         the home-indicator region. Paint that region with the app background
-         instead of leaving a detached white block. */
-      html,
-      body,
-      body > div:first-child {
-        min-height: 100dvh !important;
-        background-color: #f5f5f7 !important;
-      }
-
-      /* In standalone mode the fixed-position viewport may exclude the
-         bottom safe region. A small negative offset lets the floating pill
-         sit visually in the lower part of the real screen instead of hovering
-         above the blank PWA region. */
-      @media (display-mode: standalone) {
-        .ios-bottom-tabbar {
-          bottom: calc(10px - env(safe-area-inset-bottom, 0px)) !important;
-        }
-      }
-
-      @supports (-webkit-touch-callout: none) {
-        .ios-bottom-tabbar {
-          /* Keep a controlled offset for iOS standalone/PWA rendering. */
-          bottom: calc(10px - env(safe-area-inset-bottom, 0px)) !important;
-        }
+    /* Tablet/desktop keep their established layout. */
+    @media (min-width: 680px) {
+      #app-shell {
+        min-height: 100vh;
       }
     }
 
@@ -682,7 +643,7 @@
 
 <body class="h-full bg-apple-gray-100 dark:bg-apple-gray-900 text-apple-gray-800 dark:text-apple-gray-100 font-sans select-none selection:bg-apple-blue selection:text-white transition-colors duration-300">
 
-  <div class="min-h-full flex flex-col pb-[calc(5.5rem+var(--sab))] ipad:pb-12">
+  <div id="app-shell" class="flex flex-col ipad:pb-12">
 
     <!-- Apple Top Navigation Bar -->
     <header class="sticky top-0 z-40 apple-glass border-b border-apple-gray-300/40 dark:border-apple-gray-700/50">
