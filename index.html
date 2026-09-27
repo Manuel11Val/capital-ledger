@@ -197,11 +197,152 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    .swipe-row {
+    /* iPhone / iOS interaction: no accidental swipe-to-edit.
+       Editing is armed only after a deliberate long press. */
+    .longpress-row {
       position: relative;
-      touch-action: pan-y;
-      transition: transform 0.2s ease-out;
+      touch-action: pan-x pan-y;
+      -webkit-touch-callout: none;
+      transition: background-color 0.18s ease, box-shadow 0.18s ease;
     }
+    .longpress-row.longpress-arming {
+      background: rgba(0, 122, 255, 0.055);
+      box-shadow: inset 3px 0 0 rgba(0, 122, 255, 0.45);
+    }
+    .longpress-row.longpress-ready {
+      background: rgba(0, 122, 255, 0.09);
+      box-shadow: inset 3px 0 0 rgba(0, 122, 255, 0.9);
+    }
+    .longpress-indicator {
+      position: absolute;
+      left: 0.45rem;
+      top: 50%;
+      width: 22px;
+      height: 22px;
+      margin-top: -11px;
+      border-radius: 9999px;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      transform: scale(.72);
+      pointer-events: none;
+      background: rgba(0,122,255,.12);
+      color: rgb(0,122,255);
+      transition: opacity .16s ease, transform .18s cubic-bezier(.2,.8,.2,1);
+      z-index: 2;
+    }
+    .longpress-row.longpress-arming .longpress-indicator,
+    .longpress-row.longpress-ready .longpress-indicator {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .longpress-indicator::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      background: currentColor;
+      opacity: .65;
+    }
+    .ios-bottom-tabbar {
+      background: rgba(248, 248, 248, .78);
+      -webkit-backdrop-filter: saturate(180%) blur(24px);
+      backdrop-filter: saturate(180%) blur(24px);
+      box-shadow: 0 -1px 0 rgba(0,0,0,.06), 0 -10px 30px rgba(0,0,0,.035);
+    }
+    .dark .ios-bottom-tabbar {
+      background: rgba(28, 28, 30, .78);
+      box-shadow: 0 -1px 0 rgba(255,255,255,.07), 0 -10px 30px rgba(0,0,0,.18);
+    }
+    .ios-bottom-tab {
+      position: relative;
+      min-width: 0;
+      flex: 1 1 0%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      min-height: 48px;
+      border-radius: 16px;
+      color: rgb(142,142,147);
+      transition: color .18s ease, transform .16s cubic-bezier(.2,.8,.2,1), background .18s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .ios-bottom-tab svg {
+      width: 21px;
+      height: 21px;
+      stroke-width: 1.9;
+      transition: transform .18s cubic-bezier(.2,.8,.2,1);
+    }
+    .ios-bottom-tab span {
+      font-size: 10px;
+      line-height: 12px;
+      font-weight: 600;
+      letter-spacing: -.01em;
+    }
+    .ios-bottom-tab.active {
+      color: rgb(0,122,255);
+      background: rgba(0,122,255,.085);
+    }
+    .ios-bottom-tab.active svg {
+      transform: translateY(-1px) scale(1.04);
+      stroke-width: 2.25;
+    }
+    .ios-bottom-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      width: 4px;
+      height: 4px;
+      border-radius: 9999px;
+      background: currentColor;
+    }
+    .ios-bottom-tab:active {
+      transform: scale(.94);
+    }
+    @media (prefers-color-scheme: dark) {
+      .ios-bottom-tabbar { background: rgba(28, 28, 30, .78); }
+    }
+
+    .table-scroll-shell {
+      position: relative;
+      overflow: hidden;
+    }
+    .table-scroll-shell::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 26px;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.72));
+      opacity: 1;
+      transition: opacity .2s ease;
+    }
+    .table-scroll-shell.is-scrolled::after { opacity: 0; }
+    .table-scroll {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .arqueo-sticky-col {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: rgba(255,255,255,.96);
+      box-shadow: 7px 0 12px -12px rgba(0,0,0,.45);
+    }
+    thead .arqueo-sticky-col { z-index: 5; background: rgba(242,242,247,.97); }
+    .dark .arqueo-sticky-col {
+      background: rgba(28,28,30,.96);
+      box-shadow: 7px 0 12px -12px rgba(0,0,0,.7);
+    }
+    .dark thead .arqueo-sticky-col { background: rgba(44,44,46,.97); }
+
 
 
     /* ============================================================
@@ -516,7 +657,7 @@
                 </span>
               </div>
               <p class="text-[11px] sm:text-xs text-apple-gray-400">
-                Pulsa <strong>Editar</strong> (o desliza a la izquierda en móvil) para subsanar errores o borrar una fila con seguridad.
+                En móvil, <strong>mantén pulsada una fila</strong> para editarla. El gesto muestra una señal visual y, si el dispositivo lo permite, una vibración breve.
               </p>
             </div>
             <div class="flex items-center gap-2">
@@ -531,11 +672,12 @@
             </div>
           </div>
 
-          <div class="overflow-x-auto rounded-2xl border border-apple-gray-200/50 dark:border-apple-gray-700/50">
+          <div id="arqueo-table-shell" class="table-scroll-shell rounded-2xl border border-apple-gray-200/50 dark:border-apple-gray-700/50">
+            <div id="arqueo-table-scroll" class="table-scroll">
             <table class="w-full text-left text-xs whitespace-nowrap">
               <thead class="bg-apple-gray-100/70 dark:bg-apple-gray-800/70 text-apple-gray-400 uppercase font-semibold text-[10px]">
                 <tr>
-                  <th class="py-3 px-3">Fecha y Hora</th>
+                  <th class="arqueo-sticky-col py-3 px-3">Fecha y Hora</th>
                   <th class="py-3 px-3 text-right">Capital Total</th>
                   <th class="py-3 px-3 text-right">Variación</th>
                   <th class="py-3 px-3 text-right">Gastos Día</th>
@@ -561,6 +703,11 @@
                 <!-- Dynamically rendered rows -->
               </tbody>
             </table>
+            </div>
+          </div>
+          <div id="arqueo-scroll-hint" class="mt-2 flex items-center justify-center gap-1.5 text-[9px] font-semibold text-apple-gray-400 sm:hidden">
+            <i data-lucide="move-horizontal" class="w-3 h-3"></i>
+            <span>Desliza horizontalmente para ver más cuentas</span>
           </div>
         </div>
 
@@ -890,20 +1037,20 @@
 
     </main>
 
-    <!-- Apple Bottom Segmented Tab Bar (iPhone / Mobile) -->
-    <nav class="ipad:hidden fixed bottom-0 left-0 right-0 z-40 apple-glass border-t border-apple-gray-300/40 dark:border-apple-gray-700/50 px-4 py-2 pb-[calc(0.5rem+var(--sab))]">
-      <div class="flex items-center justify-around max-w-md mx-auto">
-        <button onclick="switchTab('airtm')" id="tab-mobile-airtm" class="flex flex-col items-center gap-1 text-apple-blue py-1 px-3">
-          <i data-lucide="wallet-cards" class="w-5 h-5"></i>
-          <span class="text-[10px] font-semibold">Arqueos</span>
+    <!-- iOS-style bottom tab bar (iPhone / Mobile) -->
+    <nav class="ipad:hidden ios-bottom-tabbar fixed bottom-0 left-0 right-0 z-40 border-t border-apple-gray-300/35 dark:border-apple-gray-700/45 px-2 pt-1.5 pb-[calc(0.35rem+var(--sab))]" aria-label="Navegación principal">
+      <div class="flex items-stretch gap-1 max-w-md mx-auto w-full">
+        <button onclick="switchTab('airtm')" id="tab-mobile-airtm" class="ios-bottom-tab active" aria-label="Arqueos">
+          <i data-lucide="wallet-cards"></i>
+          <span>Arqueos</span>
         </button>
-        <button onclick="switchTab('personal')" id="tab-mobile-personal" class="flex flex-col items-center gap-1 text-apple-gray-400 py-1 px-3">
-          <i data-lucide="credit-card" class="w-5 h-5"></i>
-          <span class="text-[10px] font-semibold">Personal</span>
+        <button onclick="switchTab('personal')" id="tab-mobile-personal" class="ios-bottom-tab" aria-label="Personal">
+          <i data-lucide="credit-card"></i>
+          <span>Personal</span>
         </button>
-        <button onclick="switchTab('prestamos')" id="tab-mobile-prestamos" class="flex flex-col items-center gap-1 text-apple-gray-400 py-1 px-3">
-          <i data-lucide="users" class="w-5 h-5"></i>
-          <span class="text-[10px] font-semibold">Préstamos</span>
+        <button onclick="switchTab('prestamos')" id="tab-mobile-prestamos" class="ios-bottom-tab" aria-label="Préstamos">
+          <i data-lucide="users"></i>
+          <span>Préstamos</span>
         </button>
       </div>
     </nav>
@@ -2219,22 +2366,59 @@
 
       list.forEach((item) => {
         const tr = document.createElement('tr');
-        tr.className = 'swipe-row hover:bg-apple-gray-50/70 dark:hover:bg-apple-gray-800/40 transition group';
+        tr.className = 'longpress-row hover:bg-apple-gray-50/70 dark:hover:bg-apple-gray-800/40 transition group';
         tr.id = `row-${item.id}`;
 
-        let touchStartX = 0;
-        let touchEndX = 0;
+        // Edición deliberada: mantener pulsada la fila ~650 ms.
+        // Cualquier desplazamiento horizontal/vertical cancela el gesto,
+        // evitando que un scroll normal abra accidentalmente el editor.
+        const longPressIndicator = document.createElement('span');
+        longPressIndicator.className = 'longpress-indicator';
+        longPressIndicator.setAttribute('aria-hidden', 'true');
+        tr.appendChild(longPressIndicator);
 
-        tr.addEventListener('touchstart', (e) => {
-          touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
+        let pressTimer = null;
+        let pressStartX = 0;
+        let pressStartY = 0;
+        let longPressTriggered = false;
 
-        tr.addEventListener('touchend', (e) => {
-          touchEndX = e.changedTouches[0].screenX;
-          if (touchStartX - touchEndX > 50) {
-            openEditArqueoModal(item.id);
+        const cancelLongPress = () => {
+          if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
           }
-        }, { passive: true });
+          if (!longPressTriggered) tr.classList.remove('longpress-arming');
+        };
+
+        tr.addEventListener('pointerdown', (e) => {
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          pressStartX = e.clientX;
+          pressStartY = e.clientY;
+          longPressTriggered = false;
+          tr.classList.add('longpress-arming');
+          pressTimer = setTimeout(() => {
+            longPressTriggered = true;
+            tr.classList.remove('longpress-arming');
+            tr.classList.add('longpress-ready');
+            if (navigator.vibrate) navigator.vibrate(12);
+            setTimeout(() => tr.classList.remove('longpress-ready'), 280);
+            openEditArqueoModal(item.id);
+            pressTimer = null;
+          }, 650);
+        });
+
+        tr.addEventListener('pointermove', (e) => {
+          if (!pressTimer) return;
+          const movedX = Math.abs(e.clientX - pressStartX);
+          const movedY = Math.abs(e.clientY - pressStartY);
+          if (movedX > 10 || movedY > 10) cancelLongPress();
+        });
+
+        tr.addEventListener('pointerup', cancelLongPress);
+        tr.addEventListener('pointercancel', cancelLongPress);
+        tr.addEventListener('pointerleave', (e) => {
+          if (e.pointerType === 'mouse') cancelLongPress();
+        });
 
         // Solo el último snapshot del día es el cierre diario.
         // Ahí se muestran: variación frente al cierre anterior, suma de todos
@@ -2266,7 +2450,7 @@
         const b = item.bancos || {};
 
         tr.innerHTML = `
-          <td class="py-3 px-3 font-semibold text-apple-gray-800 dark:text-gray-200">${item.timestamp}</td>
+          <td class="arqueo-sticky-col py-3 px-3 font-semibold text-apple-gray-800 dark:text-gray-200">${item.timestamp}</td>
           <td class="py-3 px-3 text-right font-black text-apple-gray-900 dark:text-white">${formatEUR(item.capitalTotal)}</td>
           <td class="py-3 px-3 text-right" title="Capital actual − cierre anterior registrado">${difBadge}</td>
           <td class="py-3 px-3 text-right text-apple-gray-400">${gastosBadge}</td>
@@ -3326,11 +3510,33 @@
         tbody.appendChild(tr);
       });
       lucide.createIcons();
+      initArqueoTableScrollHint();
     }
 
     // ==========================================================
     // UI NAVIGATION & MODAL HANDLERS
     // ==========================================================
+    function initArqueoTableScrollHint() {
+      const scroll = document.getElementById('arqueo-table-scroll');
+      const shell = document.getElementById('arqueo-table-shell');
+      const hint = document.getElementById('arqueo-scroll-hint');
+      if (!scroll || !shell) return;
+
+      const update = () => {
+        const canScroll = scroll.scrollWidth > scroll.clientWidth + 4;
+        const hasScrolled = scroll.scrollLeft > 8;
+        shell.classList.toggle('is-scrolled', hasScrolled || !canScroll);
+        if (hint) hint.classList.toggle('hidden', !canScroll || hasScrolled);
+      };
+
+      if (!scroll.dataset.hintBound) {
+        scroll.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update, { passive: true });
+        scroll.dataset.hintBound = '1';
+      }
+      update();
+    }
+
     function switchTab(tabId) {
       document.getElementById('view-airtm').classList.add('hidden');
       document.getElementById('view-personal').classList.add('hidden');
@@ -3343,7 +3549,7 @@
         }
         const mBtn = document.getElementById(`tab-mobile-${t}`);
         if (mBtn) {
-          mBtn.className = 'flex flex-col items-center gap-1 text-apple-gray-400 py-1 px-3';
+          mBtn.className = 'ios-bottom-tab';
         }
       });
 
@@ -3355,10 +3561,13 @@
       }
       const activeM = document.getElementById(`tab-mobile-${tabId}`);
       if (activeM) {
-        activeM.className = 'flex flex-col items-center gap-1 text-apple-blue py-1 px-3';
+        activeM.className = 'ios-bottom-tab active';
       }
 
-      if (tabId === 'airtm') renderAirtmModule();
+      if (tabId === 'airtm') {
+        renderAirtmModule();
+        requestAnimationFrame(initArqueoTableScrollHint);
+      }
       if (tabId === 'personal') renderPersonalModule();
       if (tabId === 'prestamos') renderLoansModule();
     }
