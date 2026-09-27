@@ -1964,10 +1964,17 @@
       if (syncIcon) syncIcon.classList.add('animate-spin');
 
       try {
-        const { data: configRows } = await supabaseClient.from('app_config').select('*');
+        const { data: configRows, error: configError } = await supabaseClient.from('app_config').select('*');
+        if (configError) throw configError;
+
+        // app_config es la configuración principal. Si todavía no existe
+        // (por ejemplo, después de migrar el Excel por primera vez), más abajo
+        // reconstruimos el estado actual directamente desde el último arqueo.
+        let hasCloudMainState = false;
         if (configRows && configRows.length > 0) {
           const mainState = configRows.find(r => r.key === 'main_state');
           if (mainState && mainState.value) {
+            hasCloudMainState = true;
             state.bancos = mainState.value.bancos || state.bancos;
             if (state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0.00;
             state.acciones = mainState.value.acciones !== undefined ? mainState.value.acciones : state.acciones;
@@ -1983,10 +1990,11 @@
           }
         }
 
-        const { data: gastosRows } = await supabaseClient
+        const { data: gastosRows, error: gastosError } = await supabaseClient
           .from('gastos')
           .select('*')
           .order('fecha', { ascending: false });
+        if (gastosError) throw gastosError;
 
         if (gastosRows && gastosRows.length > 0) {
           state.personalExpenses = gastosRows.map(g => ({
@@ -1998,10 +2006,11 @@
           }));
         }
 
-        const { data: prestamosRows } = await supabaseClient
+        const { data: prestamosRows, error: prestamosError } = await supabaseClient
           .from('prestamos')
           .select('*')
           .order('fecha', { ascending: false });
+        if (prestamosError) throw prestamosError;
 
         if (prestamosRows && prestamosRows.length > 0) {
           state.loans = prestamosRows.map(p => ({
@@ -2016,10 +2025,11 @@
           }));
         }
 
-        const { data: arqueosRows } = await supabaseClient
+        const { data: arqueosRows, error: arqueosError } = await supabaseClient
           .from('arqueos')
           .select('*')
           .order('fecha', { ascending: false });
+        if (arqueosError) throw arqueosError;
 
         if (arqueosRows) {
           // La respuesta de Supabase es la fuente de verdad: si no hay filas,
@@ -2053,6 +2063,39 @@
             accionesEur: parseFloat(a.acciones) || 0,
             capitalSolesMadre: parseFloat(a.capital_soles) || 1365
           }));
+
+          // Si aún no existe app_config/main_state, el último arqueo de
+          // Supabase es la fuente de verdad para arrancar en cualquier
+          // dispositivo nuevo. Así el móvil no depende del localStorage del PC.
+          if (!hasCloudMainState && state.arqueoHistory.length > 0) {
+            const latest = [...state.arqueoHistory]
+              .sort((a, b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))[0];
+            if (latest) {
+              state.bancos = { ...(latest.bancos || {}) };
+              state.acciones = Number(latest.accionesEur || 0);
+              state.capitalSolesMadre = Number(latest.capitalSolesMadre || state.capitalSolesMadre || 1365);
+              if (state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0;
+
+              // Creamos también main_state para que a partir de ahora PC,
+              // iPhone e iPad compartan exactamente el mismo estado base.
+              await supabaseClient.from('app_config').upsert({
+                key: 'main_state',
+                value: {
+                  bancos: state.bancos,
+                  acciones: state.acciones,
+                  accionesLog: state.accionesLog || [],
+                  capitalSolesMadre: state.capitalSolesMadre,
+                  capitalMadreLog: state.capitalMadreLog || [],
+                  personalBudget: state.personalBudget,
+                  cycleStartDay: state.cycleStartDay,
+                  cycleBudgets: state.cycleBudgets,
+                  personalFixedExpenses: state.personalFixedExpenses,
+                  fixedExpensesCycleState: state.fixedExpensesCycleState || {},
+                  bcp: state.bcp
+                }
+              });
+            }
+          }
         }
 
         // Al cargar desde Supabase reconstruimos inmediatamente las métricas
@@ -4156,6 +4199,7 @@
           if (workbook.SheetNames.includes('AIRTM')) {
             const wsAirtm = workbook.Sheets['AIRTM'];
             const jsonAirtm = XLSX.utils.sheet_to_json(wsAirtm, { header: 1, defval: null });
+            let latestImported = null;
             for (let r = 7; r < jsonAirtm.length; r++) {
               const row = jsonAirtm[r];
               if (!row || (!row[0] && row[1] === null)) continue;
@@ -4184,8 +4228,15 @@
               const profit = parseFloat(row[17]) || 0;
               const dif = parseFloat(row[35]) || 0;
 
+              latestImported = {
+                timestamp: ts,
+                bancos: { Airtm: airtm, N26: n26, BBVA: bbva, Imagin: imagin, Santander: santan, Bunq: bunq, Trade: trade, Wise: wise, ING: ing, Vivid: vivid, Sabadell: 0, BCP: bcp, Interbank: interbank },
+                acciones: parseFloat(row[25]) || 0,
+                capitalSolesMadre: parseFloat(row[27]) || 1365
+              };
+
               if (supabaseClient) {
-                await supabaseClient.from('arqueos').upsert({
+                const { error: upsertError } = await supabaseClient.from('arqueos').upsert({
                   id: `arq_mig_${r}`,
                   fecha: ts,
                   airtm, n26, bbva, imagin, santander: santan, bunq, trade, wise, ing, vivid, sabadell: 0, bcp, interbank,
@@ -4198,7 +4249,31 @@
                   gasto_personal_dia: 0,
                   dif: dif
                 });
+                if (upsertError) throw upsertError;
               }
+            }
+
+            // El Excel no solo migra el historial: deja también guardado en
+            // app_config el estado actual que verá un dispositivo nuevo.
+            if (supabaseClient && latestImported) {
+              const mainStateFromExcel = {
+                bancos: latestImported.bancos,
+                acciones: latestImported.acciones,
+                accionesLog: state.accionesLog || [],
+                capitalSolesMadre: latestImported.capitalSolesMadre,
+                capitalMadreLog: state.capitalMadreLog || [],
+                personalBudget: state.personalBudget,
+                cycleStartDay: state.cycleStartDay,
+                cycleBudgets: state.cycleBudgets,
+                personalFixedExpenses: state.personalFixedExpenses,
+                fixedExpensesCycleState: state.fixedExpensesCycleState || {},
+                bcp: state.bcp
+              };
+              const { error: configError } = await supabaseClient.from('app_config').upsert({
+                key: 'main_state',
+                value: mainStateFromExcel
+              });
+              if (configError) throw configError;
             }
           }
 
