@@ -244,23 +244,73 @@
       background: currentColor;
       opacity: .65;
     }
+    /* ============================================================
+       iOS / Safari — LIQUID GLASS BOTTOM BAR
+       The fixed element itself stays at bottom:0. Safari's home
+       indicator area is filled by a dedicated glass extension so the
+       navigation never appears to float above the physical bottom.
+       ============================================================ */
     .ios-bottom-tabbar {
-      background: rgba(248, 248, 248, .78);
-      -webkit-backdrop-filter: saturate(180%) blur(24px);
-      backdrop-filter: saturate(180%) blur(24px);
-      box-shadow: 0 -1px 0 rgba(0,0,0,.06), 0 -10px 30px rgba(0,0,0,.035);
-    }
-    .dark .ios-bottom-tabbar {
-      background: rgba(28, 28, 30, .78);
-      box-shadow: 0 -1px 0 rgba(255,255,255,.07), 0 -10px 30px rgba(0,0,0,.18);
+      position: fixed;
+      isolation: isolate;
+      overflow: visible;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.72), rgba(248,248,250,.54) 55%, rgba(242,242,245,.66));
+      -webkit-backdrop-filter: blur(30px) saturate(190%) contrast(1.04);
+      backdrop-filter: blur(30px) saturate(190%) contrast(1.04);
+      box-shadow:
+        0 -1px 0 rgba(255,255,255,.78),
+        0 -12px 34px rgba(0,0,0,.055),
+        0 -1px 0 rgba(0,0,0,.055) inset,
+        0 1px 0 rgba(255,255,255,.62) inset;
     }
 
-    /* iPhone: keep the bottom bar visually attached to the physical bottom
-       edge. Safari can reserve the home-indicator safe area outside the
-       visual viewport; the bar itself must extend into that area. */
-    @supports (bottom: env(safe-area-inset-bottom)) {
+    /* Soft specular highlight, similar to Apple's translucent materials. */
+    .ios-bottom-tabbar::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      left: 8%;
+      right: 8%;
+      top: 0;
+      height: 1px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.96) 18%, rgba(255,255,255,.96) 82%, transparent);
+      opacity: .9;
+      pointer-events: none;
+    }
+
+    /* This layer occupies only Safari's bottom safe-area inset.
+       It is intentionally NOT achieved by moving the whole nav downward. */
+    .ios-bottom-tabbar::after {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      left: 0;
+      right: 0;
+      bottom: calc(-1 * var(--sab));
+      height: var(--sab);
+      background: inherit;
+      -webkit-backdrop-filter: blur(30px) saturate(190%) contrast(1.04);
+      backdrop-filter: blur(30px) saturate(190%) contrast(1.04);
+      pointer-events: none;
+    }
+
+    .dark .ios-bottom-tabbar {
+      background:
+        linear-gradient(180deg, rgba(42,42,45,.72), rgba(28,28,30,.58) 55%, rgba(18,18,20,.72));
+      box-shadow:
+        0 -1px 0 rgba(255,255,255,.18),
+        0 -12px 34px rgba(0,0,0,.24),
+        0 -1px 0 rgba(255,255,255,.08) inset,
+        0 1px 0 rgba(255,255,255,.12) inset;
+    }
+
+    /* Safari can report a zero safe-area on ordinary browser tabs; in that
+       case the extension simply has zero height and changes nothing. */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
       .ios-bottom-tabbar {
-        bottom: calc(-1 * var(--sab)) !important;
+        bottom: 0 !important;
         padding-bottom: calc(0.35rem + var(--sab)) !important;
       }
     }
@@ -274,11 +324,13 @@
       justify-content: center;
       gap: 3px;
       min-height: 48px;
-      border-radius: 16px;
+      margin: 0 2px;
+      border-radius: 18px;
       color: rgb(142,142,147);
-      transition: color .18s ease, transform .16s cubic-bezier(.2,.8,.2,1), background .18s ease;
+      transition: color .18s ease, transform .16s cubic-bezier(.2,.8,.2,1), background .18s ease, box-shadow .18s ease;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      overflow: hidden;
     }
     .ios-bottom-tab svg {
       width: 21px;
@@ -294,7 +346,26 @@
     }
     .ios-bottom-tab.active {
       color: rgb(0,122,255);
-      background: rgba(0,122,255,.085);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.58), rgba(0,122,255,.105));
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.72) inset,
+        0 -1px 0 rgba(0,122,255,.035) inset,
+        0 5px 16px rgba(0,122,255,.07);
+      -webkit-backdrop-filter: blur(18px) saturate(170%);
+      backdrop-filter: blur(18px) saturate(170%);
+    }
+
+    .ios-bottom-tab.active::before {
+      content: '';
+      position: absolute;
+      left: 18%;
+      right: 18%;
+      top: 0;
+      height: 1px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.88);
+      pointer-events: none;
     }
     .ios-bottom-tab.active svg {
       transform: translateY(-1px) scale(1.04);
