@@ -1,0 +1,3046 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full antialiased">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Capital & Ledger — Apple Edition</title>
+  
+  <!-- Apple Web App Metas for Native iOS / iPadOS PWA Experience -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Capital & Ledger">
+  <meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- SheetJS: Lector nativo de archivos Excel (.xlsx) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: [
+              '-apple-system',
+              'BlinkMacSystemFont',
+              '"SF Pro Display"',
+              '"SF Pro Text"',
+              'system-ui',
+              '"Helvetica Neue"',
+              'sans-serif'
+            ],
+            mono: ['"SF Mono"', 'ui-monospace', 'Menlo', 'monospace']
+          },
+          screens: {
+            'xs': '420px',
+            'ipad-split': '680px', // Soporte específico para iPad Split View 2/3
+            'sm': '640px',
+            'md': '768px',
+            'lg': '1024px',
+            'xl': '1280px'
+          },
+          colors: {
+            apple: {
+              blue: '#007AFF',
+              green: '#34C759',
+              orange: '#FF9500',
+              red: '#FF3B30',
+              purple: '#AF52DE',
+              indigo: '#5856D6',
+              teal: '#5AC8FA',
+              yellow: '#FFCC00',
+              pink: '#FF2D55',
+              gray: {
+                25: '#FCFCFD',
+                50: '#F9F9FB',
+                100: '#F5F5F7',
+                200: '#E8E8ED',
+                300: '#D2D2D7',
+                400: '#86868B',
+                500: '#6E6E73',
+                600: '#424245',
+                700: '#2C2C2E',
+                800: '#1C1C1E',
+                850: '#141416',
+                900: '#000000'
+              }
+            }
+          },
+          boxShadow: {
+            'ios-sm': '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
+            'ios-card': '0 8px 30px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.02)',
+            'ios-float': '0 18px 45px -10px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.04)',
+            'ios-sheet': '0 -10px 40px rgba(0,0,0,0.18)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* iOS Safe Area Insets Support */
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+
+    body {
+      padding-top: var(--sat);
+      padding-left: var(--sal);
+      padding-right: var(--sar);
+    }
+
+    /* Apple Frosted Glass Morphism */
+    .apple-nav-glass {
+      background: rgba(245, 245, 247, 0.86);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+    }
+    .dark .apple-nav-glass {
+      background: rgba(28, 28, 30, 0.88);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+    }
+
+    .apple-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(210, 210, 215, 0.55);
+    }
+    .dark .apple-card {
+      background: rgba(36, 36, 38, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Native momentum scrolling on iPad/iPhone */
+    .ios-scroll {
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* iOS Haptic Tap Simulation */
+    .ios-tap {
+      transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.16s ease, background-color 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .ios-tap:active {
+      transform: scale(0.965);
+      opacity: 0.85;
+    }
+
+    @keyframes gentle-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.92); }
+    }
+    .pulse-dot {
+      animation: gentle-pulse 2.2s infinite ease-in-out;
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+
+<body class="h-full bg-apple-gray-100 dark:bg-apple-gray-900 text-apple-gray-800 dark:text-apple-gray-100 font-sans select-none selection:bg-apple-blue selection:text-white transition-colors duration-300">
+
+  <!-- Main Container: bottom padding accounts for safe-area and tab bars -->
+  <div class="min-h-full flex flex-col pb-[calc(5.5rem+var(--sab))] sm:pb-[calc(4.5rem+var(--sab))] md:pb-12">
+    
+    <!-- Apple Top Navigation Bar: Responsive for Mobile, iPad Split View (2/3) and Full Desktop -->
+    <header class="sticky top-0 z-40 apple-nav-glass border-b border-apple-gray-300/40 dark:border-apple-gray-700/50">
+      <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 gap-2">
+          
+          <!-- Logo & Brand Header -->
+          <div class="flex items-center space-x-2.5 sm:space-x-3.5 shrink-0">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-b from-apple-gray-800 to-black dark:from-apple-gray-700 dark:to-apple-gray-900 flex items-center justify-center text-white shadow-ios-sm ring-1 ring-white/15">
+              <i data-lucide="layers" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <span class="text-xs sm:text-base font-bold tracking-tight text-apple-gray-900 dark:text-white">Capital &amp; Ledger</span>
+                <span class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-apple-blue/10 text-apple-blue dark:bg-apple-blue/20">Pro</span>
+              </div>
+              <p class="text-[10px] sm:text-[11px] text-apple-gray-400 font-medium truncate max-w-[170px] xs:max-w-none">Arqueos P2P · Ciclo 15-14 · Cuentas</p>
+            </div>
+          </div>
+
+          <!-- Apple Segmented Control (Visible on iPad 2/3 Split View & Desktop: >= 680px) -->
+          <div class="hidden ipad-split:flex items-center bg-apple-gray-200/80 dark:bg-apple-gray-800/80 p-1 rounded-full border border-black/5 dark:border-white/5 shadow-inner">
+            <button onclick="switchTab('airtm')" id="tab-desktop-airtm" class="tab-button px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 text-apple-gray-900 dark:text-white bg-white dark:bg-apple-gray-700 shadow-sm flex items-center gap-1.5">
+              <i data-lucide="wallet-cards" class="w-3.5 h-3.5"></i>
+              <span>Arqueos</span>
+            </button>
+            <button onclick="switchTab('personal')" id="tab-desktop-personal" class="tab-button px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 text-apple-gray-500 hover:text-apple-gray-800 dark:text-apple-gray-400 dark:hover:text-white flex items-center gap-1.5">
+              <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
+              <span>Personal (15-14)</span>
+            </button>
+            <button onclick="switchTab('prestamos')" id="tab-desktop-prestamos" class="tab-button px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 text-apple-gray-500 hover:text-apple-gray-800 dark:text-apple-gray-400 dark:hover:text-white flex items-center gap-1.5">
+              <i data-lucide="users" class="w-3.5 h-3.5"></i>
+              <span>Préstamos</span>
+            </button>
+          </div>
+
+          <!-- Utility Bar: FX Rates, Subir Excel, Modo Oscuro y Respaldos -->
+          <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            <!-- Indicador Oficial Multidivisa Automático -->
+            <div class="hidden xs:flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-apple-gray-200/60 dark:bg-apple-gray-800/60 border border-apple-gray-300/40 dark:border-apple-gray-700/40 text-[11px] font-mono" title="Cotización oficial de mercado">
+              <span class="w-2 h-2 rounded-full bg-apple-green pulse-dot"></span>
+              <span class="text-apple-gray-500 text-[10px] hidden sm:inline">1€ =</span>
+              <span id="header-fx-pen" class="font-bold text-apple-gray-900 dark:text-white">3.88 S/.</span>
+              <span class="text-apple-gray-400 text-[10px]">|</span>
+              <span id="header-fx-usd" class="font-bold text-apple-gray-900 dark:text-white">1.08 $</span>
+            </div>
+
+            <!-- Botón Subir Excel Directo -->
+            <label class="ios-tap flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold bg-apple-green/10 text-apple-green hover:bg-apple-green/20 cursor-pointer border border-apple-green/20" title="Importar Excel original">
+              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+              <span class="hidden md:inline">Subir Excel</span>
+              <input type="file" id="direct-excel-upload" accept=".xlsx, .xls" onchange="handleExcelFileUpload(event)" class="hidden">
+            </label>
+
+            <!-- Modo Oscuro / Claro Toggle -->
+            <button onclick="toggleDarkMode()" class="ios-tap p-2 sm:p-2.5 rounded-full text-apple-gray-500 hover:text-apple-gray-800 dark:text-apple-gray-400 dark:hover:text-white hover:bg-apple-gray-200/50 dark:hover:bg-apple-gray-800/50" title="Cambiar tema">
+              <i data-lucide="moon" id="theme-icon" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Centro de Respaldos JSON -->
+            <button onclick="openModal('modal-backup')" class="ios-tap p-2 sm:p-2.5 rounded-full text-apple-gray-500 hover:text-apple-gray-800 dark:text-apple-gray-400 dark:hover:text-white hover:bg-apple-gray-200/50 dark:hover:bg-apple-gray-800/50" title="Respaldos y Memoria">
+              <i data-lucide="cloud-cog" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-4 sm:pt-6 flex-1 w-full space-y-5 sm:space-y-6">
+
+      <!-- ========================================================== -->
+      <!-- TAB 1: AIRTM & HISTORIAL DE ARQUEOS                        -->
+      <!-- ========================================================== -->
+      <section id="view-airtm" class="space-y-5 sm:space-y-6 block">
+        
+        <!-- Apple Card: Capital Hero (Optimizada para pantalla táctil, iPad y móvil) -->
+        <div class="apple-card rounded-3xl p-5 sm:p-7 lg:p-8 shadow-ios-card relative overflow-hidden">
+          <div id="airtm-halo" class="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-700 bg-apple-green/10"></div>
+
+          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+            
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-apple-green"></span>
+                <span class="text-[11px] sm:text-xs font-semibold tracking-wider uppercase text-apple-gray-400">Capital Consolidado Total</span>
+                <span id="airtm-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-apple-gray-100 text-apple-gray-600 dark:bg-apple-gray-800 dark:text-apple-gray-300">
+                  En vivo
+                </span>
+              </div>
+
+              <div class="flex items-baseline gap-2">
+                <h1 id="stat-airtm-capital-total" class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-apple-gray-900 dark:text-white font-sans">
+                  €0.00
+                </h1>
+              </div>
+
+              <div class="pt-1 flex flex-wrap items-center gap-2">
+                <div id="airtm-mother-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-apple-gray-200/80 dark:bg-apple-gray-700/80 transition-all">
+                  <!-- Semáforo Madre inyectado dinámicamente -->
+                </div>
+                <span class="text-[10px] sm:text-[11px] text-apple-gray-400 hidden xs:inline">
+                  • 11 Bancos EUR + Acciones + Préstamos + Ajuste Soles
+                </span>
+              </div>
+            </div>
+
+            <!-- Quick Action Group (Botones con área táctil cómoda) -->
+            <div class="flex flex-wrap items-center gap-2.5 pt-1 md:pt-0">
+              <button onclick="takeArqueoSnapshot()" class="ios-tap flex-1 xs:flex-none justify-center px-4 sm:px-5 py-2.5 sm:py-3 bg-apple-blue text-white rounded-2xl text-xs font-bold shadow-ios-float flex items-center gap-2 hover:bg-blue-600 transition">
+                <i data-lucide="camera" class="w-4 h-4"></i>
+                <span>Registrar Snapshot</span>
+              </button>
+              <button onclick="openModal('modal-quick-balance')" class="ios-tap flex-1 xs:flex-none justify-center px-3.5 sm:px-4 py-2.5 sm:py-3 bg-apple-gray-200/80 hover:bg-apple-gray-300 dark:bg-apple-gray-800 dark:hover:bg-apple-gray-700 text-apple-gray-800 dark:text-white rounded-2xl text-xs font-semibold transition flex items-center gap-1.5">
+                <i data-lucide="sliders" class="w-4 h-4"></i>
+                <span>Editar Cuentas</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Secondary Metrics: Responsive Grid for Mobile, iPad Split View & Desktop -->
+          <div class="grid grid-cols-2 xs:grid-cols-3 ipad-split:grid-cols-5 gap-2.5 sm:gap-3 mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50">
+            <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
+              <span class="text-[10px] font-medium text-apple-gray-400">Total en Bancos (€)</span>
+              <p id="stat-total-bancos" class="text-sm sm:text-base md:text-lg font-bold text-apple-gray-900 dark:text-white mt-0.5">€0.00</p>
+              <span class="text-[9px] text-apple-gray-400">11 Cuentas EUR (Inc. Sabadell)</span>
+            </div>
+            <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
+              <span class="text-[10px] font-medium text-apple-gray-400">Acciones (€)</span>
+              <div class="flex items-center justify-between mt-0.5">
+                <p id="stat-acciones" class="text-sm sm:text-base md:text-lg font-bold text-apple-purple">€0.00</p>
+                <button onclick="openModal('modal-edit-acciones')" class="text-apple-blue text-[10px] font-semibold hover:underline">Gestionar</button>
+              </div>
+              <span class="text-[9px] text-apple-gray-400">Con bitácora de aportes</span>
+            </div>
+            <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
+              <span class="text-[10px] font-medium text-apple-gray-400">Préstamos Netos (€)</span>
+              <p id="stat-loans-to-capital" class="text-sm sm:text-base md:text-lg font-bold text-apple-blue mt-0.5">€0.00</p>
+              <span class="text-[9px] text-apple-gray-400">Deudores unificados</span>
+            </div>
+            <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
+              <span class="text-[10px] font-medium text-apple-gray-400">Capital Madre (S/.)</span>
+              <div class="flex items-center justify-between mt-0.5">
+                <p id="stat-capital-soles" class="text-sm sm:text-base md:text-lg font-bold text-apple-orange">S/. 0.00</p>
+                <button onclick="openModal('modal-edit-madre')" class="text-apple-blue text-[10px] font-semibold hover:underline">Editar</button>
+              </div>
+              <span class="text-[9px] text-apple-gray-400">Fondo BCP + Interbank</span>
+            </div>
+            <div class="col-span-2 xs:col-span-1 p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
+              <span class="text-[10px] font-medium text-apple-gray-400">Profit Hoy Estimado</span>
+              <p id="stat-profit-hoy" class="text-sm sm:text-base md:text-lg font-bold text-apple-green mt-0.5">+€0.00</p>
+              <span class="text-[9px] text-apple-gray-400">ΔCapital + Gastos Día</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 13 Cuentas Bancarias y Tarjetas (Ahora incluye Sabadell) -->
+        <div>
+          <div class="flex items-center justify-between mb-3 px-1">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-apple-gray-400 flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-apple-blue"></i>
+              Saldos en Tarjetas &amp; Cuentas de Operación
+            </h2>
+            <button onclick="openModal('modal-quick-balance')" class="text-xs text-apple-blue font-semibold hover:underline">
+              Actualizar saldos
+            </button>
+          </div>
+
+          <div id="bank-cards-grid" class="grid grid-cols-2 xs:grid-cols-3 ipad-split:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3">
+            <!-- Dynamically populated bank balance pills including Sabadell -->
+          </div>
+        </div>
+
+        <!-- TABLA HISTÓRICA DE ARQUEOS (AUDITORÍA RASTREABLE) -->
+        <div class="apple-card rounded-3xl p-4 sm:p-6 shadow-ios-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm sm:text-base font-bold text-apple-gray-900 dark:text-white">Línea de Tiempo de Arqueos (Historial)</h3>
+                <span id="arqueo-count-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-apple-blue/10 text-apple-blue">
+                  0 snapshots
+                </span>
+              </div>
+              <p class="text-[11px] sm:text-xs text-apple-gray-400">Historial banco a banco con fecha, hora, tipo de cambio fijado y profit real</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1 sm:flex-none">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-apple-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input type="text" id="arqueo-search" placeholder="Buscar fecha..." class="w-full sm:w-44 pl-8 pr-3 py-1.5 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-transparent focus:border-apple-blue focus:outline-none transition">
+              </div>
+              <button onclick="takeArqueoSnapshot()" class="ios-tap px-3 py-1.5 rounded-xl bg-apple-blue text-white text-xs font-semibold flex items-center gap-1.5 shadow-ios-sm shrink-0">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Nuevo</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Table with horizontal scroll for complete column audit with smooth touch inertia -->
+          <div class="overflow-x-auto ios-scroll rounded-2xl border border-apple-gray-200/50 dark:border-apple-gray-700/50">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+              <thead class="bg-apple-gray-100/70 dark:bg-apple-gray-800/70 text-apple-gray-400 uppercase font-semibold text-[10px]">
+                <tr>
+                  <th class="py-3 px-3">Fecha y Hora</th>
+                  <th class="py-3 px-3 text-right">Capital Total</th>
+                  <th class="py-3 px-3 text-right">Dif. (Δ)</th>
+                  <th class="py-3 px-3 text-right">Gastos Día</th>
+                  <th class="py-3 px-3 text-right text-apple-green font-bold">Profit Diario</th>
+                  <th class="py-3 px-2 text-right">Tipo Cambio</th>
+                  <th class="py-3 px-2 text-right">Airtm</th>
+                  <th class="py-3 px-2 text-right">N26</th>
+                  <th class="py-3 px-2 text-right">BBVA</th>
+                  <th class="py-3 px-2 text-right">Imagin</th>
+                  <th class="py-3 px-2 text-right">Santan.</th>
+                  <th class="py-3 px-2 text-right">Bunq</th>
+                  <th class="py-3 px-2 text-right">Trade</th>
+                  <th class="py-3 px-2 text-right">Wise</th>
+                  <th class="py-3 px-2 text-right">ING</th>
+                  <th class="py-3 px-2 text-right">Vivid</th>
+                  <th class="py-3 px-2 text-right text-apple-blue font-bold">Sabadell</th>
+                  <th class="py-3 px-2 text-right">BCP (S/.)</th>
+                  <th class="py-3 px-2 text-right">Interb. (S/.)</th>
+                  <th class="py-3 px-2 text-right">Por Cobrar</th>
+                  <th class="py-3 px-2 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="arqueo-table-body" class="divide-y divide-apple-gray-200/40 dark:divide-apple-gray-700/40 font-mono text-[11px]">
+                <!-- Dynamically rendered snapshots -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================================== -->
+      <!-- TAB 2: FINANZAS PERSONALES (CICLO 15 - 14)                 -->
+      <!-- ========================================================== -->
+      <section id="view-personal" class="space-y-5 sm:space-y-6 hidden">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+          
+          <!-- Master Budget Card with Activity Ring & Burn Projection -->
+          <div class="lg:col-span-2 apple-card rounded-3xl p-5 sm:p-7 shadow-ios-card">
+            <div class="flex flex-col sm:flex-row items-center gap-5 sm:gap-6 justify-between">
+              
+              <!-- Apple Activity Ring SVG -->
+              <div class="relative w-40 h-40 sm:w-44 sm:h-44 flex items-center justify-center shrink-0">
+                <svg class="w-full h-full -rotate-90 transform" viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="50" stroke="currentColor" stroke-width="11" class="text-apple-gray-200 dark:text-apple-gray-800 fill-none" />
+                  <circle id="personal-ring-circle" cx="60" cy="60" r="50" stroke="currentColor" stroke-width="11" stroke-linecap="round" class="text-apple-blue fill-none transition-all duration-1000 ease-out" stroke-dasharray="314.16" stroke-dashoffset="100" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span class="text-[10px] uppercase font-bold tracking-wider text-apple-gray-400">Disponible Libre</span>
+                  <span id="personal-disp-eur" class="text-xl sm:text-2xl font-black font-mono text-apple-gray-900 dark:text-white">€0.00</span>
+                  <span id="personal-ring-percent" class="text-[10px] sm:text-[11px] font-semibold text-apple-blue mt-0.5">0% usado</span>
+                </div>
+              </div>
+
+              <!-- Cycle Meta Details & Projection -->
+              <div class="flex-1 w-full space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] sm:text-[11px] uppercase font-bold text-apple-gray-400">Ciclo de Gastos</span>
+                      <button onclick="openModal('modal-config-cycle')" class="text-[10px] text-apple-blue font-bold hover:underline">Configurar</button>
+                    </div>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <select id="select-active-cycle" onchange="changeActiveCycle(this.value)" class="text-xs font-bold bg-apple-gray-100 dark:bg-apple-gray-800 rounded-lg px-2 py-1 border border-apple-gray-300 dark:border-apple-gray-700 text-apple-gray-900 dark:text-white">
+                        <!-- Ciclos generados dinámicamente -->
+                      </select>
+                      <span id="personal-cycle-range" class="text-[11px] sm:text-xs text-apple-gray-500 font-medium"></span>
+                    </div>
+                  </div>
+                  <span id="personal-days-remaining-pill" class="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-apple-blue/10 text-apple-blue">
+                    -- días restantes
+                  </span>
+                </div>
+
+                <!-- Daily Spending Allowance Recommendation -->
+                <div class="p-3 sm:p-3.5 rounded-2xl bg-apple-blue/5 dark:bg-apple-blue/10 border border-apple-blue/20">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-xs font-medium text-apple-gray-600 dark:text-apple-gray-300">Límite Diario Permitido</p>
+                      <p class="text-[10px] text-apple-gray-400">Disponible libre / días restantes</p>
+                    </div>
+                    <span id="personal-daily-allowance" class="text-base sm:text-lg font-black font-mono text-apple-blue">€0.00 / día</span>
+                  </div>
+                </div>
+
+                <!-- Burn-Rate Projection Badge -->
+                <div id="personal-projection-banner" class="p-2.5 rounded-xl text-xs flex items-center justify-between bg-apple-gray-100/70 dark:bg-apple-gray-800/50">
+                  <!-- Inyectado por JS -->
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 sm:gap-2.5 pt-1">
+                  <div class="p-2 sm:p-2.5 rounded-xl bg-apple-gray-100/70 dark:bg-apple-gray-800/50">
+                    <span class="text-[9px] sm:text-[10px] text-apple-gray-400">Presupuesto</span>
+                    <div class="flex items-center justify-between mt-0.5">
+                      <span id="personal-budget-fixed" class="text-xs sm:text-sm font-bold text-apple-gray-900 dark:text-white">€300.00</span>
+                      <button onclick="openModal('modal-edit-budget')" class="text-apple-blue text-[10px] sm:text-[11px] font-semibold hover:underline">Editar</button>
+                    </div>
+                  </div>
+                  <div class="p-2 sm:p-2.5 rounded-xl bg-apple-gray-100/70 dark:bg-apple-gray-800/50">
+                    <span class="text-[9px] sm:text-[10px] text-apple-gray-400">Gastos Fijos</span>
+                    <p id="personal-total-fixed-spent" class="text-xs sm:text-sm font-bold text-apple-orange mt-0.5">€0.00</p>
+                  </div>
+                  <div class="p-2 sm:p-2.5 rounded-xl bg-apple-gray-100/70 dark:bg-apple-gray-800/50">
+                    <span class="text-[9px] sm:text-[10px] text-apple-gray-400">Variables</span>
+                    <p id="personal-total-spent" class="text-xs sm:text-sm font-bold text-apple-red mt-0.5">€0.00</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- BCP Credit Card Tracker Widget -->
+          <div class="apple-card rounded-3xl p-5 sm:p-6 shadow-ios-card flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-blue-800 to-indigo-900 text-white flex items-center justify-center font-black text-xs shadow-ios-sm">
+                    BCP
+                  </div>
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-apple-gray-900 dark:text-white">Tarjeta de Crédito</h3>
+                    <p class="text-[10px] text-apple-blue font-semibold">Recordatorio de Pago (0% Deuda)</p>
+                  </div>
+                </div>
+                <span id="bcp-days-countdown" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-apple-orange/15 text-apple-orange">
+                  Corte día 20
+                </span>
+              </div>
+
+              <!-- Live Billing Status -->
+              <div class="space-y-2.5 mt-4">
+                <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40 flex items-center justify-between">
+                  <span class="text-xs text-apple-gray-500 font-medium">Facturación Soles</span>
+                  <span id="bcp-val-pen" class="font-mono text-sm sm:text-base font-bold text-apple-gray-900 dark:text-white">S/. 0.00</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40 flex items-center justify-between">
+                  <span class="text-xs text-apple-gray-500 font-medium">Facturación USD</span>
+                  <span id="bcp-val-usd" class="font-mono text-sm sm:text-base font-bold text-apple-gray-900 dark:text-white">$ 0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50">
+              <div class="flex items-center justify-between text-[11px] mb-2">
+                <span class="text-apple-gray-400">Pagar todo antes del día 15</span>
+                <span class="text-apple-green font-bold">0% Interés</span>
+              </div>
+              <button onclick="openModal('modal-bcp-edit')" class="w-full py-2 bg-apple-gray-200/80 hover:bg-apple-gray-300 dark:bg-apple-gray-800 dark:hover:bg-apple-gray-700 text-apple-gray-800 dark:text-white rounded-xl text-xs font-semibold transition">
+                Actualizar Recordatorio BCP
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sección de Gastos Fijos -->
+        <div class="apple-card rounded-3xl p-5 sm:p-6 shadow-ios-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm sm:text-base font-bold text-apple-gray-900 dark:text-white">Gastos Fijos del Ciclo</h3>
+                <span id="badge-fixed-count" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-apple-orange/10 text-apple-orange">
+                  0 compromisos
+                </span>
+              </div>
+              <p class="text-xs text-apple-gray-400">Se deducen directamente de tu presupuesto mensual para proteger tu disponible diario</p>
+            </div>
+            <button onclick="openModal('modal-add-fixed-expense')" class="ios-tap px-3.5 py-2 bg-apple-gray-200/80 dark:bg-apple-gray-800 text-apple-gray-800 dark:text-white hover:bg-apple-gray-300 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition self-start sm:self-auto">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Añadir Gasto Fijo</span>
+            </button>
+          </div>
+
+          <div id="personal-fixed-expenses-list" class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+
+        <!-- Personal Expenses Log Card (Ordenado: Último gasto registrado arriba) -->
+        <div class="apple-card rounded-3xl p-5 sm:p-6 shadow-ios-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm sm:text-base font-bold text-apple-gray-900 dark:text-white">Gastos Variables Registrados</h3>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-apple-green/10 text-apple-green">
+                  Últimos arriba
+                </span>
+              </div>
+              <p class="text-xs text-apple-gray-400">Ordenados cronológicamente desde el más reciente para rápida consulta y control</p>
+            </div>
+            
+            <button onclick="openModal('modal-add-expense')" class="ios-tap px-4 py-2.5 bg-apple-blue text-white rounded-2xl text-xs font-semibold shadow-ios-sm flex items-center justify-center gap-2 hover:bg-blue-600 transition self-start sm:self-auto">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Registrar Gasto</span>
+            </button>
+          </div>
+
+          <!-- Expenses List (Newest first) -->
+          <div id="personal-expenses-list" class="divide-y divide-apple-gray-200/40 dark:divide-apple-gray-700/40">
+            <!-- Populated via JavaScript: Newest first -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================================== -->
+      <!-- TAB 3: PRÉSTAMOS, DEUDORES & DOSSIER INDIVIDUAL            -->
+      <!-- ========================================================== -->
+      <section id="view-prestamos" class="space-y-5 sm:space-y-6 hidden">
+        
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4">
+          <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-apple-gray-400">Balance Neto Unificado</span>
+            <h3 id="prestamos-net-eur" class="text-xl sm:text-2xl md:text-3xl font-black font-mono text-apple-blue mt-1">€0.00</h3>
+            <p class="text-[10px] text-apple-gray-400 mt-1">Sumatoria neta convertida en vivo</p>
+          </div>
+          <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-apple-gray-400">Total Dinero Prestado</span>
+            <h3 id="prestamos-total-prestado" class="text-xl sm:text-2xl md:text-3xl font-black font-mono text-apple-orange mt-1">€0.00</h3>
+            <p class="text-[10px] text-apple-gray-400 mt-1">Flujos "Yo presté"</p>
+          </div>
+          <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-apple-gray-400">Total Cobrado / Pagado</span>
+            <h3 id="prestamos-total-cobrado" class="text-xl sm:text-2xl md:text-3xl font-black font-mono text-apple-green mt-1">€0.00</h3>
+            <p class="text-[10px] text-apple-gray-400 mt-1">Liquidado por deudores</p>
+          </div>
+        </div>
+
+        <!-- Dossier y Directorio de Deudores -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+          
+          <!-- Directorio de personas -->
+          <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-apple-gray-400">Directorio de Deudores</h3>
+              <button onclick="filterLoanByPerson('ALL')" class="text-xs text-apple-blue font-semibold hover:underline">Ver todos</button>
+            </div>
+            <div id="debtors-directory-list" class="space-y-2 max-h-[420px] overflow-y-auto ios-scroll pr-1">
+              <!-- Dynamically populated contacts -->
+            </div>
+          </div>
+
+          <!-- Ficha / Estado de Cuenta Individual de la persona seleccionada -->
+          <div class="lg:col-span-2 apple-card rounded-3xl p-5 sm:p-6 shadow-ios-card">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+              <div>
+                <span class="text-[10px] uppercase font-bold text-apple-blue">Estado de Cuenta Individual</span>
+                <h3 id="dossier-person-name" class="text-xl sm:text-2xl font-black text-apple-gray-900 dark:text-white">Selecciona una persona</h3>
+                <p id="dossier-person-subtitle" class="text-xs text-apple-gray-400">Historial discriminado de cobros y pagos</p>
+              </div>
+              <button onclick="openModal('modal-add-loan')" class="ios-tap px-4 py-2 bg-apple-blue text-white rounded-2xl text-xs font-bold shadow-ios-sm flex items-center gap-1.5 self-start">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Nuevo Movimiento</span>
+              </button>
+            </div>
+
+            <!-- Resumen numérico individual -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-6">
+              <div class="p-2.5 sm:p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
+                <span class="text-[9px] sm:text-[10px] font-semibold text-apple-gray-400">Prestado</span>
+                <p id="dossier-total-prestado" class="text-sm sm:text-base font-bold font-mono text-apple-orange mt-0.5">€0.00</p>
+                <span id="dossier-prestado-breakdown" class="text-[8px] sm:text-[9px] text-apple-gray-400 block truncate"></span>
+              </div>
+              <div class="p-2.5 sm:p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
+                <span class="text-[9px] sm:text-[10px] font-semibold text-apple-gray-400">Pagado</span>
+                <p id="dossier-total-pagado" class="text-sm sm:text-base font-bold font-mono text-apple-green mt-0.5">€0.00</p>
+                <span id="dossier-pagado-breakdown" class="text-[8px] sm:text-[9px] text-apple-gray-400 block truncate"></span>
+              </div>
+              <div class="p-2.5 sm:p-3 rounded-2xl bg-apple-blue/5 dark:bg-apple-blue/10 border border-apple-blue/20">
+                <span class="text-[9px] sm:text-[10px] font-semibold text-apple-blue">Saldo Resta</span>
+                <p id="dossier-resta" class="text-sm sm:text-base font-black font-mono mt-0.5 text-apple-blue">€0.00</p>
+                <span id="dossier-resta-breakdown" class="text-[8px] sm:text-[9px] text-apple-gray-400 block truncate">Te debe</span>
+              </div>
+            </div>
+
+            <!-- Dos columnas: ¿Por qué le cobro? vs Pagos recibidos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-apple-orange flex items-center gap-1">
+                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                    ¿Por qué le cobro?
+                  </h4>
+                  <span id="badge-count-prestado" class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-apple-orange/10 text-apple-orange">0</span>
+                </div>
+                <div id="list-dossier-prestamos" class="space-y-2 max-h-60 overflow-y-auto ios-scroll pr-1">
+                  <!-- Inyectado por JS -->
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-apple-green flex items-center gap-1">
+                    <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i>
+                    Historial de Pagos / Abonos
+                  </h4>
+                  <span id="badge-count-pagado" class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-apple-green/10 text-apple-green">0</span>
+                </div>
+                <div id="list-dossier-pagos" class="space-y-2 max-h-60 overflow-y-auto ios-scroll pr-1">
+                  <!-- Inyectado por JS -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Tabla Completa de Transacciones de Préstamos -->
+        <div class="apple-card rounded-3xl p-4 sm:p-6 shadow-ios-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-apple-gray-900 dark:text-white">Libro de Operaciones de Préstamos</h3>
+              <p class="text-xs text-apple-gray-400">Cada registro congela la tasa oficial EUR/PEN en el momento exacto</p>
+            </div>
+            <button onclick="openModal('modal-add-loan')" class="ios-tap px-3.5 py-1.5 rounded-xl bg-apple-blue text-white text-xs font-semibold flex items-center gap-1.5 shadow-ios-sm self-start">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Registrar Flujo</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto ios-scroll rounded-2xl border border-apple-gray-200/50 dark:border-apple-gray-700/50">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+              <thead class="bg-apple-gray-100/70 dark:bg-apple-gray-800/70 text-apple-gray-400 uppercase font-semibold text-[10px]">
+                <tr>
+                  <th class="py-3 px-3">Fecha</th>
+                  <th class="py-3 px-3">Persona</th>
+                  <th class="py-3 px-3">Detalle / Motivo</th>
+                  <th class="py-3 px-3">Categoría</th>
+                  <th class="py-3 px-3">Moneda</th>
+                  <th class="py-3 px-3 text-right">Monto Original</th>
+                  <th class="py-3 px-3 text-right">Equiv. EUR (€)</th>
+                  <th class="py-3 px-3 text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="loans-table-body" class="divide-y divide-apple-gray-200/40 dark:divide-apple-gray-700/40 font-mono text-[11px]">
+                <!-- Dynamically populated loans -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Apple Segmented Bottom Tab Bar (Mobile & iPad Split View < 680px) -->
+    <nav class="ipad-split:hidden fixed bottom-0 left-0 right-0 z-40 apple-nav-glass border-t border-apple-gray-300/40 dark:border-apple-gray-700/50 px-4 py-2 pb-[calc(0.5rem+var(--sab))]">
+      <div class="flex items-center justify-around max-w-md mx-auto">
+        <button onclick="switchTab('airtm')" id="tab-mobile-airtm" class="flex flex-col items-center gap-1 text-apple-blue py-1 px-3">
+          <i data-lucide="wallet-cards" class="w-5 h-5"></i>
+          <span class="text-[10px] font-semibold">Arqueos</span>
+        </button>
+        <button onclick="switchTab('personal')" id="tab-mobile-personal" class="flex flex-col items-center gap-1 text-apple-gray-400 py-1 px-3">
+          <i data-lucide="credit-card" class="w-5 h-5"></i>
+          <span class="text-[10px] font-semibold">Personal</span>
+        </button>
+        <button onclick="switchTab('prestamos')" id="tab-mobile-prestamos" class="flex flex-col items-center gap-1 text-apple-gray-400 py-1 px-3">
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span class="text-[10px] font-semibold">Préstamos</span>
+        </button>
+      </div>
+    </nav>
+
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- MODALES DE CONTROL (CUPERTINO SHEET DIALOGS)               -->
+  <!-- ========================================================== -->
+
+  <!-- MODAL: ACTUALIZAR SALDOS DE BANCOS PARA ARQUEO (Con Sabadell) -->
+  <div id="modal-quick-balance" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-ios-sheet max-h-[90vh] overflow-y-auto ios-scroll">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Actualizar Saldos en Bancos</h3>
+          <p class="text-xs text-apple-gray-400">Guarda los montos antes de registrar el snapshot</p>
+        </div>
+        <button onclick="closeModal('modal-quick-balance')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-banks" onsubmit="handleSaveBanks(event)" class="space-y-4">
+        <div id="bank-inputs-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+          <!-- Dynamically populated inputs including Sabadell -->
+        </div>
+
+        <div class="pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-quick-balance')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+            Cancelar
+          </button>
+          <button type="submit" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
+            Guardar Saldos
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR GASTO VARIABLE PERSONAL (Con Sabadell) -->
+  <div id="modal-add-expense" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-sm p-5 sm:p-6 shadow-ios-sheet">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Registrar Gasto Personal</h3>
+          <p class="text-xs text-apple-gray-400">Se imputará al profit diario y ciclo activo</p>
+        </div>
+        <button onclick="closeModal('modal-add-expense')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-expense" onsubmit="handleSaveExpense(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto (€)</label>
+          <input type="number" step="0.01" required name="amount" placeholder="0.00" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Concepto / Motivo</label>
+          <input type="text" required name="concept" placeholder="Ej: Mercadona, Cena, Abono..." class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Categoría</label>
+            <select name="category" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+              <option value="Alimentación">Alimentación</option>
+              <option value="Ocio">Ocio</option>
+              <option value="Transporte">Transporte</option>
+              <option value="Servicios">Servicios</option>
+              <option value="Compras">Compras</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Banco / Tarjeta</label>
+            <select name="bank" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+              <option value="N26">N26</option>
+              <option value="Bunq">Bunq</option>
+              <option value="Imagin">Imagin</option>
+              <option value="Santander">Santander</option>
+              <option value="BBVA">BBVA</option>
+              <option value="Sabadell">Sabadell</option>
+              <option value="Wise">Wise</option>
+              <option value="ING">ING</option>
+              <option value="Airtm">Airtm</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Fecha</label>
+          <input type="date" required name="date" id="input-expense-date" class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+        </div>
+
+        <div class="pt-3 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-add-expense')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+            Cancelar
+          </button>
+          <button type="submit" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
+            Guardar Gasto
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR GASTO FIJO MENSUAL (Con Sabadell) -->
+  <div id="modal-add-fixed-expense" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-sm p-5 sm:p-6 shadow-ios-sheet">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Nuevo Gasto Fijo</h3>
+          <p class="text-xs text-apple-gray-400">Compromiso mensual recurrente</p>
+        </div>
+        <button onclick="closeModal('modal-add-fixed-expense')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-fixed-expense" onsubmit="handleSaveFixedExpense(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Concepto</label>
+          <input type="text" required name="concept" placeholder="Ej: Alquiler, Gimnasio, Spotify..." class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto (€)</label>
+            <input type="number" step="0.01" required name="amount" placeholder="0.00" class="w-full px-3 py-2 text-sm font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Día de Cobro</label>
+            <input type="number" min="1" max="31" required name="chargeDay" value="1" class="w-full px-3 py-2 text-sm font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Categoría</label>
+            <select name="category" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+              <option value="Suscripciones">Suscripciones</option>
+              <option value="Vivienda">Vivienda</option>
+              <option value="Gimnasio / Salud">Gimnasio / Salud</option>
+              <option value="Servicios">Servicios</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Banco Débito</label>
+            <select name="bank" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+              <option value="N26">N26</option>
+              <option value="Bunq">Bunq</option>
+              <option value="Imagin">Imagin</option>
+              <option value="Santander">Santander</option>
+              <option value="BBVA">BBVA</option>
+              <option value="Sabadell">Sabadell</option>
+              <option value="Wise">Wise</option>
+              <option value="ING">ING</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-add-fixed-expense')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+            Cancelar
+          </button>
+          <button type="submit" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
+            Guardar Fijo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR PRESUPUESTO PERSONAL -->
+  <div id="modal-edit-budget" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-sm p-5 sm:p-6 shadow-ios-sheet">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Presupuesto del Ciclo</h3>
+          <p class="text-xs text-apple-gray-400">Asigna el monto para este período</p>
+        </div>
+        <button onclick="closeModal('modal-edit-budget')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto en Euros (€)</label>
+          <input type="number" step="10" id="input-new-budget" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5 mt-4">
+        <button onclick="closeModal('modal-edit-budget')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+          Cancelar
+        </button>
+        <button onclick="handleSaveNewBudget()" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
+          Guardar Presupuesto
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GESTOR Y BITÁCORA DE ACCIONES / INVERSIONES -->
+  <div id="modal-edit-acciones" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-ios-sheet max-h-[90vh] overflow-y-auto ios-scroll">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Cartera de Acciones &amp; Patrimonio</h3>
+          <p class="text-xs text-apple-gray-400">Registro histórico de aportes, valor y retiros</p>
+        </div>
+        <button onclick="closeModal('modal-edit-acciones')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-apple-purple/10 border border-apple-purple/20 flex items-center justify-between mb-4">
+        <div>
+          <span class="text-[10px] uppercase font-bold text-apple-purple">Valor Actual Consolidado</span>
+          <p id="modal-current-acciones-val" class="text-2xl font-black font-mono text-apple-gray-900 dark:text-white">€0.00</p>
+        </div>
+        <div class="w-10 h-10 rounded-2xl bg-apple-purple text-white flex items-center justify-center">
+          <i data-lucide="trending-up" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <form id="form-accion-movement" onsubmit="handleSaveAccionMovement(event)" class="p-4 rounded-2xl bg-apple-gray-100/70 dark:bg-apple-gray-800/50 space-y-3 mb-4">
+        <span class="text-xs font-bold text-apple-gray-800 dark:text-gray-200 block">Registrar Movimiento / Actualización</span>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-semibold text-apple-gray-400 mb-1">Tipo de Evento</label>
+            <select name="type" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white dark:bg-apple-gray-700 border border-apple-gray-300 dark:border-apple-gray-600">
+              <option value="VALORIZACION">Ajuste de Cartera (Valor total)</option>
+              <option value="APORTE">Aporte Nuevo (+)</option>
+              <option value="RETIRO">Retiro (-)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-apple-gray-400 mb-1">Monto en Euros (€)</label>
+            <input type="number" step="0.01" name="amount" required placeholder="0.00" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-white dark:bg-apple-gray-700 border border-apple-gray-300 dark:border-apple-gray-600">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-semibold text-apple-gray-400 mb-1">Concepto / Activo</label>
+            <input type="text" name="notes" placeholder="Ej: ETF S&P500, Dividendos..." class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white dark:bg-apple-gray-700 border border-apple-gray-300 dark:border-apple-gray-600">
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-apple-gray-400 mb-1">Fecha</label>
+            <input type="date" name="date" id="input-accion-date" required class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white dark:bg-apple-gray-700 border border-apple-gray-300 dark:border-apple-gray-600">
+          </div>
+        </div>
+        <button type="submit" class="ios-tap w-full py-2 bg-apple-purple text-white rounded-xl text-xs font-bold hover:bg-purple-600 transition shadow-ios-sm">
+          Guardar en Historial de Acciones
+        </button>
+      </form>
+
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-apple-gray-400 mb-2">Historial de Operaciones</h4>
+        <div id="acciones-history-list" class="space-y-2 max-h-52 overflow-y-auto ios-scroll pr-1 text-xs">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR SNAPSHOT DE ARQUEO EXISTENTE (Con Sabadell) -->
+  <div id="modal-edit-arqueo-row" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-xl p-5 sm:p-6 shadow-ios-sheet max-h-[90vh] overflow-y-auto ios-scroll">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Corregir Registro de Arqueo</h3>
+          <p class="text-xs text-apple-gray-400">Edita los valores si hubo un error al registrar el snapshot</p>
+        </div>
+        <button onclick="closeModal('modal-edit-arqueo-row')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-edit-arqueo" onsubmit="handleSaveEditedArqueo(event)" class="space-y-4">
+        <input type="hidden" name="arqueo_id" id="edit-arqueo-id">
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-apple-gray-400 mb-1">Fecha y Hora</label>
+            <input type="text" name="timestamp" id="edit-arqueo-timestamp" required class="w-full px-2.5 py-1.5 text-xs font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-apple-gray-400 mb-1">Capital Total (€)</label>
+            <input type="number" step="0.01" name="capitalTotal" id="edit-arqueo-capital" required class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-apple-gray-400 mb-1">Profit Hoy (€)</label>
+            <input type="number" step="0.01" name="profitHoy" id="edit-arqueo-profit" required class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 text-apple-green">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-apple-gray-500 uppercase tracking-wider mb-2">Saldos por Cuenta en este Snapshot</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5" id="edit-arqueo-banks-container">
+            <!-- Bancos inyectados dinámicamente incluyendo Sabadell -->
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-edit-arqueo-row')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+            Cancelar
+          </button>
+          <button type="submit" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
+            Guardar Corrección
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIGURAR DÍA DE INICIO DE CICLO -->
+  <div id="modal-config-cycle" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-sm p-5 sm:p-6 shadow-ios-sheet">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Día de Inicio de Ciclo</h3>
+          <p class="text-xs text-apple-gray-400">Personaliza tus fechas de facturación</p>
+        </div>
+        <button onclick="closeModal('modal-config-cycle')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Día de Inicio (ej. 15, 1, 25...)</label>
+          <input type="number" min="1" max="28" id="input-cycle-start-day" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+        </div>
+        <p class="text-[11px] text-apple-gray-400 leading-relaxed">
+          Si fijas el día 15, el ciclo irá del 15 al 14 del mes siguiente. Si fijas el día 1, irá de primero a fin de mes.
+        </p>
+      </div>
+
+      <div class="pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5 mt-4">
+        <button onclick="closeModal('modal-config-cycle')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+          Cancelar
+        </button>
+        <button onclick="handleSaveCycleStartDay()" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
+          Guardar Configuración
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR PRÉSTAMO / COBRANZA -->
+  <div id="modal-add-loan" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-ios-sheet">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Nuevo Movimiento de Préstamo</h3>
+          <p class="text-xs text-apple-gray-400">Control de deudores y liquidaciones</p>
+        </div>
+        <button onclick="closeModal('modal-add-loan')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-loan" onsubmit="handleSaveLoan(event)" class="space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Persona</label>
+            <input type="text" required name="person" list="contacts-datalist" placeholder="Nombre..." class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+            <datalist id="contacts-datalist">
+              <option value="Amor">
+              <option value="Kily">
+              <option value="Madre">
+              <option value="Coco">
+              <option value="Denis">
+              <option value="Tata">
+              <option value="Onel">
+              <option value="UNIVERSIDAD">
+            </datalist>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Tipo de Flujo</label>
+            <select name="type" class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+              <option value="YO_PRESTE">Yo presté (+ por cobrar)</option>
+              <option value="ME_PAGARON">Me pagaron (- cobranza)</option>
+              <option value="ME_PRESTARON">Me prestaron (- deuda)</option>
+              <option value="YO_PAGUE">Yo pagué (+ liquidado)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Moneda</label>
+            <select name="currency" class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+              <option value="EUR">Euros (€)</option>
+              <option value="PEN">Soles (S/.)</option>
+              <option value="USD">Dólares ($)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto</label>
+            <input type="number" step="0.01" required name="amount" placeholder="0.00" class="w-full px-3 py-2 text-xs font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Detalle / Motivo</label>
+          <input type="text" name="notes" placeholder="Ej: Adelanto, compras, transferencia..." class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Fecha</label>
+            <input type="date" required name="date" id="input-loan-date" class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-apple-gray-500 mb-1">Tasa Congelada (Auto)</label>
+            <div id="loan-live-rate-preview" class="w-full px-3 py-2 text-xs font-mono font-semibold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 text-apple-gray-500 border border-apple-gray-300/60 dark:border-apple-gray-700/60 flex items-center justify-between">
+              <span>Al guardar</span>
+              <span class="w-2 h-2 rounded-full bg-apple-green"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-add-loan')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+            Cancelar
+          </button>
+          <button type="submit" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
+            Guardar Préstamo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR CAPITAL MADRE -->
+  <div id="modal-edit-madre" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-sm p-5 sm:p-6 shadow-ios-sheet">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Capital Madre (Soles)</h3>
+          <p class="text-xs text-apple-gray-400">Fondo no propio en BCP / Interbank</p>
+        </div>
+        <button onclick="closeModal('modal-edit-madre')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto en Soles (PEN)</label>
+          <input type="number" step="10" id="input-new-madre" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+        </div>
+        <p class="text-[11px] text-apple-gray-400 leading-relaxed">
+          Este valor define el semáforo inteligente de reposición. Si tus bancos peruanos tienen menos que este fondo, la app te avisará cuántos soles debes reponer.
+        </p>
+      </div>
+
+      <div class="pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5 mt-4">
+        <button onclick="closeModal('modal-edit-madre')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+          Cancelar
+        </button>
+        <button onclick="handleSaveMadreCapital()" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ACTUALIZAR RECORDATORIO BCP -->
+  <div id="modal-bcp-edit" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-sm p-5 sm:p-6 shadow-ios-sheet">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Estado Tarjeta BCP</h3>
+          <p class="text-xs text-apple-gray-400">Actualizar saldos al corte</p>
+        </div>
+        <button onclick="closeModal('modal-bcp-edit')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Facturación Soles (PEN)</label>
+          <input type="number" step="0.01" id="input-bcp-pen" class="w-full px-3 py-2 text-sm font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Facturación Dólares (USD)</label>
+          <input type="number" step="0.01" id="input-bcp-usd" class="w-full px-3 py-2 text-sm font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5 mt-4">
+        <button onclick="handleSaveBcp()" class="ios-tap w-full py-2.5 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
+          Guardar Cambios
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GESTOR DE MEMORIA Y RESPALDOS -->
+  <div id="modal-backup" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+    <div class="apple-card rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-ios-sheet">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-5 h-5 text-apple-green"></i>
+          <div>
+            <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Memoria &amp; Respaldos</h3>
+            <p class="text-xs text-apple-gray-400">Persistencia local sin servidores externos</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-backup')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 mb-4 text-xs text-apple-gray-500 leading-relaxed">
+        <p>
+          ✅ <strong>Memoria Automática Activa:</strong> Todos tus cambios y cada snapshot se guardan en el navegador con <code class="font-mono text-apple-blue">localStorage</code>.
+        </p>
+        <p>
+          📊 <strong>Extracción Inteligente de Excel:</strong> Puedes subir directamente tu archivo <code class="font-mono text-apple-green font-bold">AIRTM (1).xlsx</code> y el sistema volcará todas tus hojas históricas automáticamente.
+        </p>
+      </div>
+
+      <div class="space-y-2.5">
+        <label class="ios-tap w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-apple-green text-white shadow-ios-sm flex items-center justify-center gap-2 cursor-pointer hover:bg-emerald-600 transition">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+          <span>Subir Archivo Excel Original (.xlsx)</span>
+          <input type="file" accept=".xlsx, .xls" onchange="handleExcelFileUpload(event)" class="hidden">
+        </label>
+
+        <button onclick="exportBackupJSON()" class="ios-tap w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm flex items-center justify-center gap-2">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Descargar Copia de Seguridad (JSON)</span>
+        </button>
+
+        <label class="ios-tap w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-apple-gray-200/80 dark:bg-apple-gray-800/80 text-apple-gray-800 dark:text-white flex items-center justify-center gap-2 cursor-pointer border border-apple-gray-300/50 dark:border-apple-gray-700/50">
+          <i data-lucide="upload" class="w-4 h-4"></i>
+          <span>Restaurar Archivo JSON</span>
+          <input type="file" id="import-json-input" accept=".json" onchange="importBackupJSON(event)" class="hidden">
+        </label>
+
+        <button onclick="resetToCleanDefaults()" class="w-full py-2 px-4 rounded-xl text-xs font-medium text-apple-red hover:bg-apple-red/10 transition text-center">
+          Restablecer datos predeterminados
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Banner Toast -->
+  <div id="toast-notify" class="fixed top-20 right-4 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="apple-card px-4 py-3 rounded-2xl shadow-ios-float border border-apple-blue/30 flex items-center gap-3">
+      <div id="toast-icon-wrapper" class="w-7 h-7 rounded-xl bg-apple-blue/15 text-apple-blue flex items-center justify-center">
+        <i data-lucide="check" class="w-4 h-4"></i>
+      </div>
+      <div>
+        <p id="toast-title" class="text-xs font-bold text-apple-gray-900 dark:text-white">Notificación</p>
+        <p id="toast-message" class="text-[11px] text-apple-gray-500">Operación realizada con éxito.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- JAVASCRIPT LOGIC ENGINE                                    -->
+  <!-- ========================================================== -->
+  <script>
+    const STORAGE_KEY = 'CAPITAL_LEDGER_APPLE_EDITION_DB_V5';
+
+    const DEFAULT_SEED = {
+      fxRates: {
+        PEN: 3.88,
+        USD: 1.08,
+        lastUpdated: 'En vivo'
+      },
+      cycleStartDay: 15,
+      cycleBudgets: {
+        '2026-09': 300.00,
+        '2026-10': 600.00
+      },
+      acciones: 0.00,
+      accionesHistory: [
+        { id: 1, date: '2026-09-01', type: 'VALORIZACION', amount: 0.00, notes: 'Apertura de cartera' }
+      ],
+      capitalSolesMadre: 650.00,
+      bcp: {
+        pen: 1240.50,
+        usd: 0.00,
+        cutDay: 20
+      },
+      bancos: {
+        'Airtm': 920.00,
+        'N26': 137.00,
+        'BBVA': 5.00,
+        'Imagin': 83.00,
+        'Santander': 202.00,
+        'Bunq': 8.00,
+        'Trade': 58.00,
+        'Wise': 193.00,
+        'ING': 316.00,
+        'Vivid': 30.00,
+        'Sabadell': 0.00, // Nuevo banco añadido con saldo 0
+        'BCP': 314.00,
+        'Interbank': 401.00
+      },
+      personalBudget: 300.00,
+      personalFixedExpenses: [
+        { id: 101, concept: 'Suscripciones Cloud & Móvil', amount: 15.99, chargeDay: 1, category: 'Suscripciones', bank: 'N26' },
+        { id: 102, concept: 'Membresía Fitness', amount: 29.90, chargeDay: 5, category: 'Gimnasio / Salud', bank: 'Bunq' }
+      ],
+      personalExpenses: [
+        { id: 5, date: '2026-09-25', concept: 'Supermercado Mercadona', category: 'Alimentación', bank: 'N26', amount: 46.80 },
+        { id: 4, date: '2026-09-23', concept: 'Cena Amigos', category: 'Ocio', bank: 'Bunq', amount: 32.50 },
+        { id: 3, date: '2026-09-20', concept: 'Abono Transporte', category: 'Transporte', bank: 'Imagin', amount: 21.80 },
+        { id: 2, date: '2026-09-18', concept: 'Factura Móvil & Cloud', category: 'Servicios', bank: 'N26', amount: 15.99 },
+        { id: 1, date: '2026-09-16', concept: 'Farmacia & Cuidado', category: 'Compras', bank: 'N26', amount: 18.40 }
+      ],
+      loans: [
+        { id: 1, date: '2026-09-24', person: 'Amor', type: 'YO_PRESTE', currency: 'EUR', amount: 370.92, notes: 'Saldo acumulado', lockedRate: 1 },
+        { id: 2, date: '2026-09-22', person: 'Kily', type: 'YO_PRESTE', currency: 'EUR', amount: 507.88, notes: 'Viaje y adelanto', lockedRate: 1 },
+        { id: 3, date: '2026-09-17', person: 'Madre', type: 'YO_PRESTE', currency: 'PEN', amount: 354.00, notes: 'Compras y pedidos', lockedRate: 3.88 },
+        { id: 4, date: '2026-09-14', person: 'Coco', type: 'YO_PRESTE', currency: 'PEN', amount: 100.00, notes: 'Préstamo taller', lockedRate: 3.88 },
+        { id: 5, date: '2026-09-10', person: 'UNIVERSIDAD', type: 'YO_PRESTE', currency: 'EUR', amount: 530.30, notes: 'Matrícula cuota', lockedRate: 1 },
+        { id: 6, date: '2026-09-08', person: 'Denis', type: 'YO_PRESTE', currency: 'EUR', amount: 5.00, notes: 'Café pendiente', lockedRate: 1 },
+        { id: 7, date: '2026-09-05', person: 'Tata', type: 'YO_PRESTE', currency: 'EUR', amount: 5.91, notes: 'Gasto menor', lockedRate: 1 },
+        { id: 8, date: '2026-09-01', person: 'Onel', type: 'YO_PRESTE', currency: 'EUR', amount: 2.16, notes: 'Ajuste cuenta', lockedRate: 1 }
+      ],
+      arqueoHistory: [
+        {
+          id: 104,
+          timestamp: '2026-09-26 00:07:36',
+          capitalTotal: 3521.84,
+          dif: 28.50,
+          gastosDia: 0.00,
+          profitHoy: 28.50,
+          fxPen: 3.88,
+          fxUsd: 1.08,
+          bancos: { 'Airtm': 920, 'N26': 137, 'BBVA': 5, 'Imagin': 83, 'Santander': 202, 'Bunq': 8, 'Trade': 58, 'Wise': 193, 'ING': 316, 'Vivid': 30, 'Sabadell': 0, 'BCP': 314, 'Interbank': 401 },
+          porCobrarEur: 1539.62,
+          accionesEur: 0.00,
+          capitalSolesMadre: 650.00
+        },
+        {
+          id: 103,
+          timestamp: '2026-09-25 13:11:20',
+          capitalTotal: 3493.34,
+          dif: -15.20,
+          gastosDia: 46.80,
+          profitHoy: 31.60,
+          fxPen: 3.88,
+          fxUsd: 1.08,
+          bancos: { 'Airtm': 689, 'N26': 116, 'BBVA': 5, 'Imagin': 83, 'Santander': 202, 'Bunq': 8, 'Trade': 58, 'Wise': 193, 'ING': 126, 'Vivid': 30, 'Sabadell': 0, 'BCP': 797, 'Interbank': 401 },
+          porCobrarEur: 1539.62,
+          accionesEur: 0.00,
+          capitalSolesMadre: 650.00
+        },
+        {
+          id: 102,
+          timestamp: '2026-09-24 18:36:09',
+          capitalTotal: 3508.54,
+          dif: 42.10,
+          gastosDia: 0.00,
+          profitHoy: 42.10,
+          fxPen: 3.88,
+          fxUsd: 1.08,
+          bancos: { 'Airtm': 1085, 'N26': 16, 'BBVA': 5, 'Imagin': 45, 'Santander': 87, 'Bunq': 8, 'Trade': 158, 'Wise': 67, 'ING': 0, 'Vivid': 30, 'Sabadell': 0, 'BCP': 1168, 'Interbank': 401 },
+          porCobrarEur: 1558.08,
+          accionesEur: 0.00,
+          capitalSolesMadre: 650.00
+        }
+      ]
+    };
+
+    let state = {};
+    let activeContactLoanFilter = 'ALL';
+    let selectedCycleKey = null;
+
+    // Persistencia Local con Auto-migración de Sabadell
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('CAPITAL_LEDGER_APPLE_EDITION_DB_V4');
+        if (saved) {
+          state = JSON.parse(saved);
+        } else {
+          state = JSON.parse(JSON.stringify(DEFAULT_SEED));
+        }
+      } catch (err) {
+        console.error("Error al leer localStorage:", err);
+        state = JSON.parse(JSON.stringify(DEFAULT_SEED));
+      }
+
+      // Migración defensiva: asegurar Sabadell en bancos
+      if (!state.bancos) state.bancos = {};
+      if (state.bancos['Sabadell'] === undefined) {
+        state.bancos['Sabadell'] = 0.00;
+      }
+
+      if (!state.personalFixedExpenses) state.personalFixedExpenses = [];
+      if (!state.accionesHistory) state.accionesHistory = [];
+      if (!state.fxRates) state.fxRates = { PEN: 3.88, USD: 1.08, lastUpdated: 'En vivo' };
+    }
+
+    function persistState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error("Error al persistir en localStorage:", e);
+      }
+    }
+
+    // Divisas oficiales de solo lectura en vivo
+    async function fetchLiveFxRates(showToastAlert = false) {
+      try {
+        const response = await fetch('https://open.er-api.com/v6/latest/EUR');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.rates) {
+            const pen = parseFloat(data.rates.PEN) || 3.88;
+            const usd = parseFloat(data.rates.USD) || 1.08;
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            
+            if (!state.fxRates) state.fxRates = {};
+            state.fxRates.PEN = Number(pen.toFixed(4));
+            state.fxRates.USD = Number(usd.toFixed(4));
+            state.fxRates.lastUpdated = timeStr;
+            
+            persistState();
+            updateFxUI();
+            if (showToastAlert) {
+              showToast('Cotización Actualizada', `1 EUR = ${pen.toFixed(2)} PEN | ${usd.toFixed(2)} USD`, true);
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("No se pudo obtener cotización remota, usando local:", err);
+      }
+      updateFxUI();
+    }
+
+    function updateFxUI() {
+      const pen = state.fxRates?.PEN || 3.88;
+      const usd = state.fxRates?.USD || 1.08;
+
+      const headPen = document.getElementById('header-fx-pen');
+      const headUsd = document.getElementById('header-fx-usd');
+      if (headPen) headPen.innerText = `${pen.toFixed(2)} S/.`;
+      if (headUsd) headUsd.innerText = `${usd.toFixed(2)} $`;
+
+      const preview = document.getElementById('loan-live-rate-preview');
+      if (preview) {
+        preview.innerHTML = `<span>1€ = ${pen.toFixed(2)} S/. | ${usd.toFixed(2)} $</span><span class="w-2 h-2 rounded-full bg-apple-green pulse-dot"></span>`;
+      }
+    }
+
+    function showToast(title, message, isSuccess = true) {
+      const toast = document.getElementById('toast-notify');
+      const tTitle = document.getElementById('toast-title');
+      const tMsg = document.getElementById('toast-message');
+      const tIcon = document.getElementById('toast-icon-wrapper');
+
+      if (!toast) return;
+      tTitle.innerText = title;
+      tMsg.innerText = message;
+      if (isSuccess) {
+        tIcon.className = 'w-7 h-7 rounded-xl bg-apple-green/15 text-apple-green flex items-center justify-center';
+        tIcon.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+      } else {
+        tIcon.className = 'w-7 h-7 rounded-xl bg-apple-orange/15 text-apple-orange flex items-center justify-center';
+        tIcon.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i>';
+      }
+      lucide.createIcons();
+
+      toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-[-100px]', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 4000);
+    }
+
+    // Formateadores de moneda
+    function formatEUR(val) {
+      return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(val || 0);
+    }
+    function formatPEN(val) {
+      return `S/. ${(val || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    function formatUSD(val) {
+      return `$ ${(val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    // Núcleo matemático de capital
+    function calculateConsolidatedLoansNetEUR() {
+      let netEur = 0;
+      const curPenRate = state.fxRates?.PEN || 3.88;
+      const curUsdRate = state.fxRates?.USD || 1.08;
+
+      if (state.loans && Array.isArray(state.loans)) {
+        state.loans.forEach(l => {
+          const factor = (l.type === 'YO_PRESTE' || l.type === 'YO_PAGUE') ? 1 : -1;
+          const rate = l.lockedRate || (l.currency === 'PEN' ? curPenRate : (l.currency === 'USD' ? curUsdRate : 1));
+
+          if (l.currency === 'EUR') {
+            netEur += (Number(l.amount) * factor);
+          } else if (l.currency === 'PEN') {
+            netEur += ((Number(l.amount) / rate) * factor);
+          } else if (l.currency === 'USD') {
+            netEur += ((Number(l.amount) / rate) * factor);
+          }
+        });
+      }
+      return netEur;
+    }
+
+    function calculateTotalBancosEuro() {
+      // 11 Cuentas en Euros (incluye Sabadell)
+      const euroKeys = ['Airtm', 'N26', 'BBVA', 'Imagin', 'Santander', 'Bunq', 'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell'];
+      let sum = 0;
+      euroKeys.forEach(k => {
+        sum += Number((state.bancos && state.bancos[k]) || 0);
+      });
+      return sum;
+    }
+
+    function calculateTotalBancosSoles() {
+      const bcp = Number((state.bancos && state.bancos['BCP']) || 0);
+      const interbank = Number((state.bancos && state.bancos['Interbank']) || 0);
+      return bcp + interbank;
+    }
+
+    function calculateLiveCapitalTotal() {
+      const totalEurBancos = calculateTotalBancosEuro();
+      const acciones = Number(state.acciones || 0);
+      const loansEur = calculateConsolidatedLoansNetEUR();
+      const bancosSoles = calculateTotalBancosSoles();
+      const capMadre = Number(state.capitalSolesMadre || 0);
+      const fx = (state.fxRates?.PEN && state.fxRates.PEN > 0) ? state.fxRates.PEN : 3.88;
+
+      const solesAjustadosEnEur = (bancosSoles - capMadre) / fx;
+      return totalEurBancos + acciones + loansEur + solesAjustadosEnEur;
+    }
+
+    function getExpensesForDate(dateStr) {
+      let sum = 0;
+      if (state.personalExpenses && Array.isArray(state.personalExpenses)) {
+        state.personalExpenses.forEach(e => {
+          if (e.date === dateStr) {
+            sum += Number(e.amount || 0);
+          }
+        });
+      }
+      return sum;
+    }
+
+    // ==========================================================
+    // MÓDULO 1: AIRTM & HISTORIAL
+    // ==========================================================
+    function renderAirtmModule() {
+      const capitalTotal = calculateLiveCapitalTotal();
+      const totalBancos = calculateTotalBancosEuro();
+      const loansEur = calculateConsolidatedLoansNetEUR();
+      const bancosSoles = calculateTotalBancosSoles();
+      const capMadre = Number(state.capitalSolesMadre || 0);
+      const difMadre = capMadre - bancosSoles;
+
+      const statCap = document.getElementById('stat-airtm-capital-total');
+      if (statCap) statCap.innerText = formatEUR(capitalTotal);
+
+      const statTotalBancos = document.getElementById('stat-total-bancos');
+      if (statTotalBancos) statTotalBancos.innerText = formatEUR(totalBancos);
+
+      const statAcc = document.getElementById('stat-acciones');
+      if (statAcc) statAcc.innerText = formatEUR(state.acciones || 0);
+
+      const statLoans = document.getElementById('stat-loans-to-capital');
+      if (statLoans) statLoans.innerText = formatEUR(loansEur);
+
+      const statCapSoles = document.getElementById('stat-capital-soles');
+      if (statCapSoles) statCapSoles.innerText = formatPEN(capMadre);
+
+      // Profit diario en vivo
+      const todayStr = new Date().toISOString().split('T')[0];
+      const gastosHoy = getExpensesForDate(todayStr);
+      let profitHoy = 0;
+      if (state.arqueoHistory && state.arqueoHistory.length > 0) {
+        const lastSnap = state.arqueoHistory[0];
+        const delta = capitalTotal - lastSnap.capitalTotal;
+        profitHoy = delta + gastosHoy;
+      }
+      const profitElem = document.getElementById('stat-profit-hoy');
+      if (profitElem) {
+        if (profitHoy >= 0) {
+          profitElem.innerText = `+${formatEUR(profitHoy)}`;
+          profitElem.className = 'text-sm sm:text-base md:text-lg font-bold text-apple-green mt-0.5';
+        } else {
+          profitElem.innerText = formatEUR(profitHoy);
+          profitElem.className = 'text-sm sm:text-base md:text-lg font-bold text-apple-red mt-0.5';
+        }
+      }
+
+      // Semáforo Madre
+      const badgeMadre = document.getElementById('airtm-mother-badge');
+      const halo = document.getElementById('airtm-halo');
+      const badgeStatus = document.getElementById('airtm-status-badge');
+
+      if (badgeMadre && halo && badgeStatus) {
+        if (difMadre > 0) {
+          badgeMadre.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-apple-red/15 text-apple-red ring-1 ring-apple-red/30';
+          badgeMadre.innerHTML = `<span class="w-2 h-2 rounded-full bg-apple-red pulse-dot"></span> ⚠️ DEBO REPONER ${formatPEN(difMadre)}`;
+          badgeStatus.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-apple-orange/15 text-apple-orange';
+          badgeStatus.innerText = 'Soles comprometidos';
+          halo.className = 'absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-700 bg-apple-red/15';
+        } else if (difMadre < 0) {
+          const excedente = Math.abs(difMadre);
+          badgeMadre.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-apple-green/15 text-apple-green ring-1 ring-apple-green/30';
+          badgeMadre.innerHTML = `<span class="w-2 h-2 rounded-full bg-apple-green pulse-dot"></span> ✅ PUEDO RETIRAR ${formatPEN(excedente)}`;
+          badgeStatus.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-apple-green/15 text-apple-green';
+          badgeStatus.innerText = 'Capital Operativo Libre';
+          halo.className = 'absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-700 bg-apple-green/15';
+        } else {
+          badgeMadre.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-apple-gray-200 text-apple-gray-800 dark:bg-apple-gray-700 dark:text-white';
+          badgeMadre.innerHTML = `⚖️ CAPITAL INTACTO (${formatPEN(capMadre)})`;
+          badgeStatus.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-apple-gray-200 text-apple-gray-600 dark:bg-apple-gray-700 dark:text-apple-gray-300';
+          badgeStatus.innerText = 'Equilibrio exacto';
+          halo.className = 'absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-700 bg-apple-blue/10';
+        }
+      }
+
+      // Render 13 tarjetas de bancos (incluyendo Sabadell)
+      const container = document.getElementById('bank-cards-grid');
+      if (container && state.bancos) {
+        container.innerHTML = '';
+        const bankGradients = {
+          'Airtm': 'from-blue-600 to-sky-400',
+          'N26': 'from-teal-600 to-emerald-700',
+          'BBVA': 'from-blue-700 to-indigo-900',
+          'Imagin': 'from-sky-500 to-cyan-700',
+          'Santander': 'from-red-600 to-rose-800',
+          'Bunq': 'from-pink-500 to-purple-600',
+          'Trade': 'from-zinc-700 to-black',
+          'Wise': 'from-lime-500 to-emerald-600',
+          'ING': 'from-orange-500 to-amber-600',
+          'Vivid': 'from-violet-600 to-purple-800',
+          'Sabadell': 'from-sky-700 to-blue-900', // Sabadell Navy
+          'BCP': 'from-blue-800 to-sky-900',
+          'Interbank': 'from-emerald-600 to-teal-800'
+        };
+
+        for (const [name, balance] of Object.entries(state.bancos)) {
+          const isSoles = (name === 'BCP' || name === 'Interbank');
+          const grad = bankGradients[name] || 'from-gray-500 to-gray-700';
+          const card = document.createElement('div');
+          card.className = 'ios-tap p-3 rounded-2xl apple-card shadow-ios-sm flex flex-col justify-between cursor-pointer hover:border-apple-blue/50 transition';
+          card.onclick = () => openModal('modal-quick-balance');
+          card.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-apple-gray-800 dark:text-gray-200">${name}</span>
+              <div class="w-2.5 h-2.5 rounded-full bg-gradient-to-tr ${grad}"></div>
+            </div>
+            <div class="mt-2">
+              <p class="text-xs font-mono font-bold text-apple-gray-900 dark:text-white">${isSoles ? formatPEN(balance) : formatEUR(balance)}</p>
+              <span class="text-[9px] text-apple-gray-400">${isSoles ? 'Soles (PEN)' : 'Euros (€)'}</span>
+            </div>
+          `;
+          container.appendChild(card);
+        }
+      }
+
+      renderArqueoHistoryTable();
+    }
+
+    function renderArqueoHistoryTable(filter = '') {
+      const tbody = document.getElementById('arqueo-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const query = filter.toLowerCase().trim();
+      const list = (state.arqueoHistory || []).filter(item => {
+        if (!query) return true;
+        return (item.timestamp && item.timestamp.toLowerCase().includes(query));
+      });
+
+      const countPill = document.getElementById('arqueo-count-pill');
+      if (countPill) countPill.innerText = `${list.length} snapshots`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="21" class="py-8 text-center text-xs text-apple-gray-400">Sin snapshots registrados todavía</td></tr>`;
+        return;
+      }
+
+      list.forEach((item) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-apple-gray-50/70 dark:hover:bg-apple-gray-800/40 transition';
+        
+        const difVal = Number(item.dif || 0);
+        const difBadge = difVal >= 0 
+          ? `<span class="text-apple-green font-semibold">+${formatEUR(difVal)}</span>`
+          : `<span class="text-apple-red font-semibold">${formatEUR(difVal)}</span>`;
+
+        const profitVal = Number(item.profitHoy || 0);
+        const profitBadge = profitVal >= 0
+          ? `<span class="text-apple-green font-bold">+${formatEUR(profitVal)}</span>`
+          : `<span class="text-apple-red font-bold">${formatEUR(profitVal)}</span>`;
+
+        const b = item.bancos || {};
+        const fxPenUsed = item.fxPen ? Number(item.fxPen).toFixed(2) : '3.88';
+
+        tr.innerHTML = `
+          <td class="py-3 px-3 font-semibold text-apple-gray-800 dark:text-gray-200">${item.timestamp}</td>
+          <td class="py-3 px-3 text-right font-black text-apple-gray-900 dark:text-white">${formatEUR(item.capitalTotal)}</td>
+          <td class="py-3 px-3 text-right">${difBadge}</td>
+          <td class="py-3 px-3 text-right text-apple-gray-400">${item.gastosDia > 0 ? formatEUR(item.gastosDia) : '—'}</td>
+          <td class="py-3 px-3 text-right">${profitBadge}</td>
+          <td class="py-3 px-2 text-right text-apple-gray-400 font-mono text-[10px]">${fxPenUsed} S/.</td>
+          <td class="py-3 px-2 text-right">${b['Airtm'] !== undefined ? formatEUR(b['Airtm']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['N26'] !== undefined ? formatEUR(b['N26']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['BBVA'] !== undefined ? formatEUR(b['BBVA']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['Imagin'] !== undefined ? formatEUR(b['Imagin']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['Santander'] !== undefined ? formatEUR(b['Santander']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['Bunq'] !== undefined ? formatEUR(b['Bunq']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['Trade'] !== undefined ? formatEUR(b['Trade']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['Wise'] !== undefined ? formatEUR(b['Wise']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['ING'] !== undefined ? formatEUR(b['ING']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['Vivid'] !== undefined ? formatEUR(b['Vivid']) : '—'}</td>
+          <td class="py-3 px-2 text-right text-apple-blue font-bold">${b['Sabadell'] !== undefined ? formatEUR(b['Sabadell']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['BCP'] !== undefined ? formatPEN(b['BCP']) : '—'}</td>
+          <td class="py-3 px-2 text-right">${b['Interbank'] !== undefined ? formatPEN(b['Interbank']) : '—'}</td>
+          <td class="py-3 px-2 text-right text-apple-blue">${formatEUR(item.porCobrarEur || 0)}</td>
+          <td class="py-3 px-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="openEditArqueoRowModal(${item.id})" class="p-1 rounded-lg text-apple-gray-400 hover:text-apple-blue transition" title="Editar este arqueo">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteArqueoRow(${item.id})" class="p-1 rounded-lg text-apple-gray-400 hover:text-apple-red transition" title="Eliminar fila">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function takeArqueoSnapshot() {
+      const liveCap = calculateLiveCapitalTotal();
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const todayDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+      let dif = 0;
+      let lastSnap = null;
+      if (state.arqueoHistory && state.arqueoHistory.length > 0) {
+        lastSnap = state.arqueoHistory[0];
+        dif = liveCap - lastSnap.capitalTotal;
+      }
+
+      const gastosDia = getExpensesForDate(todayDate);
+      const profitHoy = dif + gastosDia;
+
+      const newSnap = {
+        id: Date.now(),
+        timestamp: timeStr,
+        capitalTotal: Number(liveCap.toFixed(2)),
+        dif: Number(dif.toFixed(2)),
+        gastosDia: Number(gastosDia.toFixed(2)),
+        profitHoy: Number(profitHoy.toFixed(2)),
+        fxPen: state.fxRates?.PEN || 3.88,
+        fxUsd: state.fxRates?.USD || 1.08,
+        bancos: JSON.parse(JSON.stringify(state.bancos || {})),
+        porCobrarEur: Number(calculateConsolidatedLoansNetEUR().toFixed(2)),
+        accionesEur: Number((state.acciones || 0).toFixed(2)),
+        capitalSolesMadre: Number((state.capitalSolesMadre || 650).toFixed(2))
+      };
+
+      if (!state.arqueoHistory) state.arqueoHistory = [];
+      state.arqueoHistory.unshift(newSnap);
+
+      persistState();
+      renderAirtmModule();
+      showToast('Snapshot Guardado', `Arqueo registrado: ${formatEUR(liveCap)} (Profit: ${formatEUR(profitHoy)})`, true);
+    }
+
+    function deleteArqueoRow(id) {
+      if (confirm('¿Deseas eliminar este registro de arqueo?')) {
+        state.arqueoHistory = (state.arqueoHistory || []).filter(x => x.id !== id);
+        persistState();
+        renderAirtmModule();
+        showToast('Snapshot Eliminado', 'El registro se ha retirado del historial.', true);
+      }
+    }
+
+    function openEditArqueoRowModal(id) {
+      const snap = (state.arqueoHistory || []).find(x => x.id === id);
+      if (!snap) return;
+
+      document.getElementById('edit-arqueo-id').value = snap.id;
+      document.getElementById('edit-arqueo-timestamp').value = snap.timestamp || '';
+      document.getElementById('edit-arqueo-capital').value = snap.capitalTotal || 0;
+      document.getElementById('edit-arqueo-profit').value = snap.profitHoy || 0;
+
+      const container = document.getElementById('edit-arqueo-banks-container');
+      container.innerHTML = '';
+
+      const bankList = snap.bancos || state.bancos || {};
+      for (const [name, val] of Object.entries(bankList)) {
+        const isSoles = (name === 'BCP' || name === 'Interbank');
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <label class="block text-[10px] text-apple-gray-400 mb-0.5">${name} (${isSoles ? 'S/.' : '€'})</label>
+          <input type="number" step="0.01" name="snap_bank_${name}" value="${val}" class="w-full px-2 py-1 text-xs font-mono font-bold rounded-lg bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+        `;
+        container.appendChild(div);
+      }
+
+      openModal('modal-edit-arqueo-row');
+    }
+
+    function handleSaveEditedArqueo(e) {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      const id = parseInt(form.get('arqueo_id'));
+      const snap = (state.arqueoHistory || []).find(x => x.id === id);
+      if (!snap) return;
+
+      snap.timestamp = form.get('timestamp');
+      snap.capitalTotal = parseFloat(form.get('capitalTotal')) || snap.capitalTotal;
+      snap.profitHoy = parseFloat(form.get('profitHoy')) || snap.profitHoy;
+
+      if (!snap.bancos) snap.bancos = {};
+      for (const key of Object.keys(snap.bancos)) {
+        const val = form.get(`snap_bank_${key}`);
+        if (val !== null) snap.bancos[key] = parseFloat(val) || 0;
+      }
+
+      persistState();
+      renderArqueoHistoryTable();
+      closeModal('modal-edit-arqueo-row');
+      showToast('Arqueo Modificado', 'Los datos del snapshot han sido corregidos correctamente.', true);
+    }
+
+    // ==========================================================
+    // MÓDULO 2: FINANZAS PERSONALES
+    // ==========================================================
+    function getCycleKeyForDate(dateObj, startDay = 15) {
+      const yr = dateObj.getFullYear();
+      const mo = dateObj.getMonth();
+      const dt = dateObj.getDate();
+
+      let cycleYear = yr;
+      let cycleMonth = mo;
+
+      if (dt < startDay) {
+        cycleMonth = mo - 1;
+        if (cycleMonth < 0) {
+          cycleMonth = 11;
+          cycleYear = yr - 1;
+        }
+      }
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${cycleYear}-${pad(cycleMonth + 1)}`;
+    }
+
+    function calculatePersonalCycle(targetCycleKey = null) {
+      const now = new Date();
+      const startDay = state.cycleStartDay || 15;
+      const currentCycleKey = getCycleKeyForDate(now, startDay);
+      const activeKey = targetCycleKey || selectedCycleKey || currentCycleKey;
+      selectedCycleKey = activeKey;
+
+      const [cYr, cMo] = activeKey.split('-').map(Number);
+      const cycleStart = new Date(cYr, cMo - 1, startDay);
+      const nextMonth = cMo === 12 ? 1 : cMo + 1;
+      const nextYear = cMo === 12 ? cYr + 1 : cYr;
+      const cycleEnd = new Date(nextYear, nextMonth - 1, startDay - 1, 23, 59, 59);
+
+      if (!state.cycleBudgets) state.cycleBudgets = {};
+      const budget = Number(state.cycleBudgets[activeKey] || state.personalBudget || 300);
+
+      let totalSpent = 0;
+      if (state.personalExpenses && Array.isArray(state.personalExpenses)) {
+        state.personalExpenses.forEach(exp => {
+          const d = new Date(exp.date);
+          if (d >= cycleStart && d <= cycleEnd) {
+            totalSpent += Number(exp.amount || 0);
+          }
+        });
+      }
+
+      let totalFixed = 0;
+      if (state.personalFixedExpenses && Array.isArray(state.personalFixedExpenses)) {
+        state.personalFixedExpenses.forEach(f => {
+          totalFixed += Number(f.amount || 0);
+        });
+      }
+
+      const totalCommitted = totalFixed + totalSpent;
+      const available = budget - totalCommitted;
+
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const daysRemaining = Math.max(1, Math.ceil((cycleEnd - now) / msPerDay));
+      const dailyAllowance = available > 0 ? (available / daysRemaining) : 0;
+
+      const daysPassed = Math.max(1, Math.floor((now - cycleStart) / msPerDay));
+      const burnRatePerDay = totalSpent / daysPassed;
+      const projectedTotalSpent = totalCommitted + (burnRatePerDay * daysRemaining);
+      const projectedDifference = budget - projectedTotalSpent;
+
+      return {
+        activeKey,
+        currentCycleKey,
+        isCurrent: activeKey === currentCycleKey,
+        budget,
+        totalFixed,
+        totalSpent,
+        totalCommitted,
+        available,
+        daysRemaining,
+        dailyAllowance,
+        burnRatePerDay,
+        projectedDifference,
+        cycleStart,
+        cycleEnd
+      };
+    }
+
+    function changeActiveCycle(key) {
+      selectedCycleKey = key;
+      renderPersonalModule();
+    }
+
+    function populateCycleDropdown(activeKey) {
+      const select = document.getElementById('select-active-cycle');
+      if (!select) return;
+      select.innerHTML = '';
+
+      const now = new Date();
+      const startDay = state.cycleStartDay || 15;
+      const months = [];
+
+      for (let i = -3; i <= 3; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, startDay);
+        const pad = (n) => String(n).padStart(2, '0');
+        const k = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+        if (!months.includes(k)) months.push(k);
+      }
+
+      months.forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = k;
+        const [yr, mo] = k.split('-');
+        const monthName = new Date(parseInt(yr), parseInt(mo) - 1, 1).toLocaleString('es-ES', { month: 'short' });
+        opt.innerText = `${monthName.toUpperCase()} ${yr}`;
+        if (k === activeKey) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function renderPersonalModule() {
+      const cyc = calculatePersonalCycle();
+      populateCycleDropdown(cyc.activeKey);
+
+      const rangeLabel = document.getElementById('personal-cycle-range');
+      if (rangeLabel) {
+        const d1 = `${cyc.cycleStart.getDate()}/${cyc.cycleStart.getMonth()+1}`;
+        const d2 = `${cyc.cycleEnd.getDate()}/${cyc.cycleEnd.getMonth()+1}`;
+        rangeLabel.innerText = `(${d1} al ${d2})`;
+      }
+
+      const circle = document.getElementById('personal-ring-circle');
+      if (circle) {
+        const circumference = 314.16;
+        const pct = Math.min(100, Math.max(0, (cyc.totalCommitted / cyc.budget) * 100));
+        const offset = circumference - (pct / 100) * circumference;
+        circle.style.strokeDashoffset = offset;
+
+        if (pct > 90) {
+          circle.setAttribute('class', 'text-apple-red fill-none transition-all duration-1000 ease-out');
+        } else if (pct > 75) {
+          circle.setAttribute('class', 'text-apple-orange fill-none transition-all duration-1000 ease-out');
+        } else {
+          circle.setAttribute('class', 'text-apple-blue fill-none transition-all duration-1000 ease-out');
+        }
+
+        const dispEl = document.getElementById('personal-disp-eur');
+        if (dispEl) dispEl.innerText = formatEUR(cyc.available);
+
+        const ringPct = document.getElementById('personal-ring-percent');
+        if (ringPct) ringPct.innerText = `${pct.toFixed(0)}% comprometido`;
+
+        const daysPill = document.getElementById('personal-days-remaining-pill');
+        if (daysPill) {
+          daysPill.innerText = cyc.isCurrent ? `${cyc.daysRemaining} días restantes` : 'Ciclo histórico';
+        }
+
+        const dailyAllow = document.getElementById('personal-daily-allowance');
+        if (dailyAllow) dailyAllow.innerText = `${formatEUR(cyc.dailyAllowance)} / día`;
+
+        const budgetFix = document.getElementById('personal-budget-fixed');
+        if (budgetFix) budgetFix.innerText = formatEUR(cyc.budget);
+
+        const totFixedSpent = document.getElementById('personal-total-fixed-spent');
+        if (totFixedSpent) totFixedSpent.innerText = formatEUR(cyc.totalFixed);
+
+        const totSpent = document.getElementById('personal-total-spent');
+        if (totSpent) totSpent.innerText = formatEUR(cyc.totalSpent);
+
+        const projBanner = document.getElementById('personal-projection-banner');
+        if (projBanner) {
+          if (!cyc.isCurrent) {
+            const balanceCiclo = cyc.budget - cyc.totalCommitted;
+            projBanner.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full ${balanceCiclo >= 0 ? 'bg-apple-green' : 'bg-apple-red'}"></span>
+                <span class="text-apple-gray-600 dark:text-apple-gray-300">Resultado final del ciclo:</span>
+              </div>
+              <span class="font-bold font-mono ${balanceCiclo >= 0 ? 'text-apple-green' : 'text-apple-red'}">${balanceCiclo >= 0 ? '+' : ''}${formatEUR(balanceCiclo)}</span>
+            `;
+          } else if (cyc.projectedDifference >= 0) {
+            projBanner.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-apple-green"></span>
+                <span class="text-apple-gray-600 dark:text-apple-gray-300">Ritmo saludable: Proyección de ahorro</span>
+              </div>
+              <span class="font-bold font-mono text-apple-green">+${formatEUR(cyc.projectedDifference)}</span>
+            `;
+          } else {
+            projBanner.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-apple-red pulse-dot"></span>
+                <span class="text-apple-gray-600 dark:text-apple-gray-300">Alerta: Proyección de desvío</span>
+              </div>
+              <span class="font-bold font-mono text-apple-red">-${formatEUR(Math.abs(cyc.projectedDifference))}</span>
+            `;
+          }
+        }
+      }
+
+      renderFixedExpensesList();
+
+      const bcpPen = document.getElementById('bcp-val-pen');
+      if (bcpPen) bcpPen.innerText = formatPEN(state.bcp?.pen || 0);
+
+      const bcpUsd = document.getElementById('bcp-val-usd');
+      if (bcpUsd) bcpUsd.innerText = `$ ${(state.bcp?.usd || 0).toFixed(2)}`;
+
+      const bcpCountdown = document.getElementById('bcp-days-countdown');
+      if (bcpCountdown) {
+        const today = new Date().getDate();
+        const cut = state.bcp?.cutDay || 20;
+        let daysToCut = cut - today;
+        if (daysToCut < 0) daysToCut += 30;
+        bcpCountdown.innerText = daysToCut === 0 ? '¡Corte hoy!' : `Corte en ${daysToCut} días`;
+      }
+
+      renderPersonalExpensesList();
+    }
+
+    function renderFixedExpensesList() {
+      const list = document.getElementById('personal-fixed-expenses-list');
+      const badge = document.getElementById('badge-fixed-count');
+      if (!list) return;
+
+      const items = state.personalFixedExpenses || [];
+      if (badge) badge.innerText = `${items.length} fijos`;
+
+      list.innerHTML = '';
+      if (items.length === 0) {
+        list.innerHTML = `<p class="col-span-full py-4 text-center text-xs text-apple-gray-400">Sin gastos fijos registrados</p>`;
+        return;
+      }
+
+      items.forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'p-3 rounded-2xl apple-card shadow-ios-sm border border-apple-gray-200/50 dark:border-apple-gray-700/50 flex flex-col justify-between';
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-apple-gray-900 dark:text-white truncate">${f.concept}</span>
+            <button onclick="deleteFixedExpense(${f.id})" class="text-apple-gray-400 hover:text-apple-red p-1">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <div class="mt-2.5 flex items-baseline justify-between">
+            <span class="font-mono font-bold text-xs text-apple-orange">-${formatEUR(f.amount)}</span>
+            <span class="text-[10px] text-apple-gray-400">Día ${f.chargeDay} • ${f.bank}</span>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    // Renderizar lista de gastos ordenados: EL MÁS RECIENTE / ÚLTIMO ARRIBA
+    function renderPersonalExpensesList() {
+      const list = document.getElementById('personal-expenses-list');
+      if (!list) return;
+      list.innerHTML = '';
+
+      if (!state.personalExpenses || state.personalExpenses.length === 0) {
+        list.innerHTML = `<p class="py-6 text-center text-xs text-apple-gray-400">Sin gastos variables registrados en este ciclo</p>`;
+        return;
+      }
+
+      const catIcons = {
+        'Alimentación': 'shopping-cart',
+        'Ocio': 'coffee',
+        'Transporte': 'navigation',
+        'Servicios': 'zap',
+        'Compras': 'tag',
+        'Otros': 'credit-card'
+      };
+
+      // Ordenar gastos: fecha más reciente primero (descendente)
+      const sortedExpenses = [...state.personalExpenses].sort((a, b) => {
+        const diff = new Date(b.date) - new Date(a.date);
+        if (diff !== 0) return diff;
+        return (b.id || 0) - (a.id || 0);
+      });
+
+      sortedExpenses.forEach(exp => {
+        const item = document.createElement('div');
+        item.className = 'py-3 flex items-center justify-between gap-3 group hover:bg-apple-gray-50/50 dark:hover:bg-apple-gray-800/20 px-2 rounded-2xl transition';
+        const ico = catIcons[exp.category] || 'credit-card';
+
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 text-apple-gray-600 dark:text-apple-gray-300 flex items-center justify-center shrink-0">
+              <i data-lucide="${ico}" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-apple-gray-900 dark:text-white">${exp.concept}</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] text-apple-gray-400 font-mono">${exp.date}</span>
+                <span class="text-[10px] text-apple-gray-400">•</span>
+                <span class="text-[10px] font-semibold text-apple-blue">${exp.bank}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2.5">
+            <span class="text-xs font-mono font-bold text-apple-red">-${formatEUR(exp.amount)}</span>
+            <button onclick="deleteExpense(${exp.id})" class="opacity-70 group-hover:opacity-100 p-1 text-apple-gray-400 hover:text-apple-red transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    // ==========================================================
+    // MÓDULO 3: PRÉSTAMOS, DEUDORES & DOSSIER INDIVIDUAL
+    // ==========================================================
+    function renderLoansModule() {
+      const netEur = calculateConsolidatedLoansNetEUR();
+      const prestNet = document.getElementById('prestamos-net-eur');
+      if (prestNet) prestNet.innerText = formatEUR(netEur);
+
+      let prestado = 0;
+      let cobrado = 0;
+      const curPenRate = state.fxRates?.PEN || 3.88;
+      const curUsdRate = state.fxRates?.USD || 1.08;
+
+      if (state.loans && Array.isArray(state.loans)) {
+        state.loans.forEach(l => {
+          const rate = l.lockedRate || (l.currency === 'PEN' ? curPenRate : (l.currency === 'USD' ? curUsdRate : 1));
+          const val = l.currency === 'EUR' ? Number(l.amount) : (Number(l.amount) / rate);
+
+          if (l.type === 'YO_PRESTE' || l.type === 'YO_PAGUE') {
+            prestado += val;
+          } else {
+            cobrado += val;
+          }
+        });
+      }
+
+      const totPrest = document.getElementById('prestamos-total-prestado');
+      if (totPrest) totPrest.innerText = formatEUR(prestado);
+
+      const totCob = document.getElementById('prestamos-total-cobrado');
+      if (totCob) totCob.innerText = formatEUR(cobrado);
+
+      renderDebtorsDirectory();
+      renderLoansTable();
+    }
+
+    function renderDebtorsDirectory() {
+      const container = document.getElementById('debtors-directory-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const contactsMap = {};
+      const curPenRate = state.fxRates?.PEN || 3.88;
+      const curUsdRate = state.fxRates?.USD || 1.08;
+
+      (state.loans || []).forEach(l => {
+        const p = l.person || 'Sin Nombre';
+        if (!contactsMap[p]) {
+          contactsMap[p] = { name: p, totalEur: 0, totalPen: 0, netEqEur: 0 };
+        }
+
+        const factor = (l.type === 'YO_PRESTE' || l.type === 'YO_PAGUE') ? 1 : -1;
+        const rate = l.lockedRate || (l.currency === 'PEN' ? curPenRate : (l.currency === 'USD' ? curUsdRate : 1));
+
+        if (l.currency === 'EUR') {
+          contactsMap[p].totalEur += (Number(l.amount) * factor);
+          contactsMap[p].netEqEur += (Number(l.amount) * factor);
+        } else if (l.currency === 'PEN') {
+          contactsMap[p].totalPen += (Number(l.amount) * factor);
+          contactsMap[p].netEqEur += ((Number(l.amount) / rate) * factor);
+        } else if (l.currency === 'USD') {
+          contactsMap[p].netEqEur += ((Number(l.amount) / rate) * factor);
+        }
+      });
+
+      const list = Object.values(contactsMap).sort((a, b) => b.netEqEur - a.netEqEur);
+
+      if (activeContactLoanFilter === 'ALL' && list.length > 0) {
+        activeContactLoanFilter = list[0].name;
+      }
+
+      list.forEach(c => {
+        const isSelected = activeContactLoanFilter === c.name;
+        const item = document.createElement('div');
+        item.className = `p-3 rounded-2xl cursor-pointer transition flex items-center justify-between ${isSelected ? 'bg-apple-blue/15 border border-apple-blue/30 text-apple-blue' : 'bg-apple-gray-100/60 dark:bg-apple-gray-800/40 hover:bg-apple-gray-200/50'}`;
+        item.onclick = () => filterLoanByPerson(c.name);
+
+        item.innerHTML = `
+          <div>
+            <p class="text-xs font-bold text-apple-gray-900 dark:text-white">${c.name}</p>
+            <div class="flex items-center gap-2 mt-0.5 text-[10px] text-apple-gray-400">
+              ${c.totalEur !== 0 ? `<span>${formatEUR(c.totalEur)}</span>` : ''}
+              ${c.totalPen !== 0 ? `<span>${formatPEN(c.totalPen)}</span>` : ''}
+            </div>
+          </div>
+          <span class="font-mono font-bold text-xs ${c.netEqEur >= 0 ? 'text-apple-blue' : 'text-apple-red'}">${formatEUR(c.netEqEur)}</span>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function filterLoanByPerson(personName) {
+      activeContactLoanFilter = personName;
+      renderLoansModule();
+    }
+
+    function renderLoansTable() {
+      const tbody = document.getElementById('loans-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const curPenRate = state.fxRates?.PEN || 3.88;
+      const curUsdRate = state.fxRates?.USD || 1.08;
+
+      const filtered = (state.loans || []).filter(l => {
+        if (activeContactLoanFilter === 'ALL') return true;
+        return l.person === activeContactLoanFilter;
+      });
+
+      // Actualizar cabecera del Dossier
+      const dName = document.getElementById('dossier-person-name');
+      const dSub = document.getElementById('dossier-person-subtitle');
+      if (dName) dName.innerText = activeContactLoanFilter === 'ALL' ? 'Todos los Deudores' : activeContactLoanFilter;
+      if (dSub) dSub.innerText = activeContactLoanFilter === 'ALL' ? 'Viendo la totalidad de operaciones' : `Historial discriminado de operaciones con ${activeContactLoanFilter}`;
+
+      let totalPrestadoEur = 0;
+      let totalPrestadoPen = 0;
+      let totalPagadoEur = 0;
+      let totalPagadoPen = 0;
+
+      const listPrestamos = document.getElementById('list-dossier-prestamos');
+      const listPagos = document.getElementById('list-dossier-pagos');
+      if (listPrestamos) listPrestamos.innerHTML = '';
+      if (listPagos) listPagos.innerHTML = '';
+
+      let countPrestado = 0;
+      let countPagado = 0;
+
+      filtered.forEach(l => {
+        const isPrestamo = (l.type === 'YO_PRESTE' || l.type === 'ME_PRESTARON');
+        const isEUR = l.currency === 'EUR';
+        const amt = Number(l.amount || 0);
+
+        if (isPrestamo) {
+          countPrestado++;
+          if (isEUR) totalPrestadoEur += amt;
+          else totalPrestadoPen += amt;
+
+          if (listPrestamos) {
+            const item = document.createElement('div');
+            item.className = 'p-2.5 rounded-xl bg-apple-gray-100/70 dark:bg-apple-gray-800/50 shadow-ios-sm border border-apple-orange/20 flex items-center justify-between text-xs';
+            item.innerHTML = `
+              <div>
+                <p class="font-bold text-apple-gray-900 dark:text-white">${l.notes || 'Préstamo'}</p>
+                <div class="flex items-center gap-2 mt-0.5 text-[10px] text-apple-gray-400">
+                  <span>${l.date}</span>
+                  <span>•</span>
+                  <span class="font-semibold text-apple-orange">${l.type === 'YO_PRESTE' ? 'Yo presté' : 'Me prestaron'}</span>
+                </div>
+              </div>
+              <span class="font-mono font-bold text-apple-orange">
+                ${isEUR ? formatEUR(amt) : (l.currency === 'PEN' ? formatPEN(amt) : formatUSD(amt))}
+              </span>
+            `;
+            listPrestamos.appendChild(item);
+          }
+        } else {
+          countPagado++;
+          if (isEUR) totalPagadoEur += amt;
+          else totalPagadoPen += amt;
+
+          if (listPagos) {
+            const item = document.createElement('div');
+            item.className = 'p-2.5 rounded-xl bg-apple-gray-100/70 dark:bg-apple-gray-800/50 shadow-ios-sm border border-apple-green/20 flex items-center justify-between text-xs';
+            item.innerHTML = `
+              <div>
+                <p class="font-bold text-apple-gray-900 dark:text-white">${l.notes || 'Devolución / Pago'}</p>
+                <div class="flex items-center gap-2 mt-0.5 text-[10px] text-apple-gray-400">
+                  <span>${l.date}</span>
+                  <span>•</span>
+                  <span class="font-semibold text-apple-green">${l.type === 'ME_PAGARON' ? 'Me pagaron' : 'Yo pagué'}</span>
+                </div>
+              </div>
+              <span class="font-mono font-bold text-apple-green">
+                ${isEUR ? formatEUR(amt) : (l.currency === 'PEN' ? formatPEN(amt) : formatUSD(amt))}
+              </span>
+            `;
+            listPagos.appendChild(item);
+          }
+        }
+      });
+
+      if (listPrestamos && countPrestado === 0) listPrestamos.innerHTML = '<p class="text-[11px] text-apple-gray-400 text-center py-4">Sin cargos registrados</p>';
+      if (listPagos && countPagado === 0) listPagos.innerHTML = '<p class="text-[11px] text-apple-gray-400 text-center py-4">Sin devoluciones registradas</p>';
+
+      const bCountPrest = document.getElementById('badge-count-prestado');
+      if (bCountPrest) bCountPrest.innerText = countPrestado;
+
+      const bCountPag = document.getElementById('badge-count-pagado');
+      if (bCountPag) bCountPag.innerText = countPagado;
+
+      const equivPrestado = totalPrestadoEur + (totalPrestadoPen / curPenRate);
+      const equivPagado = totalPagadoEur + (totalPagadoPen / curPenRate);
+      const restaEquiv = equivPrestado - equivPagado;
+
+      const dosTotPrest = document.getElementById('dossier-total-prestado');
+      if (dosTotPrest) dosTotPrest.innerText = formatEUR(equivPrestado);
+
+      const dosPrestBreak = document.getElementById('dossier-prestado-breakdown');
+      if (dosPrestBreak) dosPrestBreak.innerText = `${totalPrestadoEur > 0 ? formatEUR(totalPrestadoEur) : ''} ${totalPrestadoPen > 0 ? formatPEN(totalPrestadoPen) : ''}`;
+
+      const dosTotPag = document.getElementById('dossier-total-pagado');
+      if (dosTotPag) dosTotPag.innerText = formatEUR(equivPagado);
+
+      const dosPagBreak = document.getElementById('dossier-pagado-breakdown');
+      if (dosPagBreak) dosPagBreak.innerText = `${totalPagadoEur > 0 ? formatEUR(totalPagadoEur) : ''} ${totalPagadoPen > 0 ? formatPEN(totalPagadoPen) : ''}`;
+
+      const elResta = document.getElementById('dossier-resta');
+      if (elResta) {
+        elResta.innerText = formatEUR(restaEquiv);
+        elResta.className = `text-sm sm:text-base font-black font-mono mt-0.5 ${restaEquiv >= 0 ? 'text-apple-blue' : 'text-apple-red'}`;
+      }
+
+      const dosRestaBreak = document.getElementById('dossier-resta-breakdown');
+      if (dosRestaBreak) dosRestaBreak.innerText = restaEquiv >= 0 ? 'Te debe este monto' : 'Saldo a su favor';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-xs text-apple-gray-400">Sin movimientos que mostrar</td></tr>`;
+        return;
+      }
+
+      const flowTags = {
+        'YO_PRESTE': { label: 'Yo presté', cls: 'text-apple-orange bg-apple-orange/10' },
+        'ME_PAGARON': { label: 'Me pagaron', cls: 'text-apple-green bg-apple-green/10' },
+        'ME_PRESTARON': { label: 'Me prestaron', cls: 'text-apple-purple bg-apple-purple/10' },
+        'YO_PAGUE': { label: 'Yo pagué', cls: 'text-apple-blue bg-apple-blue/10' }
+      };
+
+      filtered.forEach(l => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-apple-gray-50/70 dark:hover:bg-apple-gray-800/40 transition';
+        const tag = flowTags[l.type] || { label: l.type, cls: 'text-apple-gray-500 bg-apple-gray-100' };
+
+        const rateUsed = l.lockedRate || (l.currency === 'PEN' ? curPenRate : (l.currency === 'USD' ? curUsdRate : 1));
+        const eqEur = l.currency === 'EUR' ? Number(l.amount) : (Number(l.amount) / rateUsed);
+
+        let amtFormatted = formatEUR(l.amount);
+        if (l.currency === 'PEN') amtFormatted = formatPEN(l.amount);
+        if (l.currency === 'USD') amtFormatted = formatUSD(l.amount);
+
+        tr.innerHTML = `
+          <td class="py-3 px-3 font-mono text-[11px] text-apple-gray-500">${l.date}</td>
+          <td class="py-3 px-3 font-bold text-apple-gray-900 dark:text-white cursor-pointer hover:text-apple-blue" onclick="filterLoanByPerson('${l.person}')">${l.person}</td>
+          <td class="py-3 px-3 text-apple-gray-700 dark:text-apple-gray-300 font-medium">${l.notes || '—'}</td>
+          <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${tag.cls}">${tag.label}</span></td>
+          <td class="py-3 px-3 font-medium text-apple-gray-600 dark:text-apple-gray-300">${l.currency}</td>
+          <td class="py-3 px-3 text-right font-mono font-bold">${amtFormatted}</td>
+          <td class="py-3 px-3 text-right font-mono text-apple-gray-400">${formatEUR(eqEur)}</td>
+          <td class="py-3 px-3 text-center">
+            <button onclick="deleteLoan(${l.id})" class="p-1 rounded-lg text-apple-gray-400 hover:text-apple-red transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    // ==========================================================
+    // NAVEGACIÓN Y MODALES
+    // ==========================================================
+    function switchTab(tabId) {
+      const vAirtm = document.getElementById('view-airtm');
+      const vPersonal = document.getElementById('view-personal');
+      const vPrestamos = document.getElementById('view-prestamos');
+
+      if (vAirtm) vAirtm.classList.add('hidden');
+      if (vPersonal) vPersonal.classList.add('hidden');
+      if (vPrestamos) vPrestamos.classList.add('hidden');
+
+      ['airtm', 'personal', 'prestamos'].forEach(t => {
+        const dBtn = document.getElementById(`tab-desktop-${t}`);
+        if (dBtn) {
+          dBtn.className = 'tab-button px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 text-apple-gray-500 hover:text-apple-gray-800 dark:text-apple-gray-400 dark:hover:text-white flex items-center gap-1.5';
+        }
+        const mBtn = document.getElementById(`tab-mobile-${t}`);
+        if (mBtn) {
+          mBtn.className = 'flex flex-col items-center gap-1 text-apple-gray-400 py-1 px-3';
+        }
+      });
+
+      const targetView = document.getElementById(`view-${tabId}`);
+      if (targetView) targetView.classList.remove('hidden');
+
+      const activeD = document.getElementById(`tab-desktop-${tabId}`);
+      if (activeD) {
+        activeD.className = 'tab-button px-3.5 py-1.5 text-xs font-bold rounded-full transition-all duration-200 text-apple-gray-900 dark:text-white bg-white dark:bg-apple-gray-700 shadow-sm flex items-center gap-1.5';
+      }
+      const activeM = document.getElementById(`tab-mobile-${tabId}`);
+      if (activeM) {
+        activeM.className = 'flex flex-col items-center gap-1 text-apple-blue py-1 px-3';
+      }
+
+      if (tabId === 'airtm') renderAirtmModule();
+      if (tabId === 'personal') renderPersonalModule();
+      if (tabId === 'prestamos') renderLoansModule();
+    }
+
+    function openModal(id) {
+      const m = document.getElementById(id);
+      if (!m) return;
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const dExp = document.getElementById('input-expense-date');
+      if (dExp && !dExp.value) dExp.value = todayStr;
+      const dLoan = document.getElementById('input-loan-date');
+      if (dLoan && !dLoan.value) dLoan.value = todayStr;
+
+      if (id === 'modal-quick-balance') {
+        const grid = document.getElementById('bank-inputs-container');
+        if (grid && state.bancos) {
+          grid.innerHTML = '';
+          for (const [name, val] of Object.entries(state.bancos)) {
+            const isSoles = (name === 'BCP' || name === 'Interbank');
+            const div = document.createElement('div');
+            div.innerHTML = `
+              <label class="block text-[11px] font-semibold text-apple-gray-500 mb-0.5">${name} (${isSoles ? 'S/.' : '€'})</label>
+              <input type="number" step="0.01" name="b_${name}" value="${val}" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+            `;
+            grid.appendChild(div);
+          }
+        }
+      }
+
+      if (id === 'modal-edit-budget') {
+        const cyc = calculatePersonalCycle();
+        const inBudget = document.getElementById('input-new-budget');
+        if (inBudget) inBudget.value = cyc.budget;
+      }
+
+      if (id === 'modal-config-cycle') {
+        const inStart = document.getElementById('input-cycle-start-day');
+        if (inStart) inStart.value = state.cycleStartDay || 15;
+      }
+
+      if (id === 'modal-edit-acciones') {
+        renderAccionesModal();
+      }
+
+      if (id === 'modal-edit-madre') {
+        const inMadre = document.getElementById('input-new-madre');
+        if (inMadre) inMadre.value = state.capitalSolesMadre || 650;
+      }
+
+      if (id === 'modal-bcp-edit') {
+        const inPen = document.getElementById('input-bcp-pen');
+        const inUsd = document.getElementById('input-bcp-usd');
+        if (inPen) inPen.value = state.bcp?.pen || 0;
+        if (inUsd) inUsd.value = state.bcp?.usd || 0;
+      }
+
+      m.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      if (m) m.classList.add('hidden');
+    }
+
+    // Formularios
+    function handleSaveBanks(e) {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      if (!state.bancos) state.bancos = {};
+      for (const [name] of Object.entries(state.bancos)) {
+        const val = form.get(`b_${name}`);
+        if (val !== null) state.bancos[name] = parseFloat(val) || 0;
+      }
+      persistState();
+      renderAirtmModule();
+      closeModal('modal-quick-balance');
+      showToast('Saldos Actualizados', 'Los saldos de tus cuentas se han guardado con éxito.', true);
+    }
+
+    function handleSaveExpense(e) {
+      e.preventDefault();
+      const form = e.target;
+      const obj = {
+        id: Date.now(),
+        amount: parseFloat(form.amount.value) || 0,
+        concept: form.concept.value.trim(),
+        category: form.category.value,
+        bank: form.bank.value,
+        date: form.date.value
+      };
+      if (!state.personalExpenses) state.personalExpenses = [];
+      state.personalExpenses.unshift(obj);
+      persistState();
+      renderPersonalModule();
+      renderAirtmModule();
+      form.reset();
+      closeModal('modal-add-expense');
+      showToast('Gasto Guardado', `-${formatEUR(obj.amount)} registrado en ${obj.concept}`, true);
+    }
+
+    function handleSaveFixedExpense(e) {
+      e.preventDefault();
+      const form = e.target;
+      const obj = {
+        id: Date.now(),
+        concept: form.concept.value.trim(),
+        amount: parseFloat(form.amount.value) || 0,
+        chargeDay: parseInt(form.chargeDay.value) || 1,
+        category: form.category.value,
+        bank: form.bank.value
+      };
+      if (!state.personalFixedExpenses) state.personalFixedExpenses = [];
+      state.personalFixedExpenses.push(obj);
+      persistState();
+      renderPersonalModule();
+      form.reset();
+      closeModal('modal-add-fixed-expense');
+      showToast('Gasto Fijo Añadido', `${obj.concept} (-${formatEUR(obj.amount)}) mensual`, true);
+    }
+
+    function deleteFixedExpense(id) {
+      state.personalFixedExpenses = (state.personalFixedExpenses || []).filter(x => x.id !== id);
+      persistState();
+      renderPersonalModule();
+      showToast('Gasto Fijo Eliminado', 'Se ha retirado de los compromisos mensuales', true);
+    }
+
+    function deleteExpense(id) {
+      state.personalExpenses = (state.personalExpenses || []).filter(x => x.id !== id);
+      persistState();
+      renderPersonalModule();
+      renderAirtmModule();
+    }
+
+    function handleSaveNewBudget() {
+      const val = parseFloat(document.getElementById('input-new-budget').value);
+      if (!isNaN(val) && val > 0) {
+        const cyc = calculatePersonalCycle();
+        if (!state.cycleBudgets) state.cycleBudgets = {};
+        state.cycleBudgets[cyc.activeKey] = val;
+        state.personalBudget = val;
+        persistState();
+        renderPersonalModule();
+        closeModal('modal-edit-budget');
+        showToast('Presupuesto Asignado', `Presupuesto para el ciclo ${cyc.activeKey}: ${formatEUR(val)}`, true);
+      }
+    }
+
+    function handleSaveCycleStartDay() {
+      const val = parseInt(document.getElementById('input-cycle-start-day').value);
+      if (val >= 1 && val <= 28) {
+        state.cycleStartDay = val;
+        persistState();
+        renderPersonalModule();
+        closeModal('modal-config-cycle');
+        showToast('Ciclo Configurado', `Los ciclos iniciarán ahora el día ${val} de cada mes.`, true);
+      }
+    }
+
+    function renderAccionesModal() {
+      const valEl = document.getElementById('modal-current-acciones-val');
+      if (valEl) valEl.innerText = formatEUR(state.acciones || 0);
+
+      const dAcc = document.getElementById('input-accion-date');
+      if (dAcc) dAcc.value = new Date().toISOString().split('T')[0];
+
+      const list = document.getElementById('acciones-history-list');
+      if (!list) return;
+      list.innerHTML = '';
+
+      const hist = state.accionesHistory || [];
+      if (hist.length === 0) {
+        list.innerHTML = `<p class="py-4 text-center text-apple-gray-400">Sin movimientos registrados</p>`;
+        return;
+      }
+
+      hist.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'p-2.5 rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 flex items-center justify-between';
+        const isUp = item.type === 'APORTE' || item.type === 'VALORIZACION';
+        row.innerHTML = `
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-apple-gray-900 dark:text-white">${item.notes || item.type}</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${isUp ? 'bg-apple-green/15 text-apple-green' : 'bg-apple-red/15 text-apple-red'}">${item.type}</span>
+            </div>
+            <span class="text-[10px] text-apple-gray-400 font-mono">${item.date}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold ${isUp ? 'text-apple-purple' : 'text-apple-red'}">${formatEUR(item.amount)}</span>
+            <button onclick="deleteAccionHistoryRow(${item.id})" class="text-apple-gray-400 hover:text-apple-red p-1">
+              <i data-lucide="trash-2" class="w-3 h-3"></i>
+            </button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+      lucide.createIcons();
+    }
+
+    function handleSaveAccionMovement(e) {
+      e.preventDefault();
+      const form = e.target;
+      const type = form.type.value;
+      const amount = parseFloat(form.amount.value) || 0;
+      const notes = form.notes.value.trim();
+      const date = form.date.value;
+
+      if (!state.accionesHistory) state.accionesHistory = [];
+      const newEntry = { id: Date.now(), date, type, amount, notes };
+      state.accionesHistory.unshift(newEntry);
+
+      if (type === 'VALORIZACION') {
+        state.acciones = amount;
+      } else if (type === 'APORTE') {
+        state.acciones = (state.acciones || 0) + amount;
+      } else if (type === 'RETIRO') {
+        state.acciones = Math.max(0, (state.acciones || 0) - amount);
+      }
+
+      persistState();
+      renderAirtmModule();
+      renderAccionesModal();
+      form.reset();
+      showToast('Cartera Actualizada', `Acciones actualizadas a ${formatEUR(state.acciones)}`, true);
+    }
+
+    function deleteAccionHistoryRow(id) {
+      state.accionesHistory = (state.accionesHistory || []).filter(x => x.id !== id);
+      persistState();
+      renderAccionesModal();
+    }
+
+    function handleSaveMadreCapital() {
+      const val = parseFloat(document.getElementById('input-new-madre').value);
+      if (!isNaN(val) && val >= 0) {
+        state.capitalSolesMadre = val;
+        persistState();
+        renderAirtmModule();
+        closeModal('modal-edit-madre');
+        showToast('Capital Madre Guardado', `Fondo configurado: ${formatPEN(val)}`, true);
+      }
+    }
+
+    function handleSaveLoan(e) {
+      e.preventDefault();
+      const form = e.target;
+      const currency = form.currency.value;
+      const curPenRate = state.fxRates?.PEN || 3.88;
+      const curUsdRate = state.fxRates?.USD || 1.08;
+      const lockedRate = currency === 'PEN' ? curPenRate : (currency === 'USD' ? curUsdRate : 1);
+
+      const obj = {
+        id: Date.now(),
+        person: form.person.value.trim(),
+        type: form.type.value,
+        currency: currency,
+        amount: parseFloat(form.amount.value) || 0,
+        notes: form.notes.value.trim(),
+        date: form.date.value,
+        lockedRate: lockedRate
+      };
+
+      if (!state.loans) state.loans = [];
+      state.loans.unshift(obj);
+      persistState();
+      renderLoansModule();
+      renderAirtmModule();
+      form.reset();
+      closeModal('modal-add-loan');
+      showToast('Préstamo Guardado', `${obj.person}: ${obj.amount} ${obj.currency}`, true);
+    }
+
+    function deleteLoan(id) {
+      state.loans = (state.loans || []).filter(x => x.id !== id);
+      persistState();
+      renderLoansModule();
+      renderAirtmModule();
+    }
+
+    function handleSaveBcp() {
+      const pen = parseFloat(document.getElementById('input-bcp-pen').value) || 0;
+      const usd = parseFloat(document.getElementById('input-bcp-usd').value) || 0;
+      if (!state.bcp) state.bcp = {};
+      state.bcp.pen = pen;
+      state.bcp.usd = usd;
+      persistState();
+      renderPersonalModule();
+      closeModal('modal-bcp-edit');
+      showToast('Tarjeta Actualizada', `Deuda PEN: ${formatPEN(pen)} | USD: $${usd.toFixed(2)}`, true);
+    }
+
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle('dark');
+      const icon = document.getElementById('theme-icon');
+      if (icon) {
+        icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      }
+      lucide.createIcons();
+    }
+
+    function exportBackupJSON() {
+      const str = JSON.stringify(state, null, 2);
+      const blob = new Blob([str], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Capital_Ledger_Apple_Backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importBackupJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (parsed && parsed.bancos && parsed.loans) {
+            state = parsed;
+            if (state.bancos && state.bancos['Sabadell'] === undefined) {
+              state.bancos['Sabadell'] = 0.00;
+            }
+            persistState();
+            renderAirtmModule();
+            renderPersonalModule();
+            renderLoansModule();
+            closeModal('modal-backup');
+            showToast('Respaldo Restaurado', 'Toda tu información ha sido cargada con éxito.', true);
+          }
+        } catch (err) {
+          console.error("Error al procesar archivo:", err);
+          showToast('Error', 'Archivo JSON no válido.', false);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function handleExcelFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+
+          let arqueosImportados = 0;
+          let gastosImportados = 0;
+          let prestamosImportados = 0;
+
+          // 1. PRESTAMOS
+          if (workbook.SheetNames.includes('PRESTAMOS')) {
+            const wsPrest = workbook.Sheets['PRESTAMOS'];
+            const jsonPrest = XLSX.utils.sheet_to_json(wsPrest, { header: 1, defval: null });
+            const nuevosPrestamos = [];
+
+            for (let r = 6; r < jsonPrest.length; r++) {
+              const row = jsonPrest[r];
+              if (!row || !row[0] || !row[1] || row[5] === null || row[5] === undefined) continue;
+
+              let fechaVal = row[0];
+              if (fechaVal instanceof Date) {
+                fechaVal = fechaVal.toISOString().split('T')[0];
+              } else {
+                fechaVal = String(fechaVal).split(' ')[0];
+              }
+
+              const persona = String(row[1]).trim();
+              const asunto = row[2] ? String(row[2]).trim() : 'Préstamo';
+              let categoria = row[3] ? String(row[3]).trim() : 'Yo presté';
+              let tipo = 'YO_PRESTE';
+              if (categoria.toLowerCase().includes('pagar') || categoria.toLowerCase().includes('pagaron')) {
+                tipo = 'ME_PAGARON';
+              } else if (categoria.toLowerCase().includes('prestaron')) {
+                tipo = 'ME_PRESTARON';
+              } else if (categoria.toLowerCase().includes('pagué') || categoria.toLowerCase().includes('pague')) {
+                tipo = 'YO_PAGUE';
+              }
+
+              const moneda = row[4] ? String(row[4]).trim().toUpperCase() : 'EUR';
+              const monto = parseFloat(row[5]) || 0;
+
+              nuevosPrestamos.push({
+                id: Date.now() + r,
+                date: fechaVal,
+                person: persona,
+                type: tipo,
+                currency: moneda,
+                amount: monto,
+                notes: asunto,
+                lockedRate: moneda === 'PEN' ? 3.88 : (moneda === 'USD' ? 1.08 : 1)
+              });
+            }
+
+            if (nuevosPrestamos.length > 0) {
+              state.loans = nuevosPrestamos;
+              prestamosImportados = nuevosPrestamos.length;
+            }
+          }
+
+          // 2. PERSONAL
+          if (workbook.SheetNames.includes('PERSONAL')) {
+            const wsPers = workbook.Sheets['PERSONAL'];
+            const jsonPers = XLSX.utils.sheet_to_json(wsPers, { header: 1, defval: null });
+            const nuevosGastos = [];
+
+            for (let r = 8; r < jsonPers.length; r++) {
+              const row = jsonPers[r];
+              if (!row || !row[0] || row[1] === null || row[1] === undefined) continue;
+
+              let fechaVal = row[0];
+              if (fechaVal instanceof Date) {
+                fechaVal = fechaVal.toISOString().split('T')[0];
+              } else {
+                fechaVal = String(fechaVal).split(' ')[0];
+              }
+
+              const gasto = parseFloat(row[1]) || 0;
+              const concepto = row[2] ? String(row[2]).trim() : 'Gasto personal';
+              const banco = row[3] ? String(row[3]).trim() : 'N26';
+
+              let cat = 'Alimentación';
+              const cLower = concepto.toLowerCase();
+              if (cLower.includes('ocio') || cLower.includes('cena') || cLower.includes('bar')) cat = 'Ocio';
+              else if (cLower.includes('transporte') || cLower.includes('bus') || cLower.includes('metro')) cat = 'Transporte';
+              else if (cLower.includes('servicio') || cLower.includes('cloud') || cLower.includes('luz')) cat = 'Servicios';
+              else if (cLower.includes('compra') || cLower.includes('farmacia')) cat = 'Compras';
+
+              nuevosGastos.push({
+                id: Date.now() + r,
+                date: fechaVal,
+                concept: concepto,
+                category: cat,
+                bank: banco,
+                amount: gasto
+              });
+            }
+
+            if (nuevosGastos.length > 0) {
+              state.personalExpenses = nuevosGastos;
+              gastosImportados = nuevosGastos.length;
+            }
+          }
+
+          // 3. AIRTM
+          if (workbook.SheetNames.includes('AIRTM')) {
+            const wsAirtm = workbook.Sheets['AIRTM'];
+            const jsonAirtm = XLSX.utils.sheet_to_json(wsAirtm, { header: 1, defval: null });
+            const nuevosArqueos = [];
+
+            for (let r = 7; r < jsonAirtm.length; r++) {
+              const row = jsonAirtm[r];
+              if (!row || (!row[0] && row[1] === null)) continue;
+
+              let ts = row[0];
+              if (ts instanceof Date) {
+                const pad = (n) => String(n).padStart(2, '0');
+                ts = `${ts.getFullYear()}-${pad(ts.getMonth() + 1)}-${pad(ts.getDate())} ${pad(ts.getHours())}:${pad(ts.getMinutes())}:${pad(ts.getSeconds())}`;
+              } else if (ts) {
+                ts = String(ts).trim();
+              } else {
+                continue;
+              }
+
+              const airtm = parseFloat(row[1]) || 0;
+              const n26 = parseFloat(row[2]) || 0;
+              const bbva = parseFloat(row[3]) || 0;
+              const imagin = parseFloat(row[4]) || 0;
+              const santan = parseFloat(row[5]) || 0;
+              const bunq = parseFloat(row[6]) || 0;
+              const trade = parseFloat(row[7]) || 0;
+              const wise = parseFloat(row[8]) || 0;
+              const ing = parseFloat(row[9]) || 0;
+              const vivid = parseFloat(row[10]) || 0;
+              const bcp = parseFloat(row[11]) || 0;
+              const interbank = parseFloat(row[12]) || 0;
+              const porCobrar = parseFloat(row[14]) || 0;
+              const capTotal = parseFloat(row[16]) || 0;
+              const profit = parseFloat(row[17]) || 0;
+              const dif = parseFloat(row[35]) || 0;
+
+              nuevosArqueos.unshift({
+                id: Date.now() - r,
+                timestamp: ts,
+                capitalTotal: capTotal > 0 ? capTotal : (airtm + n26 + bbva + imagin + santan + bunq + trade + wise + ing + vivid),
+                dif: dif,
+                gastosDia: 0.00,
+                profitHoy: profit,
+                fxPen: 3.88,
+                fxUsd: 1.08,
+                bancos: {
+                  'Airtm': airtm, 'N26': n26, 'BBVA': bbva, 'Imagin': imagin,
+                  'Santander': santan, 'Bunq': bunq, 'Trade': trade, 'Wise': wise,
+                  'ING': ing, 'Vivid': vivid, 'Sabadell': 0, 'BCP': bcp, 'Interbank': interbank
+                },
+                porCobrarEur: porCobrar,
+                accionesEur: parseFloat(row[25]) || 0,
+                capitalSolesMadre: parseFloat(row[27]) || 650
+              });
+            }
+
+            if (nuevosArqueos.length > 0) {
+              state.arqueoHistory = nuevosArqueos;
+              arqueosImportados = nuevosArqueos.length;
+
+              const latest = nuevosArqueos[0];
+              if (latest && latest.bancos) {
+                state.bancos = JSON.parse(JSON.stringify(latest.bancos));
+                if (state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0.00;
+                state.acciones = latest.accionesEur || 0;
+                state.capitalSolesMadre = latest.capitalSolesMadre || 650;
+              }
+            }
+          }
+
+          persistState();
+          renderAirtmModule();
+          renderPersonalModule();
+          renderLoansModule();
+          closeModal('modal-backup');
+
+          showToast(
+            '¡Excel Migrado con Éxito!',
+            `Se han cargado ${arqueosImportados} arqueos, ${gastosImportados} gastos y ${prestamosImportados} préstamos.`,
+            true
+          );
+
+        } catch (err) {
+          console.error("Error al leer el archivo Excel:", err);
+          showToast('Error de Lectura', 'No se pudo procesar el archivo Excel. Asegúrate de subir el archivo .xlsx original.', false);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function resetToCleanDefaults() {
+      if (confirm('¿Estás seguro de que deseas restablecer los datos iniciales? Se borrarán los cambios no respaldados.')) {
+        state = JSON.parse(JSON.stringify(DEFAULT_SEED));
+        persistState();
+        renderAirtmModule();
+        renderPersonalModule();
+        renderLoansModule();
+        closeModal('modal-backup');
+        showToast('Datos Restablecidos', 'Se ha vuelto a la configuración inicial.', true);
+      }
+    }
+
+    document.getElementById('arqueo-search')?.addEventListener('input', (e) => {
+      renderArqueoHistoryTable(e.target.value);
+    });
+
+    // Inicialización al cargar el DOM
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      fetchLiveFxRates();
+      renderAirtmModule();
+      renderPersonalModule();
+      renderLoansModule();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
