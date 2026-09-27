@@ -570,8 +570,9 @@
       }
 
       body {
-        height: auto !important;
+        height: 100% !important;
         min-height: 100vh !important;
+        min-height: 100svh !important;
         min-height: 100dvh !important;
         padding-bottom: 0 !important;
         background: #f5f5f7 !important;
@@ -586,6 +587,7 @@
         flex-direction: column !important;
         height: auto !important;
         min-height: 100vh !important;
+        min-height: 100svh !important;
         min-height: 100dvh !important;
         padding-bottom: 0 !important;
         margin-bottom: 0 !important;
@@ -599,8 +601,9 @@
 
       main {
         flex: 1 0 auto !important;
-        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: 0 !important;
         margin-bottom: 0 !important;
+        scroll-padding-bottom: 88px;
       }
 
       .ios-bottom-tabbar {
@@ -643,7 +646,7 @@
 
 <body class="h-full bg-apple-gray-100 dark:bg-apple-gray-900 text-apple-gray-800 dark:text-apple-gray-100 font-sans select-none selection:bg-apple-blue selection:text-white transition-colors duration-300">
 
-  <div id="app-shell" class="flex flex-col ipad:pb-12">
+  <div id="app-shell" class="flex flex-col">
 
     <!-- Apple Top Navigation Bar -->
     <header class="sticky top-0 z-40 apple-glass border-b border-apple-gray-300/40 dark:border-apple-gray-700/50">
