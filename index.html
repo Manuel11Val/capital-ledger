@@ -17,6 +17,7 @@
   <link rel="apple-touch-icon" id="dynamic-apple-icon">
 
   <script>
+    // Generador de PNG en alta resolución (180x180) para iOS Safari Home Screen
     (function generateCupertinoAppleTouchIcon() {
       const canvas = document.createElement('canvas');
       canvas.width = 180;
@@ -201,6 +202,101 @@
       touch-action: pan-y;
       transition: transform 0.2s ease-out;
     }
+
+
+    /* ============================================================
+       FINAL RESPONSIVE SAFETY LAYER
+       - No effect on desktop >= 1024px.
+       - Keeps iPhone/mobile layout unchanged below 680px.
+       - Specifically protects iPad / split-view widths.
+       ============================================================ */
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    @media (min-width: 680px) and (max-width: 1023px) {
+      /* Tablet/split-view: give the content a little more breathing room
+         without changing the established desktop geometry. */
+      main {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+      }
+
+      header > div {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+      }
+
+      /* Prevent the top bar from ever forcing horizontal scrolling. */
+      header .flex.items-center.justify-between.h-16 {
+        min-width: 0;
+      }
+    }
+
+    /* iPad Air/mini in a narrow landscape split view (~2/3 width).
+       The app remains in iPad navigation mode, but secondary labels
+       give way to the controls themselves so nothing gets squeezed. */
+    @media (min-width: 680px) and (max-width: 799px) {
+      #cloud-status-pill,
+      #header-fx-button {
+        display: none !important;
+      }
+
+      #tab-desktop-airtm,
+      #tab-desktop-personal,
+      #tab-desktop-prestamos {
+        padding-left: 0.65rem !important;
+        padding-right: 0.65rem !important;
+        gap: 0 !important;
+      }
+
+      #tab-desktop-airtm span,
+      #tab-desktop-personal span,
+      #tab-desktop-prestamos span {
+        display: none !important;
+      }
+
+      #direct-excel-upload > span {
+        display: none !important;
+      }
+
+      #direct-excel-upload {
+        padding-left: 0.6rem !important;
+        padding-right: 0.6rem !important;
+      }
+
+      /* Avoid overly tall tablet cards while preserving touch targets. */
+      #view-airtm .apple-card,
+      #view-personal .apple-card,
+      #view-prestamos .apple-card {
+        min-width: 0;
+      }
+    }
+
+    /* At wider iPad split views, retain labels but remove the least
+       important live-rate badge to keep the header calm. */
+    @media (min-width: 800px) and (max-width: 1023px) {
+      #header-fx-button {
+        display: none !important;
+      }
+    }
+
+    /* Landscape tablets benefit from compact vertical rhythm; this is
+       deliberately limited to tablet widths so desktop/mobile remain intact. */
+    @media (min-width: 680px) and (max-width: 1023px) and (orientation: landscape) {
+      main {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+      }
+
+      #view-airtm,
+      #view-personal,
+      #view-prestamos {
+        row-gap: 1rem;
+      }
+    }
+
   </style>
 </head>
 
@@ -252,7 +348,7 @@
           <!-- Live Market Rates & Action Tools -->
           <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
             <!-- Official Live Rates Badge -->
-            <button onclick="fetchLiveFxRates(true)" class="hidden xs:flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-apple-gray-200/60 hover:bg-apple-gray-200 dark:bg-apple-gray-800/60 dark:hover:bg-apple-gray-800 border border-apple-gray-300/40 dark:border-apple-gray-700/40 text-[11px] font-mono transition" title="Pulsa para verificar tipo de cambio oficial">
+            <button id="header-fx-button" onclick="fetchLiveFxRates(true)" class="hidden xs:flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-apple-gray-200/60 hover:bg-apple-gray-200 dark:bg-apple-gray-800/60 dark:hover:bg-apple-gray-800 border border-apple-gray-300/40 dark:border-apple-gray-700/40 text-[11px] font-mono transition" title="Pulsa para verificar tipo de cambio oficial">
               <span id="fx-indicator-dot" class="w-2 h-2 rounded-full bg-apple-green cloud-pulse"></span>
               <span class="text-apple-gray-500 text-[10px] hidden sm:inline">1€ =</span>
               <span id="header-fx-pen" class="font-bold text-apple-gray-900 dark:text-white">3.88 S/.</span>
@@ -316,7 +412,9 @@
 
               <!-- Mother Capital Balance Semaphore & Pending Commitments -->
               <div class="pt-1 flex flex-wrap items-center gap-2">
-                <div id="airtm-mother-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-apple-gray-200/80 dark:bg-apple-gray-700/80 transition-all"></div>
+                <div id="airtm-mother-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-apple-gray-200/80 dark:bg-apple-gray-700/80 transition-all">
+                  <!-- Semaphore inyectado dinámicamente -->
+                </div>
                 <div id="airtm-fijos-alert-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-apple-orange/15 text-apple-orange border border-apple-orange/20 hidden">
                   <i data-lucide="info" class="w-3.5 h-3.5"></i>
                   <span id="airtm-fijos-alert-text">Fijos pendientes: €0.00</span>
@@ -341,11 +439,21 @@
           </div>
 
           <!-- Secondary Metrics Grid -->
-          <div class="grid grid-cols-2 xs:grid-cols-3 ipad:grid-cols-5 gap-2.5 sm:gap-3 mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50">
+          <div class="grid grid-cols-2 xs:grid-cols-3 ipad:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3 mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50">
             <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
-              <span class="text-[10px] font-medium text-apple-gray-400">Total Bancos (€)</span>
+              <span class="text-[10px] font-medium text-apple-gray-400">Airtm (€)</span>
+              <p id="stat-airtm-balance" class="text-sm sm:text-base md:text-lg font-bold text-apple-green mt-0.5">€0.00</p>
+              <span class="text-[9px] text-apple-gray-400">Cuenta operativa separada</span>
+            </div>
+            <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
+              <span class="text-[10px] font-medium text-apple-gray-400">Bancos EUR</span>
               <p id="stat-total-bancos" class="text-sm sm:text-base md:text-lg font-bold text-apple-gray-900 dark:text-white mt-0.5">€0.00</p>
-              <span class="text-[9px] text-apple-gray-400">11 Cuentas EUR (Inc. Sabadell)</span>
+              <span class="text-[9px] text-apple-gray-400">N26 · BBVA · Imagin · … · Sabadell</span>
+            </div>
+            <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
+              <span class="text-[10px] font-medium text-apple-gray-400">Bancos PEN</span>
+              <p id="stat-total-bancos-soles" class="text-sm sm:text-base md:text-lg font-bold text-apple-orange mt-0.5">S/. 0.00</p>
+              <span class="text-[9px] text-apple-gray-400">BCP + Interbank · sin conversión visual</span>
             </div>
             <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
               <span class="text-[10px] font-medium text-apple-gray-400">Acciones (€)</span>
@@ -429,8 +537,8 @@
                 <tr>
                   <th class="py-3 px-3">Fecha y Hora</th>
                   <th class="py-3 px-3 text-right">Capital Total</th>
-                  <th class="py-3 px-3 text-right">Dif. (Δ)</th>
-                  <th class="py-3 px-3 text-right text-apple-orange font-bold">Gastos Día</th>
+                  <th class="py-3 px-3 text-right">Variación</th>
+                  <th class="py-3 px-3 text-right">Gastos Día</th>
                   <th class="py-3 px-3 text-right text-apple-green font-bold">Profit Diario</th>
                   <th class="py-3 px-2 text-right">Airtm</th>
                   <th class="py-3 px-2 text-right">N26</th>
@@ -502,7 +610,7 @@
                   </span>
                 </div>
 
-                <!-- Daily Spending Allowance Recommendation -->
+                <!-- Daily Spending Allowance Recommendation (Protegido contra gastos fijos) -->
                 <div class="p-3 sm:p-3.5 rounded-2xl bg-apple-blue/5 dark:bg-apple-blue/10 border border-apple-blue/20">
                   <div class="flex items-center justify-between">
                     <div>
@@ -514,9 +622,11 @@
                 </div>
 
                 <!-- Projection Banner -->
-                <div id="personal-projection-banner" class="p-2.5 rounded-xl text-xs flex items-center justify-between bg-apple-gray-100/70 dark:bg-apple-gray-800/50"></div>
+                <div id="personal-projection-banner" class="p-2.5 rounded-xl text-xs flex items-center justify-between bg-apple-gray-100/70 dark:bg-apple-gray-800/50">
+                  <!-- Injected via JS -->
+                </div>
 
-                <!-- Metric Summary Columns -->
+                <!-- Metric Summary Columns (Desglose Fijos vs Variables) -->
                 <div class="grid grid-cols-3 gap-2 sm:gap-2.5 pt-1">
                   <div class="p-2 sm:p-2.5 rounded-xl bg-apple-gray-100/70 dark:bg-apple-gray-800/50">
                     <span class="text-[9px] sm:text-[10px] text-apple-gray-400">Presupuesto</span>
@@ -804,7 +914,7 @@
   <!-- MODALES DE CONTROL (CUPERTINO SHEET MODALS)                -->
   <!-- ========================================================== -->
 
-  <!-- MODAL: MARCAR GASTO FIJO COMO PAGADO -->
+  <!-- MODAL: MARCAR GASTO FIJO COMO PAGADO (SELECCIÓN DE BANCO & DÉBITO) -->
   <div id="modal-pay-fixed" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
     <div class="apple-card rounded-3xl w-full max-w-sm p-5 sm:p-6 shadow-ios-sheet">
       <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
@@ -869,7 +979,7 @@
     </div>
   </div>
 
-  <!-- MODAL: DESMARCAR GASTO FIJO -->
+  <!-- MODAL: DESMARCAR GASTO FIJO (REVERTIR A PENDIENTE) -->
   <div id="modal-unpay-fixed" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
     <div class="apple-card rounded-3xl w-full max-w-sm p-5 sm:p-6 shadow-ios-sheet">
       <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
@@ -905,7 +1015,7 @@
     </div>
   </div>
 
-  <!-- MODAL: EDITAR ARQUEO HISTÓRICO -->
+  <!-- MODAL: EDITAR ARQUEO / SNAPSHOT HISTÓRICO (INCLUYE ELIMINAR SEGURO) -->
   <div id="modal-edit-arqueo" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
     <div class="apple-card rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-ios-sheet max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
@@ -931,17 +1041,21 @@
           </div>
           <div>
             <label class="block text-[11px] font-semibold text-apple-gray-500 mb-0.5">Gastos del Día (€)</label>
-            <input type="number" step="0.01" name="gastosDia" id="edit-arq-gastos" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-white dark:bg-apple-gray-700 border border-apple-gray-300 dark:border-apple-gray-600 focus:outline-none text-apple-orange">
+            <input type="number" step="0.01" name="gastosDia" id="edit-arq-gastos" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-white dark:bg-apple-gray-700 border border-apple-gray-300 dark:border-apple-gray-600 focus:outline-none">
           </div>
           <div>
             <label class="block text-[11px] font-semibold text-apple-gray-500 mb-0.5">Profit Diario (€)</label>
-            <input type="number" step="0.01" name="profitHoy" id="edit-arq-profit" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-white dark:bg-apple-gray-700 border border-apple-gray-300 dark:border-apple-gray-600 focus:outline-none text-apple-green">
+            <input type="number" step="0.01" name="profitHoy" id="edit-arq-profit" readonly class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-600 focus:outline-none text-apple-green">
+            <span class="block text-[9px] text-apple-gray-400 mt-0.5">Variación + gastos del día</span>
           </div>
         </div>
 
         <h4 class="text-xs font-bold uppercase tracking-wider text-apple-gray-400 pt-1">Saldos Congelados en este Snapshot</h4>
-        <div id="edit-arq-bancos-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3"></div>
+        <div id="edit-arq-bancos-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+          <!-- Dynamically filled bank fields -->
+        </div>
 
+        <!-- Safe Deletion and Save Footer -->
         <div class="pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex flex-wrap items-center justify-between gap-3">
           <button type="button" onclick="confirmDeleteFromEditModal()" class="ios-tap px-3.5 py-2 rounded-xl text-xs font-bold text-apple-red hover:bg-apple-red/10 border border-apple-red/20 transition flex items-center gap-1.5">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -975,7 +1089,9 @@
       </div>
 
       <form id="form-banks" onsubmit="handleSaveBanks(event)" class="space-y-4">
-        <div id="bank-inputs-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3"></div>
+        <div id="bank-inputs-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+          <!-- Dynamically populated inputs -->
+        </div>
 
         <div class="pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5">
           <button type="button" onclick="closeModal('modal-quick-balance')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
@@ -1028,8 +1144,8 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Fecha</label>
-            <input type="date" required name="date" id="input-expense-date" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Fecha y hora</label>
+            <input type="datetime-local" required name="date" id="input-expense-date" step="60" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
           </div>
         </div>
 
@@ -1540,11 +1656,13 @@
         'Sabadell': 0.00, 'BCP': 314.00, 'Interbank': 401.00
       },
       personalBudget: 600.00,
+      // Gastos fijos base mensuales con Alquiler y suscripciones
       personalFixedExpenses: [
         { id: 100, concept: 'Alquiler', amount: 250.00, chargeDay: 1, bank: 'N26' },
         { id: 101, concept: 'Suscripciones / iCloud', amount: 2.99, chargeDay: 5, bank: 'N26' },
         { id: 102, concept: 'Gimnasio / Cuota', amount: 35.00, chargeDay: 1, bank: 'N26' }
       ],
+      // Registro de cheques de pago por ciclo: { [cycleKey]: { [fixedId]: { paid: bool, paidAt: date, bank: string } } }
       fixedExpensesCycleState: {},
       personalExpenses: [
         { id: 'g_149', date: '2026-09-25', amount: 12.00, concept: 'Alimentación', bank: 'Imagin' },
@@ -1556,7 +1674,26 @@
         { id: 'p_97', date: '2026-09-25', person: 'Amor', notes: 'PAGO', type: 'YO_PAGUE', currency: 'EUR', amount: 105.00, lockedRate: 1 },
         { id: 'p_68', date: '2026-09-02', person: 'Kily', notes: 'Monitor', type: 'YO_PRESTE', currency: 'EUR', amount: 170.00, lockedRate: 1 }
       ],
-      arqueoHistory: []
+      arqueoHistory: [
+        {
+          id: 'arq_522',
+          timestamp: '2026-09-26 00:07:36',
+          capitalTotal: 3623.47,
+          dif: 316.67,
+          gastosDia: 0.00,
+          profitHoy: 316.67,
+          fxPen: 3.88,
+          fxUsd: 1.08,
+          bancos: {
+            'Airtm': 920.0, 'N26': 137.0, 'BBVA': 5.0, 'Imagin': 83.0, 'Santander': 202.0,
+            'Bunq': 8.0, 'Trade': 58.0, 'Wise': 193.0, 'ING': 316.0, 'Vivid': 30.0,
+            'Sabadell': 0.0, 'BCP': 314.0, 'Interbank': 401.0
+          },
+          porCobrarEur: 1539.62,
+          accionesEur: 300.0,
+          capitalSolesMadre: 1365.0
+        }
+      ]
     };
 
     let state = JSON.parse(JSON.stringify(DEFAULT_SEED));
@@ -1724,7 +1861,10 @@
           .select('*')
           .order('fecha', { ascending: false });
 
-        if (arqueosRows && arqueosRows.length > 0) {
+        if (arqueosRows) {
+          // La respuesta de Supabase es la fuente de verdad: si no hay filas,
+          // también debemos vaciar el estado local para que una fila borrada
+          // no reaparezca después de sincronizar.
           state.arqueoHistory = arqueosRows.map(a => ({
             id: a.id,
             timestamp: a.fecha,
@@ -1835,21 +1975,50 @@
       return netEur;
     }
 
-    function calculateTotalBancosEuro() {
-      const euroKeys = ['Airtm', 'N26', 'BBVA', 'Imagin', 'Santander', 'Bunq', 'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell'];
-      let sum = 0;
-      euroKeys.forEach(k => {
-        sum += Number((state.bancos && state.bancos[k]) || 0);
-      });
-      return sum;
+    // ==========================================================
+    // CONSOLIDACIÓN FINANCIERA — FUENTE ÚNICA DE VERDAD
+    // Airtm es una cuenta operativa separada y NO forma parte
+    // de la suma de bancos EUR. BCP + Interbank son PEN.
+    // ==========================================================
+    const EURO_BANK_KEYS = ['N26', 'BBVA', 'Imagin', 'Santander', 'Bunq', 'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell'];
+    const PEN_BANK_KEYS = ['BCP', 'Interbank'];
+
+    function getBankBalance(bankName, source = state.bancos) {
+      return Number((source && source[bankName]) || 0);
     }
 
-    function calculateTotalBancosSoles() {
-      const bcp = Number((state.bancos && state.bancos['BCP']) || 0);
-      const interbank = Number((state.bancos && state.bancos['Interbank']) || 0);
-      return bcp + interbank;
+    function calculateAirtmBalance(source = state.bancos) {
+      return getBankBalance('Airtm', source);
     }
 
+    function calculateTotalBancosEuro(source = state.bancos) {
+      return EURO_BANK_KEYS.reduce((sum, key) => sum + getBankBalance(key, source), 0);
+    }
+
+    function calculateTotalBancosSoles(source = state.bancos) {
+      return PEN_BANK_KEYS.reduce((sum, key) => sum + getBankBalance(key, source), 0);
+    }
+
+    // Convierte el bloque PEN a EUR descontando el capital madre reservado.
+    function calculateSolesAdjustmentEUR(bancosSoles, capitalMadre, fx) {
+      const safeFx = Number(fx) > 0 ? Number(fx) : 3.88;
+      return (Number(bancosSoles || 0) - Number(capitalMadre || 0)) / safeFx;
+    }
+
+    // Misma fórmula patrimonial que usa el Excel:
+    // Bancos EUR (sin Airtm) + Airtm + Acciones + Neto préstamos
+    // + (BCP + Interbank - Capital Madre) / FX PEN.
+    // Esta función es la única fuente de verdad para el capital vivo y
+    // para recalcular un snapshot editado.
+    function calculateCapitalFromComponents({ bancos, acciones = 0, loansEur = 0, capitalMadre = 1365, fx = 3.88 }) {
+      const bancosEur = calculateTotalBancosEuro(bancos);
+      const airtm = calculateAirtmBalance(bancos);
+      const bancosSoles = calculateTotalBancosSoles(bancos);
+      const solesAdjustment = calculateSolesAdjustmentEUR(bancosSoles, capitalMadre, fx);
+      return bancosEur + airtm + Number(acciones || 0) + Number(loansEur || 0) + solesAdjustment;
+    }
+
+    // Calcula el total de gastos fijos pendientes de pago en el ciclo actual
     function calculatePendingFixedExpensesSum(cycleKey) {
       const cycState = (state.fixedExpensesCycleState && state.fixedExpensesCycleState[cycleKey]) || {};
       let pendingSum = 0;
@@ -1863,28 +2032,26 @@
     }
 
     function calculateLiveCapitalTotal() {
-      const totalEurBancos = calculateTotalBancosEuro();
-      const acciones = Number(state.acciones || 0);
-      const loansEur = calculateConsolidatedLoansNetEUR();
-      const bancosSoles = calculateTotalBancosSoles();
-      const capMadre = Number(state.capitalSolesMadre || 1365);
       const fx = (state.fxRates?.PEN && state.fxRates.PEN > 0) ? state.fxRates.PEN : 3.88;
-
-      const solesAjustadosEnEur = (bancosSoles - capMadre) / fx;
-      return totalEurBancos + acciones + loansEur + solesAjustadosEnEur;
+      return calculateCapitalFromComponents({
+        bancos: state.bancos,
+        acciones: state.acciones || 0,
+        loansEur: calculateConsolidatedLoansNetEUR(),
+        capitalMadre: Number(state.capitalSolesMadre || 1365),
+        fx
+      });
     }
 
     function getExpensesForDate(dateStr) {
-      if (!dateStr) return 0;
-      const cleanTarget = String(dateStr).split(' ')[0].split('T')[0];
+      const target = String(dateStr || '').slice(0, 10);
       let sum = 0;
       (state.personalExpenses || []).forEach(e => {
-        const cleanExpDate = String(e.date || '').split(' ')[0].split('T')[0];
-        if (cleanExpDate === cleanTarget) {
+        const expenseDate = String(e.date || '').slice(0, 10);
+        if (expenseDate === target) {
           sum += Number(e.amount || 0);
         }
       });
-      return sum;
+      return Number(sum.toFixed(2));
     }
 
     // ==========================================================
@@ -1892,9 +2059,10 @@
     // ==========================================================
     function renderAirtmModule() {
       const capitalTotal = calculateLiveCapitalTotal();
+      const airtm = calculateAirtmBalance();
       const totalBancos = calculateTotalBancosEuro();
-      const loansEur = calculateConsolidatedLoansNetEUR();
       const bancosSoles = calculateTotalBancosSoles();
+      const loansEur = calculateConsolidatedLoansNetEUR();
       const capMadre = Number(state.capitalSolesMadre || 1365);
       const difMadre = capMadre - bancosSoles;
 
@@ -1904,8 +2072,14 @@
       const statCap = document.getElementById('stat-airtm-capital-total');
       if (statCap) statCap.innerText = formatEUR(capitalTotal);
 
+      const statAirtm = document.getElementById('stat-airtm-balance');
+      if (statAirtm) statAirtm.innerText = formatEUR(airtm);
+
       const statTotalBancos = document.getElementById('stat-total-bancos');
       if (statTotalBancos) statTotalBancos.innerText = formatEUR(totalBancos);
+
+      const statBancosSoles = document.getElementById('stat-total-bancos-soles');
+      if (statBancosSoles) statBancosSoles.innerText = formatPEN(bancosSoles);
 
       const statAcc = document.getElementById('stat-acciones');
       if (statAcc) statAcc.innerText = formatEUR(state.acciones || 0);
@@ -1922,6 +2096,7 @@
       const statMadreCount = document.getElementById('stat-madre-count');
       if (statMadreCount) statMadreCount.innerText = `${(state.capitalMadreLog || []).length} movs registrados`;
 
+      // Alerta de fijos pendientes en el balance general
       const alertBadge = document.getElementById('airtm-fijos-alert-badge');
       const alertText = document.getElementById('airtm-fijos-alert-text');
       if (alertBadge && alertText) {
@@ -1933,13 +2108,14 @@
         }
       }
 
-      const todayStr = new Date().toISOString().split('T')[0];
+      const nowLocal = new Date();
+      const todayStr = `${nowLocal.getFullYear()}-${String(nowLocal.getMonth() + 1).padStart(2, '0')}-${String(nowLocal.getDate()).padStart(2, '0')}`;
       const gastosHoy = getExpensesForDate(todayStr);
       let profitHoy = 0;
-      if (state.arqueoHistory && state.arqueoHistory.length > 0) {
-        const lastSnap = state.arqueoHistory[0];
-        const delta = capitalTotal - lastSnap.capitalTotal;
-        profitHoy = delta + gastosHoy;
+      const previousDaySnap = getPreviousArqueoReference(todayStr);
+      if (previousDaySnap) {
+        const delta = capitalTotal - Number(previousDaySnap.capitalTotal || 0);
+        profitHoy = Number((delta + gastosHoy).toFixed(2));
       }
 
       const profitElem = document.getElementById('stat-profit-hoy');
@@ -2060,44 +2236,41 @@
           }
         }, { passive: true });
 
-        const difVal = Number(item.dif || 0);
-        const difBadge = difVal >= 0
-          ? `<span class="text-apple-green font-semibold">+${formatEUR(difVal)}</span>`
-          : `<span class="text-apple-red font-semibold">${formatEUR(difVal)}</span>`;
+        // Solo el último snapshot del día es el cierre diario.
+        // Ahí se muestran: variación frente al cierre anterior, suma de todos
+        // los gastos del día y profit. Los snapshots anteriores quedan en —.
+        const itemDate = getArqueoDateOnly(item.timestamp);
+        const isLastOfDay = (state.arqueoHistory || [])
+          .filter(x => getArqueoDateOnly(x.timestamp) === itemDate)
+          .sort((a, b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))[0]?.id === item.id;
 
-        const profitVal = Number(item.profitHoy || 0);
-        const profitBadge = profitVal >= 0
-          ? `<span class="text-apple-green font-bold">+${formatEUR(profitVal)}</span>`
-          : `<span class="text-apple-red font-bold">${formatEUR(profitVal)}</span>`;
+        const difVal = isLastOfDay ? Number(item.dif || 0) : 0;
+        const difBadge = !isLastOfDay
+          ? '<span class="text-apple-gray-300">—</span>'
+          : (difVal >= 0
+            ? `<span class="text-apple-green font-semibold">+${formatEUR(difVal)}</span>`
+            : `<span class="text-apple-red font-semibold">${formatEUR(difVal)}</span>`);
 
-        // ==========================================================
-        // CÁLCULO DINÁMICO DE GASTOS DÍA
-        // ==========================================================
-        let dayExpenses = Number(item.gastosDia || 0);
+        const gastosVal = isLastOfDay ? Number(item.gastosDia || 0) : 0;
+        const gastosBadge = !isLastOfDay
+          ? '<span class="text-apple-gray-300">—</span>'
+          : (gastosVal > 0 ? formatEUR(gastosVal) : '—');
 
-        // 1. Deducir de la ecuación de Excel: Profit = Dif + Gastos Día => Gastos = Profit - Dif
-        const mathDiff = Number((profitVal - difVal).toFixed(2));
-        if (dayExpenses <= 0 && mathDiff > 0.009) {
-          dayExpenses = mathDiff;
-        }
-
-        // 2. Si no, cruzar con la tabla personal por fecha exacta
-        if (dayExpenses <= 0 && item.timestamp) {
-          const dStr = String(item.timestamp).split(' ')[0].split('T')[0];
-          const expFromLog = getExpensesForDate(dStr);
-          if (expFromLog > 0) {
-            dayExpenses = expFromLog;
-          }
-        }
+        const profitVal = isLastOfDay ? Number(item.profitHoy || 0) : 0;
+        const profitBadge = !isLastOfDay
+          ? '<span class="text-apple-gray-300">—</span>'
+          : (profitVal >= 0
+            ? `<span class="text-apple-green font-bold">+${formatEUR(profitVal)}</span>`
+            : `<span class="text-apple-red font-bold">${formatEUR(profitVal)}</span>`);
 
         const b = item.bancos || {};
 
         tr.innerHTML = `
           <td class="py-3 px-3 font-semibold text-apple-gray-800 dark:text-gray-200">${item.timestamp}</td>
           <td class="py-3 px-3 text-right font-black text-apple-gray-900 dark:text-white">${formatEUR(item.capitalTotal)}</td>
-          <td class="py-3 px-3 text-right">${difBadge}</td>
-          <td class="py-3 px-3 text-right font-mono font-medium">${dayExpenses > 0 ? `<span class="text-apple-orange font-bold">${formatEUR(dayExpenses)}</span>` : '<span class="text-apple-gray-400">—</span>'}</td>
-          <td class="py-3 px-3 text-right">${profitBadge}</td>
+          <td class="py-3 px-3 text-right" title="Capital actual − cierre anterior registrado">${difBadge}</td>
+          <td class="py-3 px-3 text-right text-apple-gray-400">${gastosBadge}</td>
+          <td class="py-3 px-3 text-right" title="Variación + gastos del día">${profitBadge}</td>
           <td class="py-3 px-2 text-right">${b['Airtm'] !== undefined ? formatEUR(b['Airtm']) : '—'}</td>
           <td class="py-3 px-2 text-right">${b['N26'] !== undefined ? formatEUR(b['N26']) : '—'}</td>
           <td class="py-3 px-2 text-right">${b['BBVA'] !== undefined ? formatEUR(b['BBVA']) : '—'}</td>
@@ -2127,6 +2300,92 @@
     // ==========================================================
     // SNAPSHOT ACTIONS (CREATE, EDIT, SAFE DELETE)
     // ==========================================================
+
+    function getArqueoDateOnly(timestamp) {
+      if (!timestamp) return '';
+      return String(timestamp).slice(0, 10);
+    }
+
+    // Busca el último cierre registrado de un día anterior.
+    // Los snapshots del mismo día NO se usan como referencia entre sí.
+    function getPreviousArqueoReference(timestamp, excludeId = null) {
+      const currentDate = getArqueoDateOnly(timestamp);
+      return (state.arqueoHistory || [])
+        .filter(item => item.id !== excludeId && getArqueoDateOnly(item.timestamp) < currentDate)
+        .sort((a, b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))[0] || null;
+    }
+
+    // Recalcula toda la cadena de Variación/Profit después de editar o eliminar.
+    // Así nunca queda un arqueo dependiendo de una cifra antigua.
+    function recalculateArqueoMetrics() {
+      // MISMA LÓGICA DEL EXCEL:
+      // 1) tomar el último snapshot de cada día como cierre del día;
+      // 2) comparar ese cierre contra el último cierre de un día anterior;
+      // 3) sumar TODOS los gastos registrados para ese día;
+      // 4) Profit = Variación + Gastos del día.
+      const sorted = [...(state.arqueoHistory || [])]
+        .sort((a, b) => {
+          const da = String(a.timestamp || '');
+          const db = String(b.timestamp || '');
+          return da.localeCompare(db);
+        });
+
+      const lastByDate = new Map();
+      sorted.forEach(item => {
+        lastByDate.set(getArqueoDateOnly(item.timestamp), item);
+      });
+
+      const dates = [...lastByDate.keys()].filter(Boolean).sort();
+
+      dates.forEach((date, index) => {
+        const item = lastByDate.get(date);
+        const previousDate = index > 0 ? dates[index - 1] : null;
+        const reference = previousDate ? lastByDate.get(previousDate) : null;
+
+        const capitalActual = Number(item.capitalTotal || 0);
+        const capitalAnterior = reference ? Number(reference.capitalTotal || 0) : null;
+        const gastos = getExpensesForDate(date);
+
+        item.gastosDia = gastos;
+        item.dif = reference
+          ? Number((capitalActual - capitalAnterior).toFixed(2))
+          : 0;
+        item.profitHoy = reference
+          ? Number((item.dif + gastos).toFixed(2))
+          : 0;
+      });
+
+      // IMPORTANTE: las métricas diarias pertenecen EXCLUSIVAMENTE al último
+      // snapshot de cada día. Los snapshots intermedios no son cierres y por
+      // tanto no deben mostrar ni variación, ni gastos acumulados, ni profit.
+      sorted.forEach(item => {
+        const date = getArqueoDateOnly(item.timestamp);
+        const cierre = lastByDate.get(date);
+        if (cierre && item.id !== cierre.id) {
+          item.gastosDia = 0;
+          item.dif = 0;
+          item.profitHoy = 0;
+        }
+      });
+    }
+
+    async function persistArqueoMetrics() {
+      recalculateArqueoMetrics();
+      if (!supabaseClient) {
+        localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
+        return;
+      }
+      for (const item of state.arqueoHistory || []) {
+        const { error } = await supabaseClient.from('arqueos').update({
+          dif: Number(item.dif || 0),
+          profit: Number(item.profitHoy || 0),
+          gasto_personal_dia: Number(item.gastosDia || 0)
+        }).eq('id', item.id);
+        if (error) throw error;
+      }
+      localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
+    }
+
     async function takeArqueoSnapshot() {
       const btn = document.getElementById('btn-snapshot-trigger');
       const label = document.getElementById('snapshot-btn-label');
@@ -2143,13 +2402,16 @@
       const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       const todayDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
-      let dif = 0;
-      if (state.arqueoHistory && state.arqueoHistory.length > 0) {
-        dif = liveCap - state.arqueoHistory[0].capitalTotal;
-      }
+      const referenceSnap = getPreviousArqueoReference(timeStr);
+      const dif = referenceSnap
+        ? Number((liveCap - Number(referenceSnap.capitalTotal || 0)).toFixed(2))
+        : 0;
 
+      // Los gastos salen del libro de gastos, igual que en Excel.
       const gastosDia = getExpensesForDate(todayDate);
-      const profitHoy = dif + gastosDia;
+      const profitHoy = referenceSnap
+        ? Number((dif + gastosDia).toFixed(2))
+        : 0;
       const snapId = 'arq_' + Date.now();
 
       const newSnap = {
@@ -2179,9 +2441,22 @@
       };
 
       if (supabaseClient) {
-        await supabaseClient.from('arqueos').insert(newSnap);
+        const { error } = await supabaseClient.from('arqueos').insert(newSnap);
+        if (error) throw error;
+      } else {
+        state.arqueoHistory.unshift({
+          id: newSnap.id, timestamp: newSnap.fecha, capitalTotal: newSnap.suma, dif: newSnap.dif,
+          gastosDia: newSnap.gasto_personal_dia, profitHoy: newSnap.profit, fxPen: state.fxRates?.PEN || 3.88,
+          fxUsd: state.fxRates?.USD || 1.08, bancos: {
+            Airtm:newSnap.airtm,N26:newSnap.n26,BBVA:newSnap.bbva,Imagin:newSnap.imagin,Santander:newSnap.santander,
+            Bunq:newSnap.bunq,Trade:newSnap.trade,Wise:newSnap.wise,ING:newSnap.ing,Vivid:newSnap.vivid,Sabadell:newSnap.sabadell,
+            BCP:newSnap.bcp,Interbank:newSnap.interbank
+          }, porCobrarEur:newSnap.por_cobrar, accionesEur:newSnap.acciones, capitalSolesMadre:newSnap.capital_soles
+        });
       }
       await syncAllFromCloud();
+      await persistArqueoMetrics();
+      renderArqueoHistoryTable(document.getElementById('arqueo-search')?.value || '');
 
       if (btn && label) {
         btn.classList.remove('opacity-75');
@@ -2196,14 +2471,8 @@
 
       document.getElementById('edit-arq-id').value = snap.id;
       document.getElementById('edit-arq-timestamp').value = snap.timestamp;
-      
-      let dayExp = Number(snap.gastosDia || 0);
-      if (dayExp <= 0 && snap.profitHoy && snap.dif) {
-        const cDiff = Number((snap.profitHoy - snap.dif).toFixed(2));
-        if (cDiff > 0.01) dayExp = cDiff;
-      }
-      document.getElementById('edit-arq-gastos').value = dayExp;
-      document.getElementById('edit-arq-profit').value = snap.profitHoy || 0;
+      document.getElementById('edit-arq-gastos').value = snap.gastosDia || 0;
+      document.getElementById('edit-arq-profit').value = Number(snap.profitHoy || 0).toFixed(2);
 
       const grid = document.getElementById('edit-arq-bancos-grid');
       if (grid) {
@@ -2219,7 +2488,7 @@
           const col = document.createElement('div');
           col.innerHTML = `
             <label class="block text-[10px] font-semibold text-apple-gray-500 mb-0.5">${bName} (${isSoles ? 'S/.' : '€'})</label>
-            <input type="number" step="0.01" name="edit_b_${bName}" value="${val}" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+            <input type="number" step="0.01" name="edit_b_${bName}" value="${val}" class="w-full px-2 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
           `;
           grid.appendChild(col);
         });
@@ -2236,8 +2505,7 @@
       if (!snap) return;
 
       snap.timestamp = form.get('timestamp');
-      snap.gastosDia = parseFloat(form.get('gastosDia')) || 0;
-      snap.profitHoy = parseFloat(form.get('profitHoy')) || 0;
+      snap.gastosDia = getExpensesForDate(snap.timestamp);
 
       const updatedBanks = {};
       const banksList = [
@@ -2249,15 +2517,22 @@
       });
       snap.bancos = updatedBanks;
 
-      let sumEur = 0;
-      ['Airtm', 'N26', 'BBVA', 'Imagin', 'Santander', 'Bunq', 'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell'].forEach(k => {
-        sumEur += (updatedBanks[k] || 0);
+      const capMadre = Number(snap.capitalSolesMadre || state.capitalSolesMadre || 1365);
+      const fx = Number(snap.fxPen || state.fxRates?.PEN || 3.88);
+      const newTotal = calculateCapitalFromComponents({
+        bancos: updatedBanks,
+        acciones: snap.accionesEur || 0,
+        loansEur: snap.porCobrarEur || 0,
+        capitalMadre: capMadre,
+        fx
       });
-      const sumSoles = (updatedBanks['BCP'] || 0) + (updatedBanks['Interbank'] || 0);
-      const capMadre = snap.capitalSolesMadre || state.capitalSolesMadre || 1365;
-      const fx = snap.fxPen || state.fxRates.PEN || 3.88;
-      const newTotal = sumEur + (snap.accionesEur || 0) + (snap.porCobrarEur || 0) + ((sumSoles - capMadre) / fx);
       snap.capitalTotal = Number(newTotal.toFixed(2));
+
+      // Recalcular siempre Variación y Profit a partir de la fecha/capital,
+      // evitando que el usuario pueda dejar cifras incoherentes manualmente.
+      const referenceSnap = getPreviousArqueoReference(snap.timestamp, snap.id);
+      snap.dif = Number(((referenceSnap ? snap.capitalTotal - Number(referenceSnap.capitalTotal || 0) : 0)).toFixed(2));
+      snap.profitHoy = Number((snap.dif + snap.gastosDia).toFixed(2));
 
       if (supabaseClient) {
         await supabaseClient.from('arqueos').update({
@@ -2282,24 +2557,52 @@
       }
 
       await syncAllFromCloud();
+      await persistArqueoMetrics();
+      renderArqueoHistoryTable(document.getElementById('arqueo-search')?.value || '');
       closeModal('modal-edit-arqueo');
-      showToast('Snapshot Actualizado', 'Los cambios se han guardado en Supabase.', true);
+      showToast('Snapshot Actualizado', 'Capital, variación, gastos y profit han quedado recalculados.', true);
     }
 
     async function confirmDeleteFromEditModal() {
       const id = document.getElementById('edit-arq-id').value;
       if (!id) return;
 
-      if (!confirm('¿Estás seguro de que deseas eliminar este snapshot? Esta acción retirará la fila de Supabase.')) {
+      if (!confirm('¿Estás seguro de que deseas eliminar este snapshot? Esta acción no se puede deshacer.')) {
         return;
       }
 
-      if (supabaseClient) {
-        await supabaseClient.from('arqueos').delete().eq('id', id);
+      try {
+        if (supabaseClient) {
+          const { error } = await supabaseClient.from('arqueos').delete().eq('id', id);
+          if (error) throw error;
+        }
+
+        // También retirar inmediatamente el registro del estado local para que
+        // la fila desaparezca aunque la sincronización tarde unos instantes.
+        state.arqueoHistory = (state.arqueoHistory || []).filter(item => String(item.id) !== String(id));
+        recalculateArqueoMetrics();
+        localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
+
+        // Persistir solo las métricas que cambiaron por la eliminación.
+        if (supabaseClient) {
+          for (const item of state.arqueoHistory || []) {
+            const { error: metricError } = await supabaseClient.from('arqueos').update({
+              dif: Number(item.dif || 0),
+              profit: Number(item.profitHoy || 0),
+              gasto_personal_dia: Number(item.gastosDia || 0)
+            }).eq('id', item.id);
+            if (metricError) throw metricError;
+          }
+        }
+
+        closeModal('modal-edit-arqueo');
+        renderArqueoHistoryTable(document.getElementById('arqueo-search')?.value || '');
+        await syncAllFromCloud();
+        showToast('Snapshot Eliminado', 'La fila fue eliminada y las métricas posteriores fueron recalculadas.', true);
+      } catch (err) {
+        console.error('Error eliminando snapshot:', err);
+        showToast('No se pudo eliminar', 'La fila no se eliminó porque Supabase devolvió un error.', false);
       }
-      closeModal('modal-edit-arqueo');
-      await syncAllFromCloud();
-      showToast('Snapshot Eliminado', 'Se ha retirado de Supabase con seguridad.', true);
     }
 
     // ==========================================================
@@ -2340,6 +2643,7 @@
       if (!state.cycleBudgets) state.cycleBudgets = {};
       const budget = Number(state.cycleBudgets[activeKey] || state.personalBudget || 600);
 
+      // Gastos variables hechos en el ciclo
       let totalSpent = 0;
       (state.personalExpenses || []).forEach(exp => {
         const d = new Date(exp.date);
@@ -2348,11 +2652,13 @@
         }
       });
 
+      // Total de gastos fijos programados
       let totalFixed = 0;
       (state.personalFixedExpenses || []).forEach(f => {
         totalFixed += Number(f.amount || 0);
       });
 
+      // Fijos pagados vs pendientes en este ciclo específico
       const cycState = (state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) || {};
       let totalFixedPaid = 0;
       let totalFixedPending = 0;
@@ -2370,12 +2676,16 @@
         }
       });
 
+      // Presupuesto Variable Protegido (Día a Día)
       const variableBudget = Math.max(0, budget - totalFixed);
+      // Disponible libre para gastar día a día
       const availableVariable = Math.max(0, variableBudget - totalSpent);
+      // Disponible total del presupuesto considerando compromisos
       const availableTotal = budget - (totalSpent + totalFixedPaid);
 
       const msPerDay = 1000 * 60 * 60 * 24;
       const daysRemaining = Math.max(1, Math.ceil((cycleEnd - now) / msPerDay));
+      // Límite diario: solo se calcula sobre el dinero VARIABLE para que el alquiler esté 100% blindado
       const dailyAllowance = availableVariable > 0 ? (availableVariable / daysRemaining) : 0;
 
       const daysPassed = Math.max(1, Math.floor((now - cycleStart) / msPerDay));
@@ -2452,6 +2762,7 @@
       const circle = document.getElementById('personal-ring-circle');
       if (circle) {
         const circumference = 314.16;
+        // El porcentaje de uso se evalúa frente al total comprometido
         const totalComprometido = cyc.totalFixedPaid + cyc.totalSpent;
         const pct = Math.min(100, Math.max(0, (totalComprometido / cyc.budget) * 100));
         const offset = circumference - (pct / 100) * circumference;
@@ -2549,6 +2860,9 @@
       renderPersonalExpensesList();
     }
 
+    // ==========================================================
+    // GASTOS FIJOS: APPLE CHECKLIST & INTERACTION ENGINE
+    // ==========================================================
     function renderFixedExpensesList() {
       const list = document.getElementById('personal-fixed-expenses-list');
       const badge = document.getElementById('badge-fixed-count');
@@ -2666,6 +2980,7 @@
         amountDebited: autodebit ? Number(f.amount) : 0
       };
 
+      // Débito automático del banco seleccionado
       if (autodebit) {
         const curBal = Number(state.bancos[bank] || 0);
         state.bancos[bank] = Math.max(0, curBal - Number(f.amount));
@@ -2698,6 +3013,7 @@
       const activeKey = cyc.activeKey;
       const paymentInfo = (state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) ? state.fixedExpensesCycleState[activeKey][fixedId] : null;
 
+      // Restituir el dinero al banco si corresponde
       if (refund && paymentInfo && paymentInfo.amountDebited > 0) {
         const bank = paymentInfo.bank || f.bank;
         const curBal = Number(state.bancos[bank] || 0);
@@ -2736,10 +3052,10 @@
             </div>
             <div>
               <p class="text-xs font-bold text-apple-gray-900 dark:text-white">${exp.concept}</p>
-              <div class="flex items-center gap-2 mt-0.5 text-[10px] text-apple-gray-400">
-                <span class="font-mono">${exp.date}</span>
-                <span>•</span>
-                <span class="font-semibold text-apple-blue">${exp.bank}</span>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] text-apple-gray-400 font-mono">${formatExpenseDateTime(exp.date)}</span>
+                <span class="text-[10px] text-apple-gray-400">•</span>
+                <span class="text-[10px] font-semibold text-apple-blue">${exp.bank}</span>
               </div>
             </div>
           </div>
@@ -3047,13 +3363,29 @@
       if (tabId === 'prestamos') renderLoansModule();
     }
 
+    function getLocalDateTimeInputValue(date = new Date()) {
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function formatExpenseDateTime(value) {
+      if (!value) return '';
+      const raw = String(value).replace('T', ' ');
+      const datePart = raw.slice(0, 10);
+      const timePart = raw.length >= 16 ? raw.slice(11, 16) : '';
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(datePart)) return value;
+      const [y, m, d] = datePart.split('-');
+      return timePart ? `${d}/${m}/${y} ${timePart}` : `${d}/${m}/${y}`;
+    }
+
     function openModal(id) {
       const m = document.getElementById(id);
       if (!m) return;
 
-      const todayStr = new Date().toISOString().split('T')[0];
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       const dExp = document.getElementById('input-expense-date');
-      if (dExp && !dExp.value) dExp.value = todayStr;
+      if (dExp && !dExp.value) dExp.value = getLocalDateTimeInputValue(now);
       const dLoan = document.getElementById('input-loan-date');
       if (dLoan && !dLoan.value) dLoan.value = todayStr;
 
@@ -3131,6 +3463,18 @@
       showToast('Saldos Guardados', 'Actualizados en Supabase Cloud.', true);
     }
 
+    async function refreshProfitAfterExpenseChange() {
+      // El Excel recalcula el beneficio a partir de los gastos del libro PERSONAL.
+      // Hacemos lo mismo aquí: refrescar gastos -> recalcular arqueos -> persistir
+      // las métricas -> volver a pintar el resumen principal y la tabla.
+      await syncAllFromCloud();
+      recalculateArqueoMetrics();
+      await persistArqueoMetrics();
+      renderAirtmModule();
+      renderPersonalModule();
+      renderArqueoHistoryTable(document.getElementById('arqueo-search')?.value || '');
+    }
+
     async function handleSaveExpense(e) {
       e.preventDefault();
       const form = e.target;
@@ -3143,19 +3487,30 @@
       };
 
       if (supabaseClient) {
-        await supabaseClient.from('gastos').insert(expenseObj);
+        const { error } = await supabaseClient.from('gastos').insert(expenseObj);
+        if (error) {
+          console.error('Error guardando gasto:', error);
+          showToast('No se guardó el gasto', error.message || 'Supabase rechazó el registro.');
+          return;
+        }
       }
-      await syncAllFromCloud();
+
+      await refreshProfitAfterExpenseChange();
       form.reset();
       closeModal('modal-add-expense');
-      showToast('Gasto Registrado', `-${formatEUR(expenseObj.monto)} en ${expenseObj.concepto}`, true);
+      showToast('Gasto Registrado', `-${formatEUR(expenseObj.monto)} en ${expenseObj.concepto}. Profit actualizado.`, true);
     }
 
     async function deleteExpense(id) {
       if (supabaseClient) {
-        await supabaseClient.from('gastos').delete().eq('id', id);
+        const { error } = await supabaseClient.from('gastos').delete().eq('id', id);
+        if (error) {
+          console.error('Error eliminando gasto:', error);
+          showToast('No se eliminó el gasto', error.message || 'Supabase rechazó la operación.');
+          return;
+        }
       }
-      await syncAllFromCloud();
+      await refreshProfitAfterExpenseChange();
     }
 
     async function handleSaveFixedExpense(e) {
@@ -3482,7 +3837,6 @@
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: 'array', cellDates: true });
 
-          // 1. Migrar PRESTAMOS
           if (workbook.SheetNames.includes('PRESTAMOS')) {
             const wsPrest = workbook.Sheets['PRESTAMOS'];
             const jsonPrest = XLSX.utils.sheet_to_json(wsPrest, { header: 1, defval: null });
@@ -3510,28 +3864,14 @@
             }
           }
 
-          // 2. Migrar PERSONAL (Gastos)
           if (workbook.SheetNames.includes('PERSONAL')) {
             const wsPers = workbook.Sheets['PERSONAL'];
             const jsonPers = XLSX.utils.sheet_to_json(wsPers, { header: 1, defval: null });
-            for (let r = 7; r < jsonPers.length; r++) {
+            for (let r = 8; r < jsonPers.length; r++) {
               const row = jsonPers[r];
               if (!row || !row[0] || row[1] === null) continue;
+              let fechaVal = row[0] instanceof Date ? row[0].toISOString().split('T')[0] : String(row[0]).split(' ')[0];
               const gasto = parseFloat(row[1]) || 0;
-              if (gasto <= 0) continue;
-
-              let fechaVal;
-              if (row[0] instanceof Date) {
-                const pad = (n) => String(n).padStart(2, '0');
-                fechaVal = `${row[0].getFullYear()}-${pad(row[0].getMonth()+1)}-${pad(row[0].getDate())}`;
-              } else if (typeof row[0] === 'number') {
-                const d = new Date((row[0] - (25567 + 2)) * 86400 * 1000);
-                const pad = (n) => String(n).padStart(2, '0');
-                fechaVal = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-              } else {
-                fechaVal = String(row[0]).split('T')[0].split(' ')[0].trim();
-              }
-
               const concepto = row[2] ? String(row[2]).trim() : 'Gasto personal';
               const banco = row[3] ? String(row[3]).trim() : 'N26';
 
@@ -3547,7 +3887,6 @@
             }
           }
 
-          // 3. Migrar AIRTM (Arqueos)
           if (workbook.SheetNames.includes('AIRTM')) {
             const wsAirtm = workbook.Sheets['AIRTM'];
             const jsonAirtm = XLSX.utils.sheet_to_json(wsAirtm, { header: 1, defval: null });
@@ -3558,10 +3897,6 @@
               if (ts instanceof Date) {
                 const pad = (n) => String(n).padStart(2, '0');
                 ts = `${ts.getFullYear()}-${pad(ts.getMonth() + 1)}-${pad(ts.getDate())} ${pad(ts.getHours())}:${pad(ts.getMinutes())}:${pad(ts.getSeconds())}`;
-              } else if (typeof ts === 'number') {
-                const d = new Date((ts - (25567 + 2)) * 86400 * 1000);
-                const pad = (n) => String(n).padStart(2, '0');
-                ts = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} 00:00:00`;
               } else if (ts) {
                 ts = String(ts).trim();
               } else continue;
@@ -3582,14 +3917,6 @@
               const capTotal = parseFloat(row[16]) || 0;
               const profit = parseFloat(row[17]) || 0;
               const dif = parseFloat(row[35]) || 0;
-              
-              // Extraer Gastos Día directamente de la columna 34 (PERSONAL) o por delta de profit y dif
-              const gastoCol = parseFloat(row[34]) || 0;
-              let finalGastoDia = gastoCol;
-              if (!finalGastoDia || finalGastoDia <= 0) {
-                const deltaCalc = Number((profit - dif).toFixed(2));
-                if (deltaCalc > 0) finalGastoDia = deltaCalc;
-              }
 
               if (supabaseClient) {
                 await supabaseClient.from('arqueos').upsert({
@@ -3602,7 +3929,7 @@
                   profit: profit,
                   acciones: parseFloat(row[25]) || 0,
                   capital_soles: parseFloat(row[27]) || 1365,
-                  gasto_personal_dia: finalGastoDia || 0,
+                  gasto_personal_dia: 0,
                   dif: dif
                 });
               }
@@ -3613,25 +3940,38 @@
           showToast('¡Excel Migrado a Supabase!', 'Todos los registros históricos están sincronizados.', true);
         } catch (err) {
           console.error(err);
-          showToast('Error al importar', 'Comprueba que el archivo sea AIRTM (1).xlsx', false);
+          showToast('Error', 'No se pudo procesar el archivo Excel.', false);
         }
       };
       reader.readAsArrayBuffer(file);
     }
 
-    // Inicializador al cargar el DOM
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('arqueo-search')?.addEventListener('input', (e) => {
+      renderArqueoHistoryTable(e.target.value);
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const cached = localStorage.getItem(LOCAL_STORAGE_BACKUP);
+        if (cached) {
+          state = JSON.parse(cached);
+          if (state.bancos && state.bancos['Sabadell'] === undefined) {
+            state.bancos['Sabadell'] = 0.00;
+          }
+          if (!state.fixedExpensesCycleState) {
+            state.fixedExpensesCycleState = {};
+          }
+        }
+      } catch (e) {}
+
+      renderAirtmModule();
+      renderPersonalModule();
+      renderLoansModule();
       lucide.createIcons();
+
       fetchLiveFxRates();
       setupSupabaseRealtime();
       await syncAllFromCloud();
-
-      const searchInput = document.getElementById('arqueo-search');
-      if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-          renderArqueoHistoryTable(e.target.value);
-        });
-      }
     });
   </script>
 </body>
