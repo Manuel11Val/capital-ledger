@@ -254,6 +254,16 @@
       background: rgba(28, 28, 30, .78);
       box-shadow: 0 -1px 0 rgba(255,255,255,.07), 0 -10px 30px rgba(0,0,0,.18);
     }
+
+    /* iPhone: keep the bottom bar visually attached to the physical bottom
+       edge. Safari can reserve the home-indicator safe area outside the
+       visual viewport; the bar itself must extend into that area. */
+    @supports (bottom: env(safe-area-inset-bottom)) {
+      .ios-bottom-tabbar {
+        bottom: calc(-1 * var(--sab)) !important;
+        padding-bottom: calc(0.35rem + var(--sab)) !important;
+      }
+    }
     .ios-bottom-tab {
       position: relative;
       min-width: 0;
