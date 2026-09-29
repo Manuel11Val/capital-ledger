@@ -644,9 +644,11 @@
 
       main {
         flex: 1 0 auto !important;
-        padding-bottom: 0 !important;
+        /* Reserva solo el espacio real de la barra flotante para que
+           el último contenido nunca quede debajo de la navegación. */
+        padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
         margin-bottom: 0 !important;
-        scroll-padding-bottom: 88px;
+        scroll-padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
       }
 
       .ios-bottom-tabbar {
@@ -654,7 +656,7 @@
         top: auto !important;
         left: 50% !important;
         right: auto !important;
-        bottom: 8px !important;
+        bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
         width: calc(100% - 32px) !important;
         max-width: 620px !important;
         margin: 0 !important;
@@ -2122,6 +2124,29 @@
     let activeContactLoanFilter = 'ALL';
     let selectedCycleKey = null;
 
+    // ============================================================
+    // NATIVE FEEDBACK / HAPTICS
+    // Uses the Web Vibration API when the browser/device supports it.
+    // iOS Safari may ignore it; visual press/transition feedback remains.
+    // ============================================================
+    function triggerHaptic(type = 'selection') {
+      if (!('vibrate' in navigator)) return;
+
+      const patterns = {
+        selection: 10,
+        success: 18,
+        important: 28,
+        error: [28, 35, 28],
+        delete: 40
+      };
+
+      try {
+        navigator.vibrate(patterns[type] ?? patterns.selection);
+      } catch (_) {
+        // Haptics are progressive enhancement; never interrupt a save.
+      }
+    }
+
     function showToast(title, message, isSuccess = true) {
       const toast = document.getElementById('toast-notify');
       const tTitle = document.getElementById('toast-title');
@@ -2139,6 +2164,9 @@
         tIcon.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i>';
       }
       lucide.createIcons();
+
+      // Un feedback corto acompaña las confirmaciones guardadas.
+      if (isSuccess) triggerHaptic('success');
 
       toast.classList.remove('translate-y-[-100px]', 'opacity-0');
       toast.classList.add('translate-y-0', 'opacity-100');
@@ -2251,8 +2279,24 @@
       if (syncIcon) syncIcon.classList.add('animate-spin');
 
       try {
-        const { data: configRows, error: configError } = await supabaseClient.from('app_config').select('*');
+        // Estas cuatro lecturas son independientes. Hacerlas en paralelo reduce
+        // el tiempo de espera total, especialmente en Safari/iPhone.
+        const [configResult, gastosResult, prestamosResult, arqueosResult] = await Promise.all([
+          supabaseClient.from('app_config').select('*'),
+          supabaseClient.from('gastos').select('*').order('fecha', { ascending: false }),
+          supabaseClient.from('prestamos').select('*').order('fecha', { ascending: false }),
+          supabaseClient.from('arqueos').select('*').order('fecha', { ascending: false })
+        ]);
+
+        const { data: configRows, error: configError } = configResult;
+        const { data: gastosRows, error: gastosError } = gastosResult;
+        const { data: prestamosRows, error: prestamosError } = prestamosResult;
+        const { data: arqueosRows, error: arqueosError } = arqueosResult;
+
         if (configError) throw configError;
+        if (gastosError) throw gastosError;
+        if (prestamosError) throw prestamosError;
+        if (arqueosError) throw arqueosError;
 
         // app_config es la configuración principal. Si todavía no existe
         // (por ejemplo, después de migrar el Excel por primera vez), más abajo
@@ -2277,12 +2321,6 @@
           }
         }
 
-        const { data: gastosRows, error: gastosError } = await supabaseClient
-          .from('gastos')
-          .select('*')
-          .order('fecha', { ascending: false });
-        if (gastosError) throw gastosError;
-
         if (gastosRows && gastosRows.length > 0) {
           state.personalExpenses = gastosRows.map(g => ({
             id: g.id,
@@ -2292,12 +2330,6 @@
             bank: g.banco || 'N26'
           }));
         }
-
-        const { data: prestamosRows, error: prestamosError } = await supabaseClient
-          .from('prestamos')
-          .select('*')
-          .order('fecha', { ascending: false });
-        if (prestamosError) throw prestamosError;
 
         if (prestamosRows && prestamosRows.length > 0) {
           state.loans = prestamosRows.map(p => ({
@@ -2311,12 +2343,6 @@
             lockedRate: p.moneda === 'PEN' ? 3.88 : (p.moneda === 'USD' ? 1.08 : 1)
           }));
         }
-
-        const { data: arqueosRows, error: arqueosError } = await supabaseClient
-          .from('arqueos')
-          .select('*')
-          .order('fecha', { ascending: false });
-        if (arqueosError) throw arqueosError;
 
         if (arqueosRows) {
           // La respuesta de Supabase es la fuente de verdad: si no hay filas,
@@ -2811,7 +2837,7 @@
             longPressTriggered = true;
             tr.classList.remove('longpress-arming');
             tr.classList.add('longpress-ready');
-            if (navigator.vibrate) navigator.vibrate(12);
+            triggerHaptic('selection');
             setTimeout(() => tr.classList.remove('longpress-ready'), 280);
             openEditArqueoModal(item.id);
             pressTimer = null;
