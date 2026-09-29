@@ -9,6 +9,19 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Capital">
+
+  <script>
+    // iOS distingue Safari normal de la versión instalada en Inicio.
+    // Marcamos el modo antes del primer paint para poder aplicar un layout
+    // específico a la Web App sin alterar la versión normal del navegador.
+    (function detectIOSStandaloneMode() {
+      const standalone =
+        window.navigator.standalone === true ||
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches;
+      if (standalone) document.documentElement.classList.add('ios-standalone');
+    })();
+  </script>
   <meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 
@@ -686,9 +699,12 @@
       }
 
       body > #app-shell > header.sticky {
-        /* Chrome/iOS standalone already reserves the system status region.
-           Applying safe-area-inset-top here double-offsets the header. */
+        /* En móvil no necesitamos sticky para este header. Evita que WebKit
+           intente recolocarlo durante el primer cálculo del viewport. */
+        position: relative !important;
+        top: auto !important;
         padding-top: 0 !important;
+        z-index: 30 !important;
       }
     }
 
@@ -783,8 +799,11 @@
       }
 
       #app-shell {
+        /* En iOS 26/Chrome standalone, 100dvh puede cambiar durante el primer
+           ajuste del viewport y dejar un hueco vertical antes del header.
+           svh es más estable para el primer layout. */
         min-height: 100svh !important;
-        min-height: 100dvh !important;
+        height: auto !important;
       }
 
       main {
@@ -800,6 +819,15 @@
         max-width: none !important;
         transform: none !important;
         -webkit-transform: none !important;
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent;
+        will-change: auto !important;
+      }
+
+      .ios-bottom-tabbar .ios-bottom-tab {
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
       }
     }
 
@@ -807,6 +835,56 @@
     @media (min-width: 680px) {
       #app-shell {
         min-height: 100vh;
+      }
+    }
+
+
+    /* ============================================================
+       iOS STANDALONE PROFILE — separate from Safari browser mode
+       The installed Home Screen app has a different WebKit viewport.
+       Keep Safari's normal mobile layout untouched.
+       ============================================================ */
+    @media (max-width: 679px) {
+      html.ios-standalone #app-shell {
+        height: auto !important;
+        min-height: 0 !important;
+      }
+
+      html.ios-standalone body > #app-shell > header.sticky {
+        position: relative !important;
+        top: auto !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        z-index: 30 !important;
+      }
+
+      html.ios-standalone main {
+        padding-top: 12px !important;
+        padding-bottom: 108px !important;
+        scroll-padding-bottom: 108px !important;
+      }
+
+      /* Keep the nav directly attached to the viewport, not to the flex shell.
+         This avoids an ancestor/layout recalculation delaying the first tap. */
+      html.ios-standalone .ios-bottom-tabbar {
+        position: fixed !important;
+        top: auto !important;
+        left: 16px !important;
+        right: 16px !important;
+        bottom: 12px !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        transform: none !important;
+        -webkit-transform: none !important;
+        z-index: 2147483647 !important;
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+      }
+
+      html.ios-standalone .ios-bottom-tab {
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
       }
     }
 
@@ -1427,26 +1505,27 @@
 
     </main>
 
-    <!-- iOS-style bottom tab bar (iPhone / Mobile) -->
-    <nav class="ipad:hidden ios-bottom-tabbar" aria-label="Navegación principal">
-      <div class="flex items-stretch gap-1 max-w-md mx-auto w-full">
-        <div class="ios-bottom-tab-indicator" aria-hidden="true"></div>
-        <button onclick="switchTab('airtm')" id="tab-mobile-airtm" class="ios-bottom-tab active" aria-label="Arqueos">
-          <i data-lucide="wallet-cards"></i>
-          <span>Arqueos</span>
-        </button>
-        <button onclick="switchTab('personal')" id="tab-mobile-personal" class="ios-bottom-tab" aria-label="Personal">
-          <i data-lucide="credit-card"></i>
-          <span>Personal</span>
-        </button>
-        <button onclick="switchTab('prestamos')" id="tab-mobile-prestamos" class="ios-bottom-tab" aria-label="Préstamos">
-          <i data-lucide="users"></i>
-          <span>Préstamos</span>
-        </button>
-      </div>
-    </nav>
 
   </div>
+
+  <!-- iOS-style bottom tab bar (iPhone / Mobile) -->
+  <nav class="ipad:hidden ios-bottom-tabbar" aria-label="Navegación principal">
+    <div class="flex items-stretch gap-1 max-w-md mx-auto w-full">
+      <div class="ios-bottom-tab-indicator" aria-hidden="true"></div>
+      <button onclick="switchTab('airtm')" id="tab-mobile-airtm" class="ios-bottom-tab active" aria-label="Arqueos">
+        <i data-lucide="wallet-cards"></i>
+        <span>Arqueos</span>
+      </button>
+      <button onclick="switchTab('personal')" id="tab-mobile-personal" class="ios-bottom-tab" aria-label="Personal">
+        <i data-lucide="credit-card"></i>
+        <span>Personal</span>
+      </button>
+      <button onclick="switchTab('prestamos')" id="tab-mobile-prestamos" class="ios-bottom-tab" aria-label="Préstamos">
+        <i data-lucide="users"></i>
+        <span>Préstamos</span>
+      </button>
+    </div>
+  </nav>
 
   <!-- ========================================================== -->
   <!-- MODALES DE CONTROL (CUPERTINO SHEET MODALS)                -->
@@ -4193,6 +4272,28 @@
       }
     }, { passive: true });
 
+    // En iOS standalone damos prioridad al gesto táctil sobre el click
+    // sintético del navegador. El click sigue presente como fallback.
+    let suppressNextMobileNavClick = false;
+    document.addEventListener('pointerup', (event) => {
+      const button = event.target.closest?.('.ios-bottom-tab');
+      if (!button || !document.documentElement.classList.contains('ios-standalone')) return;
+      const tabId = button.id.replace('tab-mobile-', '');
+      if (!tabId) return;
+      suppressNextMobileNavClick = true;
+      switchTab(tabId);
+      setTimeout(() => { suppressNextMobileNavClick = false; }, 700);
+    }, { capture: true, passive: true });
+
+    document.addEventListener('click', (event) => {
+      if (!document.documentElement.classList.contains('ios-standalone')) return;
+      if (!suppressNextMobileNavClick) return;
+      const button = event.target.closest?.('.ios-bottom-tab');
+      if (!button) return;
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
+
     function switchTab(tabId) {
       document.getElementById('view-airtm').classList.add('hidden');
       document.getElementById('view-personal').classList.add('hidden');
@@ -5096,7 +5197,24 @@
         }
       };
 
-      if ('requestIdleCallback' in window) {
+      // En iPhone/PWA dejamos libre el hilo principal durante el arranque.
+      // Supabase hace varias lecturas y después repinta tres módulos; si lo
+      // arrancamos demasiado pronto, el scroll sigue siendo fluido por el
+      // compositor pero los primeros taps del menú pueden quedar en cola.
+      const isMobileViewport = window.matchMedia('(max-width: 679px)').matches;
+      if (isMobileViewport) {
+        // En móvil/PWA no ocupamos el hilo principal durante el arranque.
+        // La sincronización empieza después de que el usuario haya tenido
+        // tiempo real de tocar la navegación, y nunca se antepone al primer tap.
+        const startAfterFirstInteraction = () => {
+          window.removeEventListener('pointerdown', startAfterFirstInteraction, true);
+          window.removeEventListener('touchstart', startAfterFirstInteraction, true);
+          setTimeout(startBackgroundSync, 900);
+        };
+        window.addEventListener('pointerdown', startAfterFirstInteraction, true);
+        window.addEventListener('touchstart', startAfterFirstInteraction, true);
+        setTimeout(startBackgroundSync, 4500);
+      } else if ('requestIdleCallback' in window) {
         requestIdleCallback(startBackgroundSync, { timeout: 900 });
       } else {
         setTimeout(startBackgroundSync, 120);
