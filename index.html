@@ -686,7 +686,9 @@
       }
 
       body > #app-shell > header.sticky {
-        padding-top: env(safe-area-inset-top, 0px);
+        /* Chrome/iOS standalone already reserves the system status region.
+           Applying safe-area-inset-top here double-offsets the header. */
+        padding-top: 0 !important;
       }
     }
 
@@ -4210,8 +4212,7 @@
       const nextView = document.getElementById(`view-${tabId}`);
       nextView.classList.remove('hidden');
       nextView.classList.remove('view-native-enter');
-      void nextView.offsetWidth;
-      nextView.classList.add('view-native-enter');
+      requestAnimationFrame(() => nextView.classList.add('view-native-enter'));
 
       const activeD = document.getElementById(`tab-desktop-${tabId}`);
       if (activeD) {
@@ -5062,7 +5063,7 @@
       renderArqueoHistoryTable(e.target.value);
     });
 
-    window.addEventListener('DOMContentLoaded', async () => {
+    window.addEventListener('DOMContentLoaded', () => {
       try {
         const cached = localStorage.getItem(LOCAL_STORAGE_BACKUP);
         if (cached) {
@@ -5076,27 +5077,29 @@
         }
       } catch (e) {}
 
+      // PRIMER PAINT: la interfaz y la navegación quedan disponibles ya.
+      // No bloqueamos el hilo esperando a Supabase, FX ni Realtime.
+      renderAirtmModule();
+      renderPersonalModule();
+      renderLoansModule();
       lucide.createIcons();
 
-      fetchLiveFxRates();
-      setupSupabaseRealtime();
+      // Trabajo de red después del primer frame. En Chrome/iOS esto evita que
+      // la app parezca congelada durante el arranque y que el menú tarde en
+      // aceptar el primer toque.
+      const startBackgroundSync = () => {
+        fetchLiveFxRates().catch(err => console.warn('FX inicial:', err));
+        setupSupabaseRealtime();
 
-      // En dispositivos nuevos NO pintamos primero los valores seed/locales.
-      // Esperamos a que Supabase entregue el estado real y así evitamos el
-      // efecto de “primero salen números cualquiera y al cambiar de pestaña se arreglan”.
-      if (supabaseClient) {
-        const synced = await syncAllFromCloud();
-        if (!synced) {
-          renderAirtmModule();
-          renderPersonalModule();
-          renderLoansModule();
-          lucide.createIcons();
+        if (supabaseClient) {
+          syncAllFromCloud().catch(err => console.warn('Sincronización inicial:', err));
         }
+      };
+
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(startBackgroundSync, { timeout: 900 });
       } else {
-        renderAirtmModule();
-        renderPersonalModule();
-        renderLoansModule();
-        lucide.createIcons();
+        setTimeout(startBackgroundSync, 120);
       }
     });
   </script>
