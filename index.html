@@ -644,11 +644,9 @@
 
       main {
         flex: 1 0 auto !important;
-        /* Reserva solo el espacio real de la barra flotante para que
-           el último contenido nunca quede debajo de la navegación. */
-        padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: 0 !important;
         margin-bottom: 0 !important;
-        scroll-padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+        scroll-padding-bottom: 88px;
       }
 
       .ios-bottom-tabbar {
@@ -656,7 +654,7 @@
         top: auto !important;
         left: 50% !important;
         right: auto !important;
-        bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+        bottom: 8px !important;
         width: calc(100% - 32px) !important;
         max-width: 620px !important;
         margin: 0 !important;
@@ -688,6 +686,86 @@
 
       body > #app-shell > header.sticky {
         padding-top: env(safe-area-inset-top, 0px);
+      }
+    }
+
+
+    /* ============================================================
+       iOS 26/27 VISUAL REFINEMENT
+       UI/navigation = Liquid Glass; content = clean, calm surface.
+       ============================================================ */
+    .apple-card {
+      background: rgba(255, 255, 255, 0.965);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: 1px solid rgba(210, 210, 215, 0.48);
+      box-shadow: 0 1px 2px rgba(0,0,0,.025), 0 10px 30px rgba(0,0,0,.035);
+    }
+    .dark .apple-card {
+      background: rgba(30, 30, 32, 0.96);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-color: rgba(255,255,255,.075);
+      box-shadow: 0 1px 2px rgba(0,0,0,.18), 0 12px 32px rgba(0,0,0,.14);
+    }
+
+    .apple-glass {
+      background: rgba(248, 248, 250, 0.72);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: 0 1px 0 rgba(255,255,255,.68);
+    }
+    .dark .apple-glass {
+      background: rgba(28, 28, 30, 0.68);
+      box-shadow: 0 1px 0 rgba(255,255,255,.055);
+    }
+
+    .ios-bottom-tabbar {
+      background: rgba(248,248,250,.68);
+      border-color: rgba(255,255,255,.84);
+      box-shadow:
+        0 18px 42px rgba(0,0,0,.16),
+        0 4px 12px rgba(0,0,0,.07),
+        inset 0 1px 0 rgba(255,255,255,.95),
+        inset 0 -1px 0 rgba(0,0,0,.035);
+      -webkit-backdrop-filter: blur(30px) saturate(175%);
+      backdrop-filter: blur(30px) saturate(175%);
+    }
+    .dark .ios-bottom-tabbar {
+      background: rgba(30,30,32,.66);
+      border-color: rgba(255,255,255,.13);
+      box-shadow:
+        0 18px 42px rgba(0,0,0,.46),
+        0 4px 12px rgba(0,0,0,.24),
+        inset 0 1px 0 rgba(255,255,255,.09),
+        inset 0 -1px 0 rgba(0,0,0,.18);
+    }
+
+    .ios-bottom-tab-indicator {
+      background: rgba(255,255,255,.48);
+      border-color: rgba(255,255,255,.72);
+      box-shadow:
+        0 5px 14px rgba(0,0,0,.08),
+        inset 0 1px 0 rgba(255,255,255,.9);
+    }
+    .dark .ios-bottom-tab-indicator {
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.11);
+      box-shadow: 0 5px 14px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+
+    @media (max-width: 679px) {
+      main {
+        padding-top: 12px !important;
+      }
+      .apple-card {
+        border-radius: 26px !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ios-bottom-tabbar, .ios-bottom-tab-indicator, .ios-bottom-tab, .ios-bottom-tab svg {
+        transition-duration: .01ms !important;
       }
     }
 
@@ -838,9 +916,6 @@
                   <i data-lucide="info" class="w-3.5 h-3.5"></i>
                   <span id="airtm-fijos-alert-text">Fijos pendientes: €0.00</span>
                 </div>
-                <span class="text-[10px] sm:text-[11px] text-apple-gray-400 hidden xs:inline">
-                  • 11 Bancos EUR + Sabadell + Acciones + Préstamos + Ajuste PEN
-                </span>
               </div>
             </div>
 
@@ -1194,14 +1269,20 @@
           </div>
         </div>
 
+        <div class="px-1 -mt-2 text-[10px] text-apple-gray-400">EUR y PEN se conservan en su moneda original. El <span class="font-semibold text-apple-blue">Balance Neto Unificado</span> y la vinculación con Capital Total se calculan siempre en EUR.</div>
+
         <!-- Debtors Directory & Dossier -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
 
           <!-- Contacts Directory -->
           <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center justify-between mb-3 gap-2">
               <h3 class="text-xs font-bold uppercase tracking-wider text-apple-gray-400">Directorio de Deudores</h3>
               <button onclick="filterLoanByPerson('ALL')" class="text-xs text-apple-blue font-semibold hover:underline">Ver todos</button>
+            </div>
+            <div class="flex items-center gap-1.5 p-1 mb-3 rounded-2xl bg-apple-gray-100/70 dark:bg-apple-gray-800/60">
+              <button id="loans-view-active" onclick="setLoanViewMode('active')" class="ios-tap flex-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition bg-white dark:bg-apple-gray-700 text-apple-blue shadow-sm">Activos</button>
+              <button id="loans-view-history" onclick="setLoanViewMode('history')" class="ios-tap flex-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition text-apple-gray-500 dark:text-apple-gray-300">Historial <span id="loans-history-count" class="ml-0.5 opacity-70">0</span></button>
             </div>
             <div id="debtors-directory-list" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
               <!-- Dynamically populated contacts -->
@@ -2122,30 +2203,9 @@
 
     let state = JSON.parse(JSON.stringify(DEFAULT_SEED));
     let activeContactLoanFilter = 'ALL';
+    // Vista de préstamos: activos por defecto; los saldados pasan automáticamente a historial.
+    let loanViewMode = 'active';
     let selectedCycleKey = null;
-
-    // ============================================================
-    // NATIVE FEEDBACK / HAPTICS
-    // Uses the Web Vibration API when the browser/device supports it.
-    // iOS Safari may ignore it; visual press/transition feedback remains.
-    // ============================================================
-    function triggerHaptic(type = 'selection') {
-      if (!('vibrate' in navigator)) return;
-
-      const patterns = {
-        selection: 10,
-        success: 18,
-        important: 28,
-        error: [28, 35, 28],
-        delete: 40
-      };
-
-      try {
-        navigator.vibrate(patterns[type] ?? patterns.selection);
-      } catch (_) {
-        // Haptics are progressive enhancement; never interrupt a save.
-      }
-    }
 
     function showToast(title, message, isSuccess = true) {
       const toast = document.getElementById('toast-notify');
@@ -2164,9 +2224,6 @@
         tIcon.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i>';
       }
       lucide.createIcons();
-
-      // Un feedback corto acompaña las confirmaciones guardadas.
-      if (isSuccess) triggerHaptic('success');
 
       toast.classList.remove('translate-y-[-100px]', 'opacity-0');
       toast.classList.add('translate-y-0', 'opacity-100');
@@ -2279,24 +2336,8 @@
       if (syncIcon) syncIcon.classList.add('animate-spin');
 
       try {
-        // Estas cuatro lecturas son independientes. Hacerlas en paralelo reduce
-        // el tiempo de espera total, especialmente en Safari/iPhone.
-        const [configResult, gastosResult, prestamosResult, arqueosResult] = await Promise.all([
-          supabaseClient.from('app_config').select('*'),
-          supabaseClient.from('gastos').select('*').order('fecha', { ascending: false }),
-          supabaseClient.from('prestamos').select('*').order('fecha', { ascending: false }),
-          supabaseClient.from('arqueos').select('*').order('fecha', { ascending: false })
-        ]);
-
-        const { data: configRows, error: configError } = configResult;
-        const { data: gastosRows, error: gastosError } = gastosResult;
-        const { data: prestamosRows, error: prestamosError } = prestamosResult;
-        const { data: arqueosRows, error: arqueosError } = arqueosResult;
-
+        const { data: configRows, error: configError } = await supabaseClient.from('app_config').select('*');
         if (configError) throw configError;
-        if (gastosError) throw gastosError;
-        if (prestamosError) throw prestamosError;
-        if (arqueosError) throw arqueosError;
 
         // app_config es la configuración principal. Si todavía no existe
         // (por ejemplo, después de migrar el Excel por primera vez), más abajo
@@ -2321,6 +2362,12 @@
           }
         }
 
+        const { data: gastosRows, error: gastosError } = await supabaseClient
+          .from('gastos')
+          .select('*')
+          .order('fecha', { ascending: false });
+        if (gastosError) throw gastosError;
+
         if (gastosRows && gastosRows.length > 0) {
           state.personalExpenses = gastosRows.map(g => ({
             id: g.id,
@@ -2330,6 +2377,12 @@
             bank: g.banco || 'N26'
           }));
         }
+
+        const { data: prestamosRows, error: prestamosError } = await supabaseClient
+          .from('prestamos')
+          .select('*')
+          .order('fecha', { ascending: false });
+        if (prestamosError) throw prestamosError;
 
         if (prestamosRows && prestamosRows.length > 0) {
           state.loans = prestamosRows.map(p => ({
@@ -2343,6 +2396,12 @@
             lockedRate: p.moneda === 'PEN' ? 3.88 : (p.moneda === 'USD' ? 1.08 : 1)
           }));
         }
+
+        const { data: arqueosRows, error: arqueosError } = await supabaseClient
+          .from('arqueos')
+          .select('*')
+          .order('fecha', { ascending: false });
+        if (arqueosError) throw arqueosError;
 
         if (arqueosRows) {
           // La respuesta de Supabase es la fuente de verdad: si no hay filas,
@@ -2837,7 +2896,7 @@
             longPressTriggered = true;
             tr.classList.remove('longpress-arming');
             tr.classList.add('longpress-ready');
-            triggerHaptic('selection');
+            if (navigator.vibrate) navigator.vibrate(12);
             setTimeout(() => tr.classList.remove('longpress-ready'), 280);
             openEditArqueoModal(item.id);
             pressTimer = null;
@@ -3745,6 +3804,46 @@
     // ==========================================================
     // MODULE 3: LOANS & DEBTORS
     // ==========================================================
+    // El saldo original siempre conserva su moneda. Para decidir si una
+    // persona está liquidada, comparamos su saldo neto por moneda.
+    // No se borra ni modifica ningún movimiento: el historial solo cambia
+    // qué registros se muestran en la vista principal.
+    function getLoanPersonBalances(personName) {
+      const balances = { EUR: 0, PEN: 0, USD: 0 };
+      (state.loans || []).forEach(l => {
+        if (personName !== 'ALL' && String(l.person || '') !== String(personName || '')) return;
+        const currency = l.currency || 'EUR';
+        if (!(currency in balances)) balances[currency] = 0;
+        const factor = (l.type === 'YO_PRESTE' || l.type === 'YO_PAGUE') ? 1 : -1;
+        balances[currency] += Number(l.amount || 0) * factor;
+      });
+      return balances;
+    }
+
+    function isLoanPersonSettled(personName) {
+      const balances = getLoanPersonBalances(personName);
+      return Object.values(balances).every(v => Math.abs(Number(v) || 0) < 0.005);
+    }
+
+    function setLoanViewMode(mode) {
+      loanViewMode = mode === 'history' ? 'history' : 'active';
+      activeContactLoanFilter = 'ALL';
+      renderLoansModule();
+    }
+
+    function renderLoanViewToggle(historyCount = 0) {
+      const activeBtn = document.getElementById('loans-view-active');
+      const historyBtn = document.getElementById('loans-view-history');
+      const count = document.getElementById('loans-history-count');
+      if (count) count.innerText = String(historyCount);
+      if (activeBtn) {
+        activeBtn.className = `ios-tap flex-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition ${loanViewMode === 'active' ? 'bg-white dark:bg-apple-gray-700 text-apple-blue shadow-sm' : 'text-apple-gray-500 dark:text-apple-gray-300'}`;
+      }
+      if (historyBtn) {
+        historyBtn.className = `ios-tap flex-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition ${loanViewMode === 'history' ? 'bg-white dark:bg-apple-gray-700 text-apple-blue shadow-sm' : 'text-apple-gray-500 dark:text-apple-gray-300'}`;
+      }
+    }
+
     function renderLoansModule() {
       const netEur = calculateConsolidatedLoansNetEUR();
       const prestNet = document.getElementById('prestamos-net-eur');
@@ -3787,43 +3886,52 @@
 
       (state.loans || []).forEach(l => {
         const p = l.person || 'Sin Nombre';
-        if (!contactsMap[p]) {
-          contactsMap[p] = { name: p, totalEur: 0, totalPen: 0, netEqEur: 0 };
-        }
-
+        if (!contactsMap[p]) contactsMap[p] = { name: p, totalEur: 0, totalPen: 0, netEqEur: 0 };
         const factor = (l.type === 'YO_PRESTE' || l.type === 'YO_PAGUE') ? 1 : -1;
         const rate = l.lockedRate || (l.currency === 'PEN' ? curPenRate : (l.currency === 'USD' ? curUsdRate : 1));
-
         if (l.currency === 'EUR') {
-          contactsMap[p].totalEur += (Number(l.amount) * factor);
-          contactsMap[p].netEqEur += (Number(l.amount) * factor);
+          contactsMap[p].totalEur += Number(l.amount || 0) * factor;
+          contactsMap[p].netEqEur += Number(l.amount || 0) * factor;
         } else if (l.currency === 'PEN') {
-          contactsMap[p].totalPen += (Number(l.amount) * factor);
-          contactsMap[p].netEqEur += ((Number(l.amount) / rate) * factor);
+          contactsMap[p].totalPen += Number(l.amount || 0) * factor;
+          contactsMap[p].netEqEur += (Number(l.amount || 0) / rate) * factor;
         } else if (l.currency === 'USD') {
-          contactsMap[p].netEqEur += ((Number(l.amount) / rate) * factor);
+          contactsMap[p].netEqEur += (Number(l.amount || 0) / rate) * factor;
         }
       });
 
-      const list = Object.values(contactsMap).sort((a, b) => b.netEqEur - a.netEqEur);
+      const allContacts = Object.values(contactsMap);
+      const historyContacts = allContacts.filter(c => isLoanPersonSettled(c.name));
+      const visibleContacts = allContacts
+        .filter(c => (loanViewMode === 'history') === isLoanPersonSettled(c.name))
+        .sort((a, b) => b.netEqEur - a.netEqEur);
 
-      if (activeContactLoanFilter === 'ALL' && list.length > 0) {
-        activeContactLoanFilter = list[0].name;
+      renderLoanViewToggle(historyContacts.length);
+
+      if (activeContactLoanFilter === 'ALL' && visibleContacts.length > 0 && loanViewMode === 'active') {
+        activeContactLoanFilter = visibleContacts[0].name;
       }
 
-      list.forEach(c => {
+      if (visibleContacts.length === 0) {
+        container.innerHTML = `<div class="py-6 text-center text-[11px] text-apple-gray-400">${loanViewMode === 'history' ? 'Aún no hay préstamos liquidados.' : 'No hay préstamos activos.'}</div>`;
+        return;
+      }
+
+      visibleContacts.forEach(c => {
         const isSelected = activeContactLoanFilter === c.name;
         const item = document.createElement('div');
         item.className = `p-3 rounded-2xl cursor-pointer transition flex items-center justify-between ${isSelected ? 'bg-apple-blue/15 border border-apple-blue/30 text-apple-blue' : 'bg-apple-gray-100/60 dark:bg-apple-gray-800/40 hover:bg-apple-gray-200/50'}`;
         item.onclick = () => filterLoanByPerson(c.name);
 
+        const currencyBits = [];
+        if (Math.abs(c.totalEur) > 0.005) currencyBits.push(formatEUR(c.totalEur));
+        if (Math.abs(c.totalPen) > 0.005) currencyBits.push(formatPEN(c.totalPen));
+        const settledBadge = loanViewMode === 'history' ? '<span class="ml-1 text-[9px] font-bold text-apple-green">✓ Liquidado</span>' : '';
+
         item.innerHTML = `
-          <div>
-            <p class="text-xs font-bold text-apple-gray-900 dark:text-white">${c.name}</p>
-            <div class="flex items-center gap-2 mt-0.5 text-[10px] text-apple-gray-400">
-              ${c.totalEur !== 0 ? `<span>${formatEUR(c.totalEur)}</span>` : ''}
-              ${c.totalPen !== 0 ? `<span>${formatPEN(c.totalPen)}</span>` : ''}
-            </div>
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-apple-gray-900 dark:text-white truncate">${c.name}${settledBadge}</p>
+            <div class="flex items-center gap-2 mt-0.5 text-[10px] text-apple-gray-400">${currencyBits.join('<span>•</span>')}</div>
           </div>
           <span class="font-mono font-bold text-xs ${c.netEqEur >= 0 ? 'text-apple-blue' : 'text-apple-red'}">${formatEUR(c.netEqEur)}</span>
         `;
@@ -3845,14 +3953,18 @@
       const curUsdRate = state.fxRates?.USD || 1.08;
 
       const filtered = (state.loans || []).filter(l => {
+        const person = l.person || 'Sin Nombre';
+        const settled = isLoanPersonSettled(person);
+        const modeMatch = (loanViewMode === 'history') ? settled : !settled;
+        if (!modeMatch) return false;
         if (activeContactLoanFilter === 'ALL') return true;
-        return l.person === activeContactLoanFilter;
+        return person === activeContactLoanFilter;
       });
 
       const dName = document.getElementById('dossier-person-name');
       const dSub = document.getElementById('dossier-person-subtitle');
-      if (dName) dName.innerText = activeContactLoanFilter === 'ALL' ? 'Todos los Deudores' : activeContactLoanFilter;
-      if (dSub) dSub.innerText = activeContactLoanFilter === 'ALL' ? 'Viendo la totalidad de operaciones' : `Historial discriminado de operaciones con ${activeContactLoanFilter}`;
+      if (dName) dName.innerText = activeContactLoanFilter === 'ALL' ? (loanViewMode === 'history' ? 'Historial de Préstamos Liquidados' : 'Todos los Deudores Activos') : activeContactLoanFilter;
+      if (dSub) dSub.innerText = activeContactLoanFilter === 'ALL' ? (loanViewMode === 'history' ? 'Movimientos de personas con saldo neto 0' : 'Viendo únicamente saldos pendientes') : `Historial discriminado de operaciones con ${activeContactLoanFilter}`;
 
       let totalPrestadoEur = 0;
       let totalPrestadoPen = 0;
