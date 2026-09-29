@@ -867,7 +867,7 @@
                   <span id="airtm-fijos-alert-text">Fijos pendientes: €0.00</span>
                 </div>
                 <span class="text-[10px] sm:text-[11px] text-apple-gray-400 hidden xs:inline">
-                  • 11 Bancos EUR + Sabadell + Acciones + Préstamos + Ajuste PEN
+                  
                 </span>
               </div>
             </div>
@@ -1227,13 +1227,23 @@
 
           <!-- Contacts Directory -->
           <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center justify-between mb-3 gap-3">
               <h3 class="text-xs font-bold uppercase tracking-wider text-apple-gray-400">Directorio de Deudores</h3>
-              <button onclick="filterLoanByPerson('ALL')" class="text-xs text-apple-blue font-semibold hover:underline">Ver todos</button>
+              <button onclick="filterLoanByPerson('ALL')" class="text-xs text-apple-blue font-semibold hover:underline shrink-0">Ver todos</button>
             </div>
-            <div id="debtors-directory-list" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-              <!-- Dynamically populated contacts -->
+
+            <div class="flex items-center justify-center mb-3">
+              <div class="inline-flex items-center p-1 rounded-full bg-apple-gray-100/80 dark:bg-apple-gray-800/70 border border-apple-gray-200/60 dark:border-apple-gray-700/60">
+                <button id="debtors-view-active" onclick="setDebtorsDirectoryView('active')" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 bg-white dark:bg-apple-gray-700 text-apple-gray-900 dark:text-white shadow-sm">Activos</button>
+                <button id="debtors-view-history" onclick="setDebtorsDirectoryView('history')" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 text-apple-gray-400">Historial</button>
+              </div>
             </div>
+
+            <div id="debtors-directory-list" class="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+              <!-- Dynamically populated -->
+            </div>
+            <div id="debtors-history-count" class="hidden">0</div>
+            <div id="debtors-history-list" class="hidden"></div>
           </div>
 
           <!-- Dossier / Individual Account Sheet -->
@@ -2150,6 +2160,7 @@
 
     let state = JSON.parse(JSON.stringify(DEFAULT_SEED));
     let activeContactLoanFilter = 'ALL';
+    let activeDebtorsDirectoryView = 'active';
     let selectedCycleKey = null;
 
     function showToast(title, message, isSuccess = true) {
@@ -3780,14 +3791,23 @@
       renderLoansTable();
     }
 
+    function setDebtorsDirectoryView(view) {
+      activeDebtorsDirectoryView = view === 'history' ? 'history' : 'active';
+      renderDebtorsDirectory();
+    }
+
     function renderDebtorsDirectory() {
       const container = document.getElementById('debtors-directory-list');
       if (!container) return;
       container.innerHTML = '';
 
+      const historyCount = document.getElementById('debtors-history-count');
+      const historyContainer = document.getElementById('debtors-history-list');
+
       const contactsMap = {};
       const curPenRate = state.fxRates?.PEN || 3.88;
       const curUsdRate = state.fxRates?.USD || 1.08;
+      const EPSILON = 0.005;
 
       (state.loans || []).forEach(l => {
         const p = l.person || 'Sin Nombre';
@@ -3797,25 +3817,39 @@
 
         const factor = (l.type === 'YO_PRESTE' || l.type === 'YO_PAGUE') ? 1 : -1;
         const rate = l.lockedRate || (l.currency === 'PEN' ? curPenRate : (l.currency === 'USD' ? curUsdRate : 1));
+        const amount = Number(l.amount || 0);
 
         if (l.currency === 'EUR') {
-          contactsMap[p].totalEur += (Number(l.amount) * factor);
-          contactsMap[p].netEqEur += (Number(l.amount) * factor);
+          contactsMap[p].totalEur += amount * factor;
+          contactsMap[p].netEqEur += amount * factor;
         } else if (l.currency === 'PEN') {
-          contactsMap[p].totalPen += (Number(l.amount) * factor);
-          contactsMap[p].netEqEur += ((Number(l.amount) / rate) * factor);
+          contactsMap[p].totalPen += amount * factor;
+          contactsMap[p].netEqEur += (amount / rate) * factor;
         } else if (l.currency === 'USD') {
-          contactsMap[p].netEqEur += ((Number(l.amount) / rate) * factor);
+          contactsMap[p].netEqEur += (amount / rate) * factor;
         }
       });
 
-      const list = Object.values(contactsMap).sort((a, b) => b.netEqEur - a.netEqEur);
+      const allContacts = Object.values(contactsMap).sort((a, b) => b.netEqEur - a.netEqEur);
+      const activeList = allContacts.filter(c => c.netEqEur > EPSILON);
+      const completedList = allContacts.filter(c => Math.abs(c.netEqEur) <= EPSILON);
 
-      if (activeContactLoanFilter === 'ALL' && list.length > 0) {
-        activeContactLoanFilter = list[0].name;
+      if (activeContactLoanFilter !== 'ALL' && !activeList.some(c => c.name === activeContactLoanFilter)) {
+        activeContactLoanFilter = activeList[0]?.name || 'ALL';
+      }
+      if (activeContactLoanFilter === 'ALL' && activeList.length > 0) {
+        activeContactLoanFilter = activeList[0].name;
       }
 
-      list.forEach(c => {
+      const activeBtn = document.getElementById('debtors-view-active');
+      const historyBtn = document.getElementById('debtors-view-history');
+      if (activeBtn && historyBtn) {
+        const active = activeDebtorsDirectoryView === 'active';
+        activeBtn.className = `px-4 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${active ? 'bg-white dark:bg-apple-gray-700 text-apple-gray-900 dark:text-white shadow-sm' : 'text-apple-gray-400'}`;
+        historyBtn.className = `px-4 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${!active ? 'bg-white dark:bg-apple-gray-700 text-apple-gray-900 dark:text-white shadow-sm' : 'text-apple-gray-400'}`;
+      }
+
+      const renderPerson = (c, completed = false) => {
         const isSelected = activeContactLoanFilter === c.name;
         const item = document.createElement('div');
         item.className = `p-3 rounded-2xl cursor-pointer transition flex items-center justify-between ${isSelected ? 'bg-apple-blue/15 border border-apple-blue/30 text-apple-blue' : 'bg-apple-gray-100/60 dark:bg-apple-gray-800/40 hover:bg-apple-gray-200/50'}`;
@@ -3829,10 +3863,22 @@
               ${c.totalPen !== 0 ? `<span>${formatPEN(c.totalPen)}</span>` : ''}
             </div>
           </div>
-          <span class="font-mono font-bold text-xs ${c.netEqEur >= 0 ? 'text-apple-blue' : 'text-apple-red'}">${formatEUR(c.netEqEur)}</span>
+          <span class="font-mono font-bold text-xs ${completed ? 'text-apple-gray-400' : 'text-apple-blue'}">${completed ? 'Liquidado' : formatEUR(c.netEqEur)}</span>
         `;
-        container.appendChild(item);
-      });
+        return item;
+      };
+
+      const visibleList = activeDebtorsDirectoryView === 'history' ? completedList : activeList;
+      if (visibleList.length === 0) {
+        container.innerHTML = activeDebtorsDirectoryView === 'history'
+          ? '<p class="text-[10px] text-apple-gray-400 py-3 text-center">Sin préstamos liquidados.</p>'
+          : '<p class="text-[10px] text-apple-gray-400 py-3 text-center">No hay deudores activos.</p>';
+      } else {
+        visibleList.forEach(c => container.appendChild(renderPerson(c, activeDebtorsDirectoryView === 'history')));
+      }
+
+      if (historyCount) historyCount.innerText = String(completedList.length);
+      if (historyContainer) historyContainer.innerHTML = '';
     }
 
     function filterLoanByPerson(personName) {
