@@ -152,7 +152,7 @@
       --sar: env(safe-area-inset-right, 0px);
     }
     body {
-      padding-top: var(--sat);
+      padding-top: 0;
       padding-left: var(--sal);
       padding-right: var(--sar);
     }
@@ -629,9 +629,7 @@
         display: flex !important;
         flex-direction: column !important;
         height: auto !important;
-        min-height: 100vh !important;
         min-height: 100svh !important;
-        min-height: 100dvh !important;
         padding-bottom: 0 !important;
         margin-bottom: 0 !important;
         box-sizing: border-box !important;
@@ -652,16 +650,16 @@
       .ios-bottom-tabbar {
         position: fixed !important;
         top: auto !important;
-        left: 50% !important;
-        right: auto !important;
-        bottom: 8px !important;
-        width: calc(100% - 32px) !important;
-        max-width: 620px !important;
+        left: 16px !important;
+        right: 16px !important;
+        bottom: 12px !important;
+        width: auto !important;
+        max-width: none !important;
         margin: 0 !important;
         padding: 5px !important;
         border-radius: 38px !important;
-        transform: translate3d(-50%, 0, 0) !important;
-        -webkit-transform: translate3d(-50%, 0, 0) !important;
+        transform: none !important;
+        -webkit-transform: none !important;
         z-index: 9999 !important;
       }
 
@@ -679,9 +677,12 @@
         margin-bottom: 0 !important;
       }
 
-      /* El contenido respeta la zona segura sin crear un hueco artificial. */
+      /* El alto del shell queda gobernado por el viewport CSS estable.
+         No lo atamos a visualViewport: Safari puede reportar un alto
+         transitorio distinto al viewport visible y dejar el documento
+         artificialmente corto/largo durante el primer render. */
       body > #app-shell {
-        min-height: var(--app-mobile-height, 100dvh) !important;
+        min-height: 100svh !important;
       }
 
       body > #app-shell > header.sticky {
@@ -766,6 +767,37 @@
     @media (prefers-reduced-motion: reduce) {
       .ios-bottom-tabbar, .ios-bottom-tab-indicator, .ios-bottom-tab, .ios-bottom-tab svg {
         transition-duration: .01ms !important;
+      }
+    }
+
+    /* FINAL HOSTED-WEB VIEWPORT PATCH
+       Keep the fixed navigation tied to the layout viewport. Safari/WebKit
+       has documented regressions around fixed bottom elements, viewport
+       recalculation and safe-area handling. Avoid transform-based centering
+       and avoid using visualViewport as the shell height. */
+    @media (max-width: 679px) {
+      body {
+        padding-top: 0 !important;
+      }
+
+      #app-shell {
+        min-height: 100svh !important;
+        min-height: 100dvh !important;
+      }
+
+      main {
+        padding-bottom: 108px !important;
+        scroll-padding-bottom: 108px !important;
+      }
+
+      .ios-bottom-tabbar {
+        left: 16px !important;
+        right: 16px !important;
+        bottom: 12px !important;
+        width: auto !important;
+        max-width: none !important;
+        transform: none !important;
+        -webkit-transform: none !important;
       }
     }
 
@@ -5082,33 +5114,9 @@
 
 
 <script>
-  // Mobile viewport stabilizer:
-  // avoids the first-paint white jump when Safari/Chrome recalculates
-  // the dynamic toolbar/safe-area height.
-  (function initMobileViewportStabilizer() {
-    const root = document.documentElement;
-
-    function updateMobileViewportHeight() {
-      if (window.innerWidth > 679) return;
-      const vv = window.visualViewport;
-      const h = vv ? vv.height : window.innerHeight;
-      if (h > 0) root.style.setProperty('--app-mobile-height', `${Math.round(h)}px`);
-    }
-
-    updateMobileViewportHeight();
-
-    window.addEventListener('resize', updateMobileViewportHeight, { passive: true });
-    window.addEventListener('orientationchange', () => {
-      requestAnimationFrame(updateMobileViewportHeight);
-    }, { passive: true });
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateMobileViewportHeight, { passive: true });
-    }
-
-    // Recalcular después del primer layout, sin animar ni desplazar la página.
-    requestAnimationFrame(() => requestAnimationFrame(updateMobileViewportHeight));
-  })();
+  // Viewport stabilizer intentionally disabled.
+  // The layout uses CSS svh/dvh directly; visualViewport is not written
+  // into the app shell height because Safari can report transient values.
 </script>
 
 </body>
