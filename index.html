@@ -670,10 +670,22 @@
         max-width: none !important;
       }
 
-      /* Move the header content below the top system blur. */
+      /* El header no debe arrancar desplazado: ese top/margin provocaba
+         el bloque blanco inicial y luego un reajuste visible al terminar
+         de calcular el viewport del navegador móvil. */
       body > #app-shell > header.sticky {
-        top: 14px !important;
-        margin-bottom: 14px !important;
+        top: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+      }
+
+      /* El contenido respeta la zona segura sin crear un hueco artificial. */
+      body > #app-shell {
+        min-height: var(--app-mobile-height, 100dvh) !important;
+      }
+
+      body > #app-shell > header.sticky {
+        padding-top: env(safe-area-inset-top, 0px);
       }
     }
 
@@ -685,6 +697,24 @@
     }
 
 </style>
+
+<style>
+  @media (max-width: 679px) {
+    #toast-notify {
+      top: auto !important;
+      right: 12px !important;
+      left: 12px !important;
+      bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+      transform: translateY(120px) !important;
+    }
+
+    #toast-notify > div {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+</style>
+
 </head>
 
 <body class="h-full bg-apple-gray-100 dark:bg-apple-gray-900 text-apple-gray-800 dark:text-apple-gray-100 font-sans select-none selection:bg-apple-blue selection:text-white transition-colors duration-300">
@@ -829,18 +859,15 @@
           <div class="grid grid-cols-2 xs:grid-cols-3 ipad:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3 mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50">
             <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
               <span class="text-[10px] font-medium text-apple-gray-400">Airtm (€)</span>
-              <p id="stat-airtm-balance" class="text-sm sm:text-base md:text-lg font-bold text-apple-green mt-0.5">€0.00</p>
-              <span class="text-[9px] text-apple-gray-400">Cuenta operativa separada</span>
+              <p id="stat-airtm-balance" class="text-lg sm:text-xl md:text-2xl font-bold text-apple-green mt-0.5 leading-tight">€0.00</p>
             </div>
             <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
               <span class="text-[10px] font-medium text-apple-gray-400">Bancos EUR</span>
-              <p id="stat-total-bancos" class="text-sm sm:text-base md:text-lg font-bold text-apple-gray-900 dark:text-white mt-0.5">€0.00</p>
-              <span class="text-[9px] text-apple-gray-400">N26 · BBVA · Imagin · … · Sabadell</span>
+              <p id="stat-total-bancos" class="text-lg sm:text-xl md:text-2xl font-bold text-apple-gray-900 dark:text-white mt-0.5 leading-tight">€0.00</p>
             </div>
             <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
               <span class="text-[10px] font-medium text-apple-gray-400">Bancos PEN</span>
-              <p id="stat-total-bancos-soles" class="text-sm sm:text-base md:text-lg font-bold text-apple-orange mt-0.5">S/. 0.00</p>
-              <span class="text-[9px] text-apple-gray-400">BCP + Interbank · sin conversión visual</span>
+              <p id="stat-total-bancos-soles" class="text-lg sm:text-xl md:text-2xl font-bold text-apple-orange mt-0.5 leading-tight">S/. 0.00</p>
             </div>
             <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
               <span class="text-[10px] font-medium text-apple-gray-400">Acciones (€)</span>
@@ -1515,7 +1542,7 @@
       <form id="form-expense" onsubmit="handleSaveExpense(event)" class="space-y-3.5">
         <div>
           <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto (€)</label>
-          <input type="number" step="0.01" required name="amount" placeholder="0.00" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+          <input type="number" step="0.01" required name="amount" placeholder="0.00" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue" inputmode="decimal">
         </div>
         <div>
           <label class="block text-xs font-medium text-apple-gray-500 mb-1">Concepto / Motivo</label>
@@ -1576,11 +1603,11 @@
         <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto (€)</label>
-            <input type="number" step="0.01" required name="amount" placeholder="0.00" class="w-full px-3 py-2 text-sm font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+            <input type="number" step="0.01" required name="amount" placeholder="0.00" class="w-full px-3 py-2 text-sm font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700" inputmode="decimal">
           </div>
           <div>
             <label class="block text-xs font-medium text-apple-gray-500 mb-1">Día de Cobro</label>
-            <input type="number" min="1" max="31" required name="chargeDay" value="1" class="w-full px-3 py-2 text-sm font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+            <input type="number" min="1" max="31" required name="chargeDay" value="1" class="w-full px-3 py-2 text-sm font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700" inputmode="numeric">
           </div>
         </div>
         <div>
@@ -1625,7 +1652,7 @@
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto Total en Euros (€)</label>
-          <input type="number" step="10" id="input-new-budget" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+          <input type="number" step="10" id="input-new-budget" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue" inputmode="decimal">
         </div>
       </div>
 
@@ -1692,7 +1719,7 @@
         <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="block text-xs font-semibold text-apple-gray-500 mb-1">Monto de la Variación (€)</label>
-            <input type="number" step="0.01" required name="delta_amount" id="input-acc-delta-amount" oninput="updateAccionesProjectedPreview()" placeholder="0.00" class="w-full px-3 py-2 text-lg font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-purple">
+            <input type="number" step="0.01" required name="delta_amount" id="input-acc-delta-amount" oninput="updateAccionesProjectedPreview()" placeholder="0.00" class="w-full px-3 py-2 text-lg font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-purple" inputmode="decimal">
           </div>
           <div>
             <label class="block text-xs font-semibold text-apple-gray-500 mb-1">Fecha</label>
@@ -1778,7 +1805,7 @@
         <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="block text-xs font-semibold text-apple-gray-500 mb-1">Monto de Variación (S/.)</label>
-            <input type="number" step="0.01" required name="delta_amount" id="input-madre-delta-amount" oninput="updateMadreProjectedPreview()" placeholder="0.00" class="w-full px-3 py-2 text-lg font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-orange">
+            <input type="number" step="0.01" required name="delta_amount" id="input-madre-delta-amount" oninput="updateMadreProjectedPreview()" placeholder="0.00" class="w-full px-3 py-2 text-lg font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-orange" inputmode="decimal">
           </div>
           <div>
             <label class="block text-xs font-semibold text-apple-gray-500 mb-1">Fecha</label>
@@ -1866,7 +1893,7 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto</label>
-            <input type="number" step="0.01" required name="amount" placeholder="0.00" class="w-full px-3 py-2 text-xs font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+            <input type="number" step="0.01" required name="amount" placeholder="0.00" class="w-full px-3 py-2 text-xs font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none" inputmode="decimal">
           </div>
         </div>
 
@@ -1917,7 +1944,7 @@
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-medium text-apple-gray-500 mb-1">Día de inicio del ciclo (1 al 28)</label>
-          <input type="number" min="1" max="28" id="input-cycle-start-day" value="15" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+          <input type="number" min="1" max="28" id="input-cycle-start-day" value="15" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue" inputmode="numeric">
         </div>
       </div>
 
@@ -1948,15 +1975,15 @@
       <form id="form-bcp-recordatorio" onsubmit="handleSaveBcp(event)" class="space-y-3.5">
         <div>
           <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto en Soles (S/.)</label>
-          <input type="number" step="0.01" name="pen" id="input-bcp-pen" class="w-full px-3 py-2 text-lg font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+          <input type="number" step="0.01" name="pen" id="input-bcp-pen" class="w-full px-3 py-2 text-lg font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none" inputmode="decimal">
         </div>
         <div>
           <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto en Dólares ($)</label>
-          <input type="number" step="0.01" name="usd" id="input-bcp-usd" class="w-full px-3 py-2 text-lg font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+          <input type="number" step="0.01" name="usd" id="input-bcp-usd" class="w-full px-3 py-2 text-lg font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none" inputmode="decimal">
         </div>
         <div>
           <label class="block text-xs font-medium text-apple-gray-500 mb-1">Día de corte mensual</label>
-          <input type="number" min="1" max="31" name="cutDay" id="input-bcp-cut" value="20" class="w-full px-3 py-2 text-xs font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+          <input type="number" min="1" max="31" name="cutDay" id="input-bcp-cut" value="20" class="w-full px-3 py-2 text-xs font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none" inputmode="numeric">
         </div>
 
         <div class="pt-3 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5">
@@ -2007,7 +2034,7 @@
   </div>
 
   <!-- Notification Toast -->
-  <div id="toast-notify" class="fixed top-20 right-4 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none">
+  <div id="toast-notify" class="fixed top-20 right-4 z-[10000] transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none">
     <div class="apple-card px-4 py-3 rounded-2xl shadow-ios-float border border-apple-blue/30 flex items-center gap-3">
       <div id="toast-icon-wrapper" class="w-7 h-7 rounded-xl bg-apple-blue/15 text-apple-blue flex items-center justify-center">
         <i data-lucide="check" class="w-4 h-4"></i>
@@ -2557,6 +2584,8 @@
     // ==========================================================
     // MODULE 1: ARQUEOS & AIRTM
     // ==========================================================
+    // Último snapshot anterior al estado actual. Solo se usa para mostrar
+    // la referencia numérica pequeña de Airtm / Bancos EUR / Bancos PEN.
     function renderAirtmModule() {
       const capitalTotal = calculateLiveCapitalTotal();
       const airtm = calculateAirtmBalance();
@@ -2689,21 +2718,33 @@
           'Interbank': 'from-emerald-600 to-teal-800'
         };
 
+        // Comparación visual: saldo vivo frente al último snapshot guardado.
+        const latestVaultSnapshot = [...(state.arqueoHistory || [])]
+          .sort((a, b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))[0] || null;
+        const latestVaultBalances = latestVaultSnapshot?.bancos || null;
+
         for (const name of getOrderedBankNames(state.bancos)) {
-          const balance = state.bancos[name];
+          const balance = Number(state.bancos[name] || 0);
           const isSoles = (name === 'BCP' || name === 'Interbank');
           const grad = bankGradients[name] || 'from-gray-500 to-gray-700';
+          const snapshotBalance = latestVaultBalances ? Number(latestVaultBalances[name] || 0) : null;
+          const vaultDelta = snapshotBalance === null ? null : Number((balance - snapshotBalance).toFixed(2));
+          const vaultArrow = vaultDelta > 0
+            ? '<i data-lucide="arrow-up" class="w-3.5 h-3.5 text-apple-green"></i>'
+            : vaultDelta < 0
+              ? '<i data-lucide="arrow-down" class="w-3.5 h-3.5 text-apple-red"></i>'
+              : '';
           const card = document.createElement('div');
           card.className = 'ios-tap p-3 rounded-2xl apple-card shadow-ios-sm flex flex-col justify-between cursor-pointer hover:border-apple-blue/50 transition';
           card.onclick = () => openModal('modal-quick-balance');
           card.innerHTML = `
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-apple-gray-800 dark:text-gray-200">${name}</span>
-              <div class="w-2.5 h-2.5 rounded-full bg-gradient-to-tr ${grad}"></div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-sm sm:text-base font-bold text-apple-gray-800 dark:text-gray-200 truncate">${name}</span>
+              <div class="w-2.5 h-2.5 rounded-full bg-gradient-to-tr ${grad} shrink-0"></div>
             </div>
-            <div class="mt-2">
-              <p class="text-xs font-mono font-bold text-apple-gray-900 dark:text-white">${isSoles ? formatPEN(balance) : formatEUR(balance)}</p>
-              <span class="text-[9px] text-apple-gray-400">${isSoles ? 'Soles (PEN)' : 'Euros (€)'}</span>
+            <div class="mt-2.5 flex items-center justify-between gap-2">
+              <p class="text-base sm:text-lg font-mono font-bold tracking-tight text-apple-gray-900 dark:text-white">${isSoles ? formatPEN(balance) : formatEUR(balance)}</p>
+              ${vaultArrow ? `<span class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full bg-apple-gray-100/80 dark:bg-apple-gray-800/70">${vaultArrow}</span>` : ''}
             </div>
           `;
           container.appendChild(card);
@@ -3222,6 +3263,8 @@
       });
 
       // Fijos pagados vs pendientes en este ciclo específico
+      // Cada ciclo tiene su propio estado de pagos. Al comenzar un ciclo
+      // nuevo (nuevo activeKey), no se heredan marcas del ciclo anterior.
       const cycState = (state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) || {};
       let totalFixedPaid = 0;
       let totalFixedPending = 0;
@@ -4133,7 +4176,22 @@
 
     async function handleSaveExpense(e) {
       e.preventDefault();
+
       const form = e.target;
+      const saveButton = form.querySelector('button[type="submit"]');
+
+      // Evitar dobles pulsaciones mientras se confirma la inserción.
+      if (form.dataset.saving === '1') return;
+      form.dataset.saving = '1';
+
+      const originalButtonHTML = saveButton ? saveButton.innerHTML : '';
+      if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.classList.add('opacity-70');
+        saveButton.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Guardando...</span>';
+        lucide.createIcons();
+      }
+
       const expenseObj = {
         id: 'g_' + Date.now(),
         fecha: form.date.value,
@@ -4142,19 +4200,88 @@
         banco: form.bank.value
       };
 
-      if (supabaseClient) {
-        const { error } = await supabaseClient.from('gastos').insert(expenseObj);
-        if (error) {
-          console.error('Error guardando gasto:', error);
-          showToast('No se guardó el gasto', error.message || 'Supabase rechazó el registro.');
-          return;
+      if (!expenseObj.concepto || expenseObj.monto <= 0) {
+        showToast('Revisa el gasto', 'Introduce un concepto y un monto mayor que 0.', false);
+        form.dataset.saving = '0';
+        if (saveButton) {
+          saveButton.disabled = false;
+          saveButton.classList.remove('opacity-70');
+          saveButton.innerHTML = originalButtonHTML;
+          lucide.createIcons();
         }
+        return;
       }
 
-      await refreshProfitAfterExpenseChange();
-      form.reset();
-      closeModal('modal-add-expense');
-      showToast('Gasto Registrado', `-${formatEUR(expenseObj.monto)} en ${expenseObj.concepto}. Profit actualizado.`, true);
+      try {
+        // La inserción es la confirmación real de que Supabase recibió el gasto.
+        if (supabaseClient) {
+          const { error } = await supabaseClient.from('gastos').insert(expenseObj);
+          if (error) throw error;
+        }
+
+        // Pintado optimista local: el gasto aparece inmediatamente, sin esperar
+        // a la sincronización/recalculación completa.
+        if (!state.personalExpenses) state.personalExpenses = [];
+        state.personalExpenses = [
+          {
+            id: expenseObj.id,
+            date: expenseObj.fecha,
+            amount: expenseObj.monto,
+            concept: expenseObj.concepto,
+            bank: expenseObj.banco
+          },
+          ...state.personalExpenses.filter(x => String(x.id) !== String(expenseObj.id))
+        ];
+
+        renderPersonalModule();
+
+        form.reset();
+        closeModal('modal-add-expense');
+        form.dataset.saving = '0';
+
+        showToast(
+          '✓ Gasto registrado',
+          `-${formatEUR(expenseObj.monto)} · ${expenseObj.concepto}. Actualizando Profit…`,
+          true
+        );
+
+        // La parte pesada ocurre después de cerrar el modal.
+        // Si Supabase ya confirmó el INSERT, el usuario no queda bloqueado.
+        setTimeout(async () => {
+          try {
+            await refreshProfitAfterExpenseChange();
+            showToast(
+              'Gasto sincronizado',
+              `-${formatEUR(expenseObj.monto)} · Profit actualizado en la nube.`,
+              true
+            );
+          } catch (syncError) {
+            console.error('Error recalculando después de registrar gasto:', syncError);
+            showToast(
+              'Gasto guardado',
+              'El registro está en Supabase, pero la actualización de métricas tardó o falló. Puedes sincronizar de nuevo.',
+              false
+            );
+          }
+        }, 50);
+
+      } catch (error) {
+        console.error('Error guardando gasto:', error);
+        form.dataset.saving = '0';
+
+        showToast(
+          'No se guardó el gasto',
+          error?.message || 'Supabase rechazó el registro.',
+          false
+        );
+
+        if (saveButton) {
+          saveButton.disabled = false;
+          saveButton.classList.remove('opacity-70');
+          saveButton.innerHTML = originalButtonHTML;
+          lucide.createIcons();
+        }
+      }
     }
 
     async function deleteExpense(id) {
@@ -4803,5 +4930,48 @@
       }
     });
   </script>
+
+<script>
+  // Mobile UX: all numeric fields should open the device numeric keypad.
+  document.addEventListener('focusin', function (event) {
+    const el = event.target;
+    if (!el || el.tagName !== 'INPUT' || el.type !== 'number') return;
+    if (!el.hasAttribute('inputmode')) {
+      el.setAttribute('inputmode', el.step && el.step !== '1' ? 'decimal' : 'numeric');
+    }
+  });
+</script>
+
+
+<script>
+  // Mobile viewport stabilizer:
+  // avoids the first-paint white jump when Safari/Chrome recalculates
+  // the dynamic toolbar/safe-area height.
+  (function initMobileViewportStabilizer() {
+    const root = document.documentElement;
+
+    function updateMobileViewportHeight() {
+      if (window.innerWidth > 679) return;
+      const vv = window.visualViewport;
+      const h = vv ? vv.height : window.innerHeight;
+      if (h > 0) root.style.setProperty('--app-mobile-height', `${Math.round(h)}px`);
+    }
+
+    updateMobileViewportHeight();
+
+    window.addEventListener('resize', updateMobileViewportHeight, { passive: true });
+    window.addEventListener('orientationchange', () => {
+      requestAnimationFrame(updateMobileViewportHeight);
+    }, { passive: true });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateMobileViewportHeight, { passive: true });
+    }
+
+    // Recalcular después del primer layout, sin animar ni desplazar la página.
+    requestAnimationFrame(() => requestAnimationFrame(updateMobileViewportHeight));
+  })();
+</script>
+
 </body>
 </html>
