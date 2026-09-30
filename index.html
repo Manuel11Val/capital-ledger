@@ -513,6 +513,325 @@
 
 
     /* ============================================================
+       BANK EDITOR — iOS / APPLE SHEET
+       Aislado del resto del responsive para no alterar las páginas.
+       ============================================================ */
+    .bank-editor-modal {
+      opacity: 1;
+      transition: opacity .24s ease;
+    }
+    .bank-editor-modal.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .bank-editor-sheet {
+      transform: translateY(0) scale(1);
+      transform-origin: center bottom;
+      transition: transform .38s cubic-bezier(.22,1,.36,1), opacity .28s ease;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .bank-editor-modal.hidden .bank-editor-sheet {
+      transform: translateY(18px) scale(.985);
+      opacity: .01;
+    }
+    .bank-editor-grabber {
+      width: 38px;
+      height: 4px;
+      border-radius: 999px;
+      margin: 9px auto 0;
+      background: rgba(120,120,128,.28);
+    }
+    .bank-editor-kicker {
+      font-size: 9px;
+      line-height: 1;
+      letter-spacing: .14em;
+      font-weight: 800;
+      color: #8e8e93;
+      margin-bottom: 5px;
+    }
+    .bank-editor-close {
+      transition: transform .18s ease, background .18s ease;
+    }
+    .bank-editor-close:active {
+      transform: scale(.91);
+    }
+    .bank-editor-hero {
+      border-radius: 24px;
+      padding: 15px;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(0,122,255,.11), transparent 42%),
+        linear-gradient(145deg, rgba(242,242,247,.92), rgba(255,255,255,.96));
+      border: 1px solid rgba(60,60,67,.08);
+    }
+    .dark .bank-editor-hero {
+      background:
+        radial-gradient(circle at 100% 0%, rgba(10,132,255,.16), transparent 42%),
+        linear-gradient(145deg, rgba(44,44,46,.92), rgba(28,28,30,.96));
+      border-color: rgba(255,255,255,.07);
+    }
+    .bank-editor-logo-shell {
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex: 0 0 auto;
+      box-shadow: 0 8px 22px rgba(0,0,0,.10);
+    }
+    .bank-editor-logo-shell .bank-mini-logo {
+      width: 48px !important;
+      height: 48px !important;
+      border-radius: 15px !important;
+      box-shadow: 0 8px 22px rgba(0,0,0,.08) !important;
+    }
+    .bank-editor-logo-shell .bank-real-logo-img {
+      width: 68%;
+      height: 68%;
+      object-fit: contain;
+    }
+    .bank-real-logo-img {
+      display: block;
+    }
+    .bank-logo-fallback {
+      align-items: center;
+      justify-content: center;
+    }
+    .bank-editor-balance {
+      font-size: clamp(32px, 7vw, 46px);
+      line-height: .98;
+      letter-spacing: -.045em;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 800;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
+    }
+    .dark .bank-editor-balance { color: #fff; }
+    .bank-editor-delta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 750;
+      background: rgba(142,142,147,.10);
+      color: #8e8e93;
+      transition: color .22s ease, background .22s ease, transform .22s ease;
+    }
+    .bank-editor-delta.positive {
+      color: #34c759;
+      background: rgba(52,199,89,.11);
+    }
+    .bank-editor-delta.negative {
+      color: #ff3b30;
+      background: rgba(255,59,48,.10);
+    }
+    .bank-editor-delta.neutral {
+      color: #8e8e93;
+      background: rgba(142,142,147,.10);
+    }
+    .bank-editor-delta.pulse {
+      animation: bank-editor-delta-pulse .28s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes bank-editor-delta-pulse {
+      50% { transform: scale(1.025); }
+    }
+    .bank-editor-summary,
+    .bank-editor-edit-block {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(242,242,247,.64);
+      border: 1px solid rgba(60,60,67,.06);
+    }
+    .dark .bank-editor-summary,
+    .dark .bank-editor-edit-block {
+      background: rgba(44,44,46,.55);
+      border-color: rgba(255,255,255,.055);
+    }
+    .bank-editor-section-label {
+      font-size: 9px;
+      letter-spacing: .13em;
+      font-weight: 850;
+      color: #8e8e93;
+    }
+    .bank-editor-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 10px;
+      margin-top: 11px;
+    }
+    .bank-editor-summary-grid > div {
+      min-width: 0;
+      padding: 10px 11px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.68);
+    }
+    .dark .bank-editor-summary-grid > div {
+      background: rgba(28,28,30,.60);
+    }
+    .bank-editor-summary-grid span {
+      display: block;
+      font-size: 9px;
+      color: #8e8e93;
+      margin-bottom: 4px;
+    }
+    .bank-editor-summary-grid strong {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+      color: #1d1d1f;
+    }
+    .dark .bank-editor-summary-grid strong { color: #f5f5f7; }
+    .bank-editor-inputs-grid {
+      display: grid;
+      grid-template-columns: minmax(0,1fr);
+      gap: 10px;
+    }
+    .bank-editor-input-card {
+      padding: 12px;
+      border-radius: 17px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(60,60,67,.07);
+      animation: bank-editor-input-enter .32s cubic-bezier(.22,1,.36,1) both;
+    }
+    .dark .bank-editor-input-card {
+      background: rgba(28,28,30,.72);
+      border-color: rgba(255,255,255,.06);
+    }
+    @keyframes bank-editor-input-enter {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .bank-editor-input-card .bank-editor-field {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      border-radius: 15px;
+      padding: 12px 13px;
+      background: rgba(242,242,247,.92);
+      color: #1d1d1f;
+      font-size: 22px;
+      line-height: 1;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      box-shadow: inset 0 0 0 1px rgba(60,60,67,.05);
+      transition: box-shadow .18s ease, background .18s ease, transform .18s ease;
+    }
+    .dark .bank-editor-input-card .bank-editor-field {
+      background: rgba(44,44,46,.92);
+      color: #fff;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .bank-editor-input-card .bank-editor-field:focus {
+      box-shadow: inset 0 0 0 2px rgba(0,122,255,.62), 0 5px 18px rgba(0,122,255,.08);
+      transform: translateY(-1px);
+    }
+    .bank-editor-currency-chip {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 9px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: .08em;
+      color: #007aff;
+      background: rgba(0,122,255,.10);
+    }
+    .bank-editor-actions {
+      display: flex;
+      gap: 9px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(60,60,67,.08);
+    }
+    .dark .bank-editor-actions { border-top-color: rgba(255,255,255,.07); }
+    .bank-editor-cancel,
+    .bank-editor-save {
+      min-height: 46px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 750;
+      transition: transform .18s ease, opacity .18s ease, filter .18s ease;
+    }
+    .bank-editor-cancel {
+      flex: 0 0 34%;
+      color: #6e6e73;
+      background: rgba(242,242,247,.85);
+    }
+    .dark .bank-editor-cancel {
+      color: #c7c7cc;
+      background: rgba(44,44,46,.82);
+    }
+    .bank-editor-save {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      color: #fff;
+      background: linear-gradient(135deg,#007aff,#0a84ff);
+      box-shadow: 0 9px 22px rgba(0,122,255,.20);
+    }
+    .bank-editor-cancel:active,
+    .bank-editor-save:active { transform: scale(.985); }
+    .bank-editor-save.is-saving { opacity: .72; pointer-events: none; }
+    .bank-editor-save.is-saved { background: linear-gradient(135deg,#34c759,#30d158); }
+    .bank-editor-empty {
+      padding: 14px;
+      border-radius: 16px;
+      color: #8e8e93;
+      font-size: 11px;
+      text-align: center;
+      background: rgba(142,142,147,.08);
+    }
+
+    @media (min-width: 640px) {
+      .bank-editor-inputs-grid.bank-editor-multi {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+      }
+      .bank-editor-sheet {
+        transform-origin: center center;
+      }
+      .bank-editor-modal.hidden .bank-editor-sheet {
+        transform: translateY(10px) scale(.975);
+      }
+    }
+
+    @media (max-width: 639px) {
+      .bank-editor-sheet {
+        max-height: calc(100dvh - env(safe-area-inset-top));
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .bank-editor-summary-grid {
+        gap: 7px;
+      }
+      .bank-editor-summary-grid > div {
+        padding: 9px;
+      }
+      .bank-editor-balance {
+        font-size: clamp(30px, 10vw, 40px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bank-editor-sheet,
+      .bank-editor-delta,
+      .bank-editor-input-card,
+      .bank-editor-save,
+      .bank-editor-cancel { transition: none !important; animation: none !important; }
+    }
+
+    /* ============================================================
        FINAL RESPONSIVE SAFETY LAYER
        - No effect on desktop >= 1024px.
        - Keeps iPhone/mobile layout unchanged below 680px.
@@ -1537,29 +1856,98 @@
   </div>
 
   <!-- MODAL: ACTUALIZAR SALDOS EN BANCOS -->
-  <div id="modal-quick-balance" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
-    <div class="apple-card rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-ios-sheet max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
-        <div class="min-w-0">
-          <h3 id="quick-balance-title" class="text-base font-bold text-apple-gray-900 dark:text-white truncate">Actualizar Saldos en Bancos</h3>
-          <p id="quick-balance-subtitle" class="text-xs text-apple-gray-400">Actualiza todas tus cuentas desde un solo lugar</p>
+  <div id="modal-quick-balance" class="bank-editor-modal fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/45 backdrop-blur-xl hidden transition-opacity">
+    <div class="bank-editor-sheet apple-card w-full sm:max-w-xl rounded-t-[30px] sm:rounded-[30px] shadow-ios-sheet max-h-[94vh] sm:max-h-[90vh] overflow-hidden">
+      <div class="bank-editor-grabber sm:hidden"></div>
+
+      <div class="px-5 pt-3 pb-4 sm:px-6 sm:pt-5">
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p id="quick-balance-kicker" class="bank-editor-kicker">BÓVEDA</p>
+            <h3 id="quick-balance-title" class="text-xl sm:text-2xl font-bold tracking-tight text-apple-gray-900 dark:text-white truncate">
+              Actualizar Saldos en Bancos
+            </h3>
+            <p id="quick-balance-subtitle" class="text-xs sm:text-sm text-apple-gray-400 mt-0.5 truncate">
+              Actualiza tus cuentas desde un solo lugar
+            </p>
+          </div>
+          <button type="button" onclick="closeModal('modal-quick-balance')" aria-label="Cerrar"
+                  class="bank-editor-close ios-tap shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-apple-gray-500 bg-apple-gray-100/80 dark:bg-apple-gray-800/80">
+            <i data-lucide="x" class="w-4.5 h-4.5"></i>
+          </button>
         </div>
-        <button onclick="closeModal('modal-quick-balance')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-700">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+
+        <div id="bank-editor-hero" class="bank-editor-hero mt-4">
+          <div id="bank-editor-identity" class="flex items-center gap-3 min-w-0">
+            <div id="bank-editor-logo" class="bank-editor-logo-shell"></div>
+            <div class="min-w-0">
+              <div id="bank-editor-name" class="text-sm font-bold text-apple-gray-900 dark:text-white truncate">Cuenta</div>
+              <div id="bank-editor-currency" class="text-[10px] uppercase tracking-[.12em] font-semibold text-apple-gray-400 mt-0.5">EUR · Euros</div>
+            </div>
+          </div>
+
+          <div id="bank-editor-balance-wrap" class="mt-4">
+            <div id="bank-editor-balance" class="bank-editor-balance">€0,00</div>
+            <div id="bank-editor-balance-label" class="text-[10px] uppercase tracking-[.12em] text-apple-gray-400 mt-1">Saldo actual</div>
+          </div>
+
+          <div id="bank-editor-delta-pill" class="bank-editor-delta neutral mt-3">
+            <span id="bank-editor-delta-icon"><i data-lucide="minus" class="w-3.5 h-3.5"></i></span>
+            <span id="bank-editor-delta-text">Sin cambio</span>
+            <span class="opacity-55">vs. último snapshot</span>
+          </div>
+        </div>
       </div>
 
-      <form id="form-banks" onsubmit="handleSaveBanks(event)" class="space-y-4">
-        <div id="bank-inputs-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
-          <!-- Dynamically populated inputs -->
+      <form id="form-banks" onsubmit="handleSaveBanks(event)" class="bank-editor-form px-5 pb-5 sm:px-6 sm:pb-6">
+        <div id="bank-editor-summary" class="bank-editor-summary">
+          <div class="bank-editor-summary-head">
+            <div>
+              <span class="bank-editor-section-label">RESUMEN</span>
+              <p class="text-[11px] text-apple-gray-400 mt-0.5">Referencia del último arqueo guardado</p>
+            </div>
+          </div>
+          <div class="bank-editor-summary-grid">
+            <div>
+              <span>Saldo actual</span>
+              <strong id="quick-balance-current">—</strong>
+            </div>
+            <div>
+              <span>Último snapshot</span>
+              <strong id="quick-balance-previous">—</strong>
+            </div>
+            <div>
+              <span>Variación</span>
+              <strong id="quick-balance-delta">Sin cambio</strong>
+            </div>
+            <div>
+              <span>Referencia</span>
+              <strong id="quick-balance-snapshot-date">—</strong>
+            </div>
+          </div>
         </div>
 
-        <div class="pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5">
-          <button type="button" onclick="closeModal('modal-quick-balance')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+        <div class="bank-editor-edit-block">
+          <div class="flex items-end justify-between gap-3 mb-2.5">
+            <div>
+              <span class="bank-editor-section-label">EDITAR SALDO</span>
+              <p id="bank-editor-edit-hint" class="text-[11px] text-apple-gray-400 mt-0.5">El cambio se refleja en tiempo real.</p>
+            </div>
+            <span id="bank-editor-currency-chip" class="bank-editor-currency-chip">EUR</span>
+          </div>
+
+          <div id="bank-inputs-container" class="bank-editor-inputs-grid">
+            <!-- Dynamically populated inputs -->
+          </div>
+        </div>
+
+        <div class="bank-editor-actions">
+          <button type="button" onclick="closeModal('modal-quick-balance')" class="bank-editor-cancel ios-tap">
             Cancelar
           </button>
-          <button type="submit" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
-            Guardar en la Nube
+          <button id="bank-editor-save-button" type="submit" class="bank-editor-save ios-tap">
+            <span id="bank-editor-save-icon"><i data-lucide="check" class="w-4 h-4"></i></span>
+            <span id="bank-editor-save-label">Guardar cambios</span>
           </button>
         </div>
       </form>
@@ -4165,13 +4553,28 @@
     }
 
     function getBankMiniLogo(name, grad = 'from-gray-500 to-gray-700') {
-      const marks = {
-        Airtm: 'A', N26: 'N26', BBVA: 'BB', Imagin: 'i', Santander: 'S',
-        Bunq: 'b', Trade: '↗', Wise: 'W', ING: 'ING', Vivid: 'V',
-        Sabadell: 'S', BCP: 'BCP', Interbank: 'IB'
+      /* Logos por dominio oficial mediante Brandfetch CDN. */
+      const domains = {
+        Airtm: 'airtm.com',
+        N26: 'n26.com',
+        BBVA: 'bbva.com',
+        Imagin: 'imagin.com',
+        Santander: 'santander.com',
+        Bunq: 'bunq.com',
+        Trade: 'traderepublic.com',
+        Wise: 'wise.com',
+        ING: 'ing.es',
+        Vivid: 'vivid.money',
+        Sabadell: 'bancsabadell.com',
+        BCP: 'viabcp.com',
+        Interbank: 'interbank.pe'
       };
-      const mark = marks[name] || String(name || '?').slice(0, 2).toUpperCase();
-      return `<span class="bank-mini-logo w-8 h-8 shrink-0 rounded-[10px] bg-gradient-to-br ${grad} text-white flex items-center justify-center shadow-sm ring-1 ring-white/15"><span class="text-[9px] font-black tracking-tight leading-none">${mark}</span></span>`;
+      const fallback = String(name || '?').slice(0, 2).toUpperCase();
+      const domain = domains[name];
+      const src = domain ? `https://cdn.brandfetch.io/${domain}/w/128/h/128` : '';
+      return `<span class="bank-mini-logo bank-mini-logo-real w-8 h-8 shrink-0 rounded-[10px] bg-white dark:bg-white flex items-center justify-center shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden" title="${name || ''}">` +
+        (src ? `<img src="${src}" alt="${name || ''}" class="bank-mini-logo-img" loading="eager" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">` : '') +
+        `<span class="bank-mini-logo-fallback" style="${src ? 'display:none;' : ''}">${fallback}</span></span>`;
     }
 
     function openAllBankEditor() {
@@ -4199,34 +4602,168 @@
         const grid = document.getElementById('bank-inputs-container');
         const title = document.getElementById('quick-balance-title');
         const subtitle = document.getElementById('quick-balance-subtitle');
+        const kicker = document.getElementById('quick-balance-kicker');
+        const hero = document.getElementById('bank-editor-hero');
+        const logoWrap = document.getElementById('bank-editor-logo');
+        const bankName = document.getElementById('bank-editor-name');
+        const currencyLabel = document.getElementById('bank-editor-currency');
+        const balanceEl = document.getElementById('bank-editor-balance');
+        const deltaPill = document.getElementById('bank-editor-delta-pill');
+        const deltaIcon = document.getElementById('bank-editor-delta-icon');
+        const deltaText = document.getElementById('bank-editor-delta-text');
         const current = document.getElementById('quick-balance-current');
+        const previousEl = document.getElementById('quick-balance-previous');
         const delta = document.getElementById('quick-balance-delta');
+        const snapshotDate = document.getElementById('quick-balance-snapshot-date');
+        const currencyChip = document.getElementById('bank-editor-currency-chip');
+        const hint = document.getElementById('bank-editor-edit-hint');
+        const saveLabel = document.getElementById('bank-editor-save-label');
+        const saveButton = document.getElementById('bank-editor-save-button');
+
         const selected = state.quickBalanceBank || null;
-        if (title) title.innerText = selected ? `Actualizar ${selected}` : 'Actualizar Saldos en Bancos';
-        if (subtitle) subtitle.innerText = selected ? 'Edita únicamente esta cuenta · se guarda en Supabase Cloud' : 'Actualiza todas tus cuentas desde un solo lugar';
-        if (grid && state.bancos) {
-          grid.innerHTML = '';
-          const names = selected ? [selected] : getOrderedBankNames(state.bancos);
-          for (const name of names) {
-            const val = Number(state.bancos[name] || 0);
-            const isSoles = (name === 'BCP' || name === 'Interbank');
-            const latest = [...(state.arqueoHistory || [])].sort((a,b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))[0];
-            const previous = latest?.bancos?.[name] === undefined ? null : Number(latest.bancos[name] || 0);
-            const d = previous === null ? null : Number((val - previous).toFixed(2));
-            const gradMap = { Airtm:'from-blue-600 to-sky-400', N26:'from-teal-600 to-emerald-700', BBVA:'from-blue-700 to-indigo-900', Imagin:'from-sky-500 to-cyan-700', Santander:'from-red-600 to-rose-800', Bunq:'from-pink-500 to-purple-600', Trade:'from-zinc-700 to-black', Wise:'from-lime-500 to-emerald-600', ING:'from-orange-500 to-amber-600', Vivid:'from-violet-600 to-purple-800', Sabadell:'from-sky-700 to-blue-900', BCP:'from-blue-800 to-sky-900', Interbank:'from-emerald-600 to-teal-800' };
-            const div = document.createElement('div');
-            div.className = selected ? 'sm:col-span-1' : '';
-            div.innerHTML = `
-              <div class="flex items-center gap-2 mb-2">${getBankMiniLogo(name, gradMap[name] || 'from-gray-500 to-gray-700')}<div><div class="text-xs font-bold text-apple-gray-800 dark:text-white">${name}</div><div class="text-[9px] text-apple-gray-400">${isSoles ? 'PEN · Soles' : 'EUR · Euros'}</div></div></div>
-              <label class="block text-[10px] font-semibold text-apple-gray-500 mb-1">Nuevo saldo</label>
-              <input id="quick-balance-input" type="number" step="0.01" name="b_${name}" value="${val}" inputmode="decimal" class="w-full px-3 py-2.5 text-sm font-mono font-bold rounded-2xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue" oninput="updateQuickBalanceDelta('${name}', ${val}, ${isSoles})">
-              <div class="mt-2 flex items-center justify-between text-[10px]"><span class="text-apple-gray-400">Actual: ${isSoles ? formatPEN(val) : formatEUR(val)}</span><span id="quick-balance-delta" class="font-bold text-apple-gray-400">${d === null ? 'Sin snapshot' : d > 0 ? '+' + (isSoles ? formatPEN(d) : formatEUR(d)) : d < 0 ? (isSoles ? formatPEN(d) : formatEUR(d)) : 'Sin cambio'}</span></div>
-            `;
-            grid.appendChild(div);
+        const latest = [...(state.arqueoHistory || [])]
+          .sort((a,b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))[0] || null;
+
+        const gradMap = {
+          Airtm:'from-blue-600 to-sky-400', N26:'from-teal-600 to-emerald-700',
+          BBVA:'from-blue-700 to-indigo-900', Imagin:'from-sky-500 to-cyan-700',
+          Santander:'from-red-600 to-rose-800', Bunq:'from-pink-500 to-purple-600',
+          Trade:'from-zinc-700 to-black', Wise:'from-lime-500 to-emerald-600',
+          ING:'from-orange-500 to-amber-600', Vivid:'from-violet-600 to-purple-800',
+          Sabadell:'from-sky-700 to-blue-900', BCP:'from-blue-800 to-sky-900',
+          Interbank:'from-emerald-600 to-teal-800'
+        };
+
+        const formatSnapshotDate = (value) => {
+          if (!value) return '—';
+          const raw = String(value).replace('T',' ');
+          return raw.length >= 16 ? raw.slice(0,16) : raw;
+        };
+
+        if (selected) {
+          const val = Number(state.bancos[selected] || 0);
+          const isSoles = selected === 'BCP' || selected === 'Interbank';
+          const previous = latest?.bancos?.[selected] === undefined ? null : Number(latest.bancos[selected] || 0);
+          const d = previous === null ? null : Number((val - previous).toFixed(2));
+          const formatted = isSoles ? formatPEN(val) : formatEUR(val);
+          const previousFormatted = previous === null ? 'Sin snapshot' : (isSoles ? formatPEN(previous) : formatEUR(previous));
+          const deltaFormatted = d === null ? 'Sin snapshot' : d > 0 ? `+${isSoles ? formatPEN(d) : formatEUR(d)}` : d < 0 ? `${isSoles ? formatPEN(d) : formatEUR(d)}` : 'Sin cambio';
+
+          if (title) title.innerText = selected;
+          if (subtitle) subtitle.innerText = 'Edita esta cuenta y revisa el cambio antes de guardar.';
+          if (kicker) kicker.innerText = 'BÓVEDA · EDITAR';
+          if (hero) hero.classList.remove('hidden');
+          if (logoWrap) logoWrap.innerHTML = getBankMiniLogo(selected, gradMap[selected] || 'from-gray-500 to-gray-700');
+          if (bankName) bankName.innerText = selected;
+          if (currencyLabel) currencyLabel.innerText = isSoles ? 'PEN · Soles' : 'EUR · Euros';
+          if (currencyChip) currencyChip.innerText = isSoles ? 'PEN' : 'EUR';
+          if (balanceEl) balanceEl.innerText = formatted;
+          if (current) current.innerText = formatted;
+          if (previousEl) previousEl.innerText = previousFormatted;
+          if (delta) delta.innerText = deltaFormatted;
+          if (snapshotDate) snapshotDate.innerText = formatSnapshotDate(latest?.timestamp);
+          if (hint) hint.innerText = 'El indicador se actualiza mientras escribes.';
+          if (saveLabel) saveLabel.innerText = 'Guardar cambios';
+
+          if (deltaPill) {
+            deltaPill.className = `bank-editor-delta mt-3 ${d > 0 ? 'positive' : d < 0 ? 'negative' : 'neutral'}`;
           }
+          if (deltaIcon) {
+            deltaIcon.innerHTML = d > 0
+              ? '<i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>'
+              : d < 0
+                ? '<i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>'
+                : '<i data-lucide="minus" class="w-3.5 h-3.5"></i>';
+          }
+          if (deltaText) deltaText.innerText = deltaFormatted;
+
+          if (grid) {
+            grid.className = 'bank-editor-inputs-grid';
+            grid.innerHTML = `
+              <div class="bank-editor-input-card">
+                <div class="flex items-center justify-between gap-3 mb-2.5">
+                  <div>
+                    <div class="text-[10px] font-semibold text-apple-gray-400 uppercase tracking-wide">Saldo actual</div>
+                    <div class="text-[9px] text-apple-gray-400 mt-0.5">${isSoles ? 'Importe expresado en soles' : 'Importe expresado en euros'}</div>
+                  </div>
+                  <span class="text-[10px] font-bold text-apple-gray-400">${isSoles ? 'S/' : '€'}</span>
+                </div>
+                <input id="quick-balance-input-${selected}" type="number" step="0.01"
+                       name="b_${selected}" value="${val}" inputmode="decimal"
+                       class="bank-editor-field" autocomplete="off"
+                       oninput="updateQuickBalanceDelta('${selected}', ${val}, ${isSoles})">
+                <div class="flex items-center justify-between gap-3 mt-2.5">
+                  <span class="text-[9px] text-apple-gray-400">Snapshot: ${previousFormatted}</span>
+                  <span id="quick-balance-delta-${selected}" class="text-[10px] font-bold ${d > 0 ? 'text-apple-green' : d < 0 ? 'text-apple-red' : 'text-apple-gray-400'}">${deltaFormatted}</span>
+                </div>
+              </div>
+            `;
+          }
+        } else {
+          // Modo "Actualizar todos": conserva la función existente, pero con el nuevo lenguaje visual.
+          if (title) title.innerText = 'Actualizar saldos';
+          if (subtitle) subtitle.innerText = 'Revisa tus cuentas y guarda los cambios juntos.';
+          if (kicker) kicker.innerText = 'BÓVEDAS · TODAS';
+          if (hero) hero.classList.add('hidden');
+          if (hint) hint.innerText = 'Puedes actualizar varias cuentas antes de guardar.';
+          if (saveLabel) saveLabel.innerText = 'Guardar cambios';
+          if (grid) {
+            grid.className = 'bank-editor-inputs-grid bank-editor-multi';
+            grid.innerHTML = '';
+            const names = getOrderedBankNames(state.bancos);
+            names.forEach((name, index) => {
+              const val = Number(state.bancos[name] || 0);
+              const isSoles = name === 'BCP' || name === 'Interbank';
+              const previous = latest?.bancos?.[name] === undefined ? null : Number(latest.bancos[name] || 0);
+              const d = previous === null ? null : Number((val - previous).toFixed(2));
+              const previousFormatted = previous === null ? 'Sin snapshot' : (isSoles ? formatPEN(previous) : formatEUR(previous));
+              const deltaFormatted = d === null ? 'Sin snapshot' : d > 0 ? `+${isSoles ? formatPEN(d) : formatEUR(d)}` : d < 0 ? `${isSoles ? formatPEN(d) : formatEUR(d)}` : 'Sin cambio';
+              const div = document.createElement('div');
+              div.className = 'bank-editor-input-card';
+              div.style.animationDelay = `${Math.min(index, 7) * 30}ms`;
+              div.innerHTML = `
+                <div class="flex items-center gap-2.5 mb-2.5">
+                  ${getBankMiniLogo(name, gradMap[name] || 'from-gray-500 to-gray-700')}
+                  <div class="min-w-0">
+                    <div class="text-xs font-bold text-apple-gray-900 dark:text-white truncate">${name}</div>
+                    <div class="text-[9px] text-apple-gray-400">${isSoles ? 'PEN · Soles' : 'EUR · Euros'}</div>
+                  </div>
+                </div>
+                <input id="quick-balance-input-${name}" type="number" step="0.01"
+                       name="b_${name}" value="${val}" inputmode="decimal"
+                       class="bank-editor-field"
+                       oninput="updateQuickBalanceDelta('${name}', ${val}, ${isSoles})">
+                <div class="flex items-center justify-between gap-2 mt-2">
+                  <span class="text-[9px] text-apple-gray-400 truncate">Snapshot: ${previousFormatted}</span>
+                  <span id="quick-balance-delta-${name}" class="text-[10px] font-bold ${d > 0 ? 'text-apple-green' : d < 0 ? 'text-apple-red' : 'text-apple-gray-400'} truncate">${deltaFormatted}</span>
+                </div>
+              `;
+              grid.appendChild(div);
+            });
+          }
+          if (current) current.innerText = '';
+          if (previousEl) previousEl.innerText = '—';
+          if (delta) delta.innerText = '—';
+          if (snapshotDate) snapshotDate.innerText = latest?.timestamp ? formatSnapshotDate(latest.timestamp) : '—';
         }
-        if (current) current.innerText = selected && state.bancos[selected] !== undefined ? ((selected === 'BCP' || selected === 'Interbank') ? formatPEN(state.bancos[selected]) : formatEUR(state.bancos[selected])) : '';
-        if (delta) delta.innerText = '';
+
+        if (saveButton) {
+          saveButton.classList.remove('is-saving','is-saved');
+          saveButton.disabled = false;
+        }
+
+        requestAnimationFrame(() => {
+          if (window.lucide) lucide.createIcons();
+          const focusInput = selected
+            ? document.getElementById(`quick-balance-input-${selected}`)
+            : null;
+          if (focusInput) {
+            setTimeout(() => {
+              focusInput.focus({ preventScroll: true });
+              try { focusInput.select(); } catch (_) {}
+            }, 180);
+          }
+        });
       }
 
       if (id === 'modal-edit-budget') {
@@ -4272,36 +4809,145 @@
     function closeModal(id) {
       const m = document.getElementById(id);
       if (m) m.classList.add('hidden');
+      if (id === 'modal-quick-balance') {
+        const form = document.getElementById('form-banks');
+        if (form) form.dataset.saving = '0';
+        const saveButton = document.getElementById('bank-editor-save-button');
+        if (saveButton) {
+          saveButton.classList.remove('is-saving','is-saved');
+          saveButton.disabled = false;
+        }
+        state.quickBalanceBank = null;
+      }
     }
 
     function updateQuickBalanceDelta(name, original, isSoles) {
-      const input = document.getElementById('quick-balance-input');
-      const out = document.getElementById('quick-balance-delta');
-      if (!input || !out) return;
-      const next = parseFloat(input.value) || 0;
-      const d = Number((next - Number(original || 0)).toFixed(2));
-      out.className = `font-bold ${d > 0 ? 'text-apple-green' : d < 0 ? 'text-apple-red' : 'text-apple-gray-400'}`;
-      out.innerText = d > 0 ? `+${isSoles ? formatPEN(d) : formatEUR(d)}` : d < 0 ? `${isSoles ? formatPEN(d) : formatEUR(d)}` : 'Sin cambio';
+      const input = document.getElementById(`quick-balance-input-${name}`);
+      const out = document.getElementById(`quick-balance-delta-${name}`);
+      if (!input) return;
+
+      const next = Number.parseFloat(input.value);
+      const safeNext = Number.isFinite(next) ? next : 0;
+      const d = Number((safeNext - Number(original || 0)).toFixed(2));
+      const formatted = d > 0
+        ? `+${isSoles ? formatPEN(d) : formatEUR(d)}`
+        : d < 0
+          ? `${isSoles ? formatPEN(d) : formatEUR(d)}`
+          : 'Sin cambio';
+
+      if (out) {
+        out.className = `text-[10px] font-bold ${d > 0 ? 'text-apple-green' : d < 0 ? 'text-apple-red' : 'text-apple-gray-400'} truncate`;
+        out.innerText = formatted;
+      }
+
+      const selected = state.quickBalanceBank || null;
+      if (selected === name) {
+        const balanceEl = document.getElementById('bank-editor-balance');
+        const current = document.getElementById('quick-balance-current');
+        const delta = document.getElementById('quick-balance-delta');
+        const deltaText = document.getElementById('bank-editor-delta-text');
+        const deltaIcon = document.getElementById('bank-editor-delta-icon');
+        const deltaPill = document.getElementById('bank-editor-delta-pill');
+
+        const nextFormatted = isSoles ? formatPEN(safeNext) : formatEUR(safeNext);
+        if (balanceEl) balanceEl.innerText = nextFormatted;
+        if (current) current.innerText = nextFormatted;
+        if (delta) delta.innerText = formatted;
+        if (deltaText) deltaText.innerText = formatted;
+
+        if (deltaPill) {
+          deltaPill.className = `bank-editor-delta mt-3 ${d > 0 ? 'positive' : d < 0 ? 'negative' : 'neutral'} pulse`;
+          setTimeout(() => deltaPill.classList.remove('pulse'), 300);
+        }
+        if (deltaIcon) {
+          deltaIcon.innerHTML = d > 0
+            ? '<i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>'
+            : d < 0
+              ? '<i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>'
+              : '<i data-lucide="minus" class="w-3.5 h-3.5"></i>';
+          if (window.lucide) lucide.createIcons();
+        }
+      }
     }
 
     async function handleSaveBanks(e) {
       e.preventDefault();
-      const form = new FormData(e.target);
+
+      const form = e.target;
       const selected = state.quickBalanceBank || null;
-      if (selected) {
-        const val = form.get(`b_${selected}`);
-        if (val !== null) state.bancos[selected] = parseFloat(val) || 0;
-      } else {
-        for (const name of getOrderedBankNames(state.bancos)) {
-          const val = form.get(`b_${name}`);
-          if (val !== null) state.bancos[name] = parseFloat(val) || 0;
-        }
+      const saveButton = document.getElementById('bank-editor-save-button');
+      const saveLabel = document.getElementById('bank-editor-save-label');
+      const saveIcon = document.getElementById('bank-editor-save-icon');
+
+      if (form.dataset.saving === '1') return;
+      form.dataset.saving = '1';
+
+      if (saveButton) {
+        saveButton.classList.add('is-saving');
+        saveButton.disabled = true;
       }
-      await saveGlobalConfigToCloud();
-      renderAirtmModule();
-      closeModal('modal-quick-balance');
-      showToast(selected ? `${selected} actualizado` : 'Saldos Guardados', 'Actualizado en Supabase Cloud.', true);
-      state.quickBalanceBank = null;
+      if (saveLabel) saveLabel.innerText = 'Guardando…';
+      if (saveIcon) {
+        saveIcon.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>';
+        if (window.lucide) lucide.createIcons();
+      }
+
+      try {
+        const formData = new FormData(form);
+
+        if (selected) {
+          const val = formData.get(`b_${selected}`);
+          if (val !== null) state.bancos[selected] = Number.parseFloat(val) || 0;
+        } else {
+          for (const name of getOrderedBankNames(state.bancos)) {
+            const val = formData.get(`b_${name}`);
+            if (val !== null) state.bancos[name] = Number.parseFloat(val) || 0;
+          }
+        }
+
+        await saveGlobalConfigToCloud();
+        renderAirtmModule();
+
+        if (saveButton) {
+          saveButton.classList.remove('is-saving');
+          saveButton.classList.add('is-saved');
+        }
+        if (saveLabel) saveLabel.innerText = 'Guardado';
+        if (saveIcon) {
+          saveIcon.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+          if (window.lucide) lucide.createIcons();
+        }
+
+        showToast(
+          selected ? `${selected} actualizado` : 'Saldos guardados',
+          selected ? 'El cambio se sincronizó con Supabase Cloud.' : 'Todos los saldos se sincronizaron con Supabase Cloud.',
+          true
+        );
+
+        setTimeout(() => {
+          closeModal('modal-quick-balance');
+          state.quickBalanceBank = null;
+          form.dataset.saving = '0';
+          if (saveButton) {
+            saveButton.classList.remove('is-saving','is-saved');
+            saveButton.disabled = false;
+          }
+        }, 420);
+
+      } catch (error) {
+        console.error('Error guardando saldos:', error);
+        form.dataset.saving = '0';
+        if (saveButton) {
+          saveButton.classList.remove('is-saving','is-saved');
+          saveButton.disabled = false;
+        }
+        if (saveLabel) saveLabel.innerText = 'Guardar cambios';
+        if (saveIcon) {
+          saveIcon.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+          if (window.lucide) lucide.createIcons();
+        }
+        showToast('No se guardaron los saldos', error?.message || 'Supabase rechazó la operación.', false);
+      }
     }
 
     async function refreshProfitAfterExpenseChange() {
