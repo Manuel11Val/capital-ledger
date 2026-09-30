@@ -878,7 +878,7 @@
                 <i data-lucide="camera" class="w-4 h-4"></i>
                 <span id="snapshot-btn-label">Registrar Snapshot</span>
               </button>
-              <button onclick="openModal('modal-quick-balance')" class="ios-tap flex-1 xs:flex-none justify-center px-3.5 sm:px-4 py-2.5 sm:py-3 bg-apple-gray-200/80 hover:bg-apple-gray-300 dark:bg-apple-gray-800 dark:hover:bg-apple-gray-700 text-apple-gray-800 dark:text-white rounded-2xl text-xs font-semibold transition flex items-center gap-1.5">
+              <button onclick="openAllBankEditor()" class="ios-tap flex-1 xs:flex-none justify-center px-3.5 sm:px-4 py-2.5 sm:py-3 bg-apple-gray-200/80 hover:bg-apple-gray-300 dark:bg-apple-gray-800 dark:hover:bg-apple-gray-700 text-apple-gray-800 dark:text-white rounded-2xl text-xs font-semibold transition flex items-center gap-1.5">
                 <i data-lucide="sliders" class="w-4 h-4"></i>
                 <span>Editar Bancos</span>
               </button>
@@ -939,7 +939,7 @@
               <i data-lucide="layers" class="w-3.5 h-3.5 text-apple-blue"></i>
               Bóvedas &amp; Cuentas de Operación
             </h2>
-            <button onclick="openModal('modal-quick-balance')" class="text-xs text-apple-blue font-semibold hover:underline">
+            <button onclick="openAllBankEditor()" class="text-xs text-apple-blue font-semibold hover:underline">
               Actualizar saldos
             </button>
           </div>
@@ -1540,9 +1540,9 @@
   <div id="modal-quick-balance" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
     <div class="apple-card rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-ios-sheet max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
-        <div>
-          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Actualizar Saldos en Bancos</h3>
-          <p class="text-xs text-apple-gray-400">Guarda en Supabase Cloud al instante</p>
+        <div class="min-w-0">
+          <h3 id="quick-balance-title" class="text-base font-bold text-apple-gray-900 dark:text-white truncate">Actualizar Saldos en Bancos</h3>
+          <p id="quick-balance-subtitle" class="text-xs text-apple-gray-400">Actualiza todas tus cuentas desde un solo lugar</p>
         </div>
         <button onclick="closeModal('modal-quick-balance')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-700">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -2775,17 +2775,26 @@
             : vaultDelta < 0
               ? '<i data-lucide="arrow-down" class="w-3.5 h-3.5 text-apple-red"></i>'
               : '';
+          const logo = getBankMiniLogo(name, grad);
+          const deltaText = vaultDelta === null ? '' : vaultDelta > 0 ? `+${isSoles ? formatPEN(vaultDelta) : formatEUR(vaultDelta)}` : vaultDelta < 0 ? `${isSoles ? formatPEN(vaultDelta) : formatEUR(vaultDelta)}` : 'Sin cambio';
+          const deltaClass = vaultDelta > 0 ? 'text-apple-green' : vaultDelta < 0 ? 'text-apple-red' : 'text-apple-gray-400';
           const card = document.createElement('div');
           card.className = 'ios-tap p-3 rounded-2xl apple-card shadow-ios-sm flex flex-col justify-between cursor-pointer hover:border-apple-blue/50 transition';
-          card.onclick = () => openModal('modal-quick-balance');
+          card.onclick = () => openBankQuickEditor(name);
           card.innerHTML = `
             <div class="flex items-center justify-between gap-2">
-              <span class="text-sm sm:text-base font-bold text-apple-gray-800 dark:text-gray-200 truncate">${name}</span>
-              <div class="w-2.5 h-2.5 rounded-full bg-gradient-to-tr ${grad} shrink-0"></div>
-            </div>
-            <div class="mt-2.5 flex items-center justify-between gap-2">
-              <p class="text-base sm:text-lg font-mono font-bold tracking-tight text-apple-gray-900 dark:text-white">${isSoles ? formatPEN(balance) : formatEUR(balance)}</p>
+              <div class="flex items-center gap-2 min-w-0">
+                ${logo}
+                <span class="text-sm sm:text-base font-bold text-apple-gray-800 dark:text-gray-200 truncate">${name}</span>
+              </div>
               ${vaultArrow ? `<span class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full bg-apple-gray-100/80 dark:bg-apple-gray-800/70">${vaultArrow}</span>` : ''}
+            </div>
+            <div class="mt-2.5">
+              <p class="text-base sm:text-lg font-mono font-bold tracking-tight text-apple-gray-900 dark:text-white">${isSoles ? formatPEN(balance) : formatEUR(balance)}</p>
+              <div class="mt-1 flex items-center justify-between gap-2">
+                <span class="text-[9px] uppercase tracking-wide text-apple-gray-400">${isSoles ? 'PEN · Soles' : 'EUR · Euros'}</span>
+                ${vaultDelta !== null ? `<span class="text-[9px] font-bold ${deltaClass} truncate">${deltaText}</span>` : ''}
+              </div>
             </div>
           `;
           container.appendChild(card);
@@ -4155,6 +4164,26 @@
       return timePart ? `${d}/${m}/${y} ${timePart}` : `${d}/${m}/${y}`;
     }
 
+    function getBankMiniLogo(name, grad = 'from-gray-500 to-gray-700') {
+      const marks = {
+        Airtm: 'A', N26: 'N26', BBVA: 'BB', Imagin: 'i', Santander: 'S',
+        Bunq: 'b', Trade: '↗', Wise: 'W', ING: 'ING', Vivid: 'V',
+        Sabadell: 'S', BCP: 'BCP', Interbank: 'IB'
+      };
+      const mark = marks[name] || String(name || '?').slice(0, 2).toUpperCase();
+      return `<span class="bank-mini-logo w-8 h-8 shrink-0 rounded-[10px] bg-gradient-to-br ${grad} text-white flex items-center justify-center shadow-sm ring-1 ring-white/15"><span class="text-[9px] font-black tracking-tight leading-none">${mark}</span></span>`;
+    }
+
+    function openAllBankEditor() {
+      state.quickBalanceBank = null;
+      openModal('modal-quick-balance');
+    }
+
+    function openBankQuickEditor(name) {
+      state.quickBalanceBank = name;
+      openModal('modal-quick-balance');
+    }
+
     function openModal(id) {
       const m = document.getElementById(id);
       if (!m) return;
@@ -4168,19 +4197,36 @@
 
       if (id === 'modal-quick-balance') {
         const grid = document.getElementById('bank-inputs-container');
+        const title = document.getElementById('quick-balance-title');
+        const subtitle = document.getElementById('quick-balance-subtitle');
+        const current = document.getElementById('quick-balance-current');
+        const delta = document.getElementById('quick-balance-delta');
+        const selected = state.quickBalanceBank || null;
+        if (title) title.innerText = selected ? `Actualizar ${selected}` : 'Actualizar Saldos en Bancos';
+        if (subtitle) subtitle.innerText = selected ? 'Edita únicamente esta cuenta · se guarda en Supabase Cloud' : 'Actualiza todas tus cuentas desde un solo lugar';
         if (grid && state.bancos) {
           grid.innerHTML = '';
-          for (const name of getOrderedBankNames(state.bancos)) {
-            const val = state.bancos[name];
+          const names = selected ? [selected] : getOrderedBankNames(state.bancos);
+          for (const name of names) {
+            const val = Number(state.bancos[name] || 0);
             const isSoles = (name === 'BCP' || name === 'Interbank');
+            const latest = [...(state.arqueoHistory || [])].sort((a,b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))[0];
+            const previous = latest?.bancos?.[name] === undefined ? null : Number(latest.bancos[name] || 0);
+            const d = previous === null ? null : Number((val - previous).toFixed(2));
+            const gradMap = { Airtm:'from-blue-600 to-sky-400', N26:'from-teal-600 to-emerald-700', BBVA:'from-blue-700 to-indigo-900', Imagin:'from-sky-500 to-cyan-700', Santander:'from-red-600 to-rose-800', Bunq:'from-pink-500 to-purple-600', Trade:'from-zinc-700 to-black', Wise:'from-lime-500 to-emerald-600', ING:'from-orange-500 to-amber-600', Vivid:'from-violet-600 to-purple-800', Sabadell:'from-sky-700 to-blue-900', BCP:'from-blue-800 to-sky-900', Interbank:'from-emerald-600 to-teal-800' };
             const div = document.createElement('div');
+            div.className = selected ? 'sm:col-span-1' : '';
             div.innerHTML = `
-              <label class="block text-[11px] font-semibold text-apple-gray-500 mb-0.5">${name} (${isSoles ? 'S/.' : '€'})</label>
-              <input type="number" step="0.01" name="b_${name}" value="${val}" inputmode="decimal" class="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+              <div class="flex items-center gap-2 mb-2">${getBankMiniLogo(name, gradMap[name] || 'from-gray-500 to-gray-700')}<div><div class="text-xs font-bold text-apple-gray-800 dark:text-white">${name}</div><div class="text-[9px] text-apple-gray-400">${isSoles ? 'PEN · Soles' : 'EUR · Euros'}</div></div></div>
+              <label class="block text-[10px] font-semibold text-apple-gray-500 mb-1">Nuevo saldo</label>
+              <input id="quick-balance-input" type="number" step="0.01" name="b_${name}" value="${val}" inputmode="decimal" class="w-full px-3 py-2.5 text-sm font-mono font-bold rounded-2xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue" oninput="updateQuickBalanceDelta('${name}', ${val}, ${isSoles})">
+              <div class="mt-2 flex items-center justify-between text-[10px]"><span class="text-apple-gray-400">Actual: ${isSoles ? formatPEN(val) : formatEUR(val)}</span><span id="quick-balance-delta" class="font-bold text-apple-gray-400">${d === null ? 'Sin snapshot' : d > 0 ? '+' + (isSoles ? formatPEN(d) : formatEUR(d)) : d < 0 ? (isSoles ? formatPEN(d) : formatEUR(d)) : 'Sin cambio'}</span></div>
             `;
             grid.appendChild(div);
           }
         }
+        if (current) current.innerText = selected && state.bancos[selected] !== undefined ? ((selected === 'BCP' || selected === 'Interbank') ? formatPEN(state.bancos[selected]) : formatEUR(state.bancos[selected])) : '';
+        if (delta) delta.innerText = '';
       }
 
       if (id === 'modal-edit-budget') {
@@ -4228,17 +4274,34 @@
       if (m) m.classList.add('hidden');
     }
 
+    function updateQuickBalanceDelta(name, original, isSoles) {
+      const input = document.getElementById('quick-balance-input');
+      const out = document.getElementById('quick-balance-delta');
+      if (!input || !out) return;
+      const next = parseFloat(input.value) || 0;
+      const d = Number((next - Number(original || 0)).toFixed(2));
+      out.className = `font-bold ${d > 0 ? 'text-apple-green' : d < 0 ? 'text-apple-red' : 'text-apple-gray-400'}`;
+      out.innerText = d > 0 ? `+${isSoles ? formatPEN(d) : formatEUR(d)}` : d < 0 ? `${isSoles ? formatPEN(d) : formatEUR(d)}` : 'Sin cambio';
+    }
+
     async function handleSaveBanks(e) {
       e.preventDefault();
       const form = new FormData(e.target);
-      for (const name of getOrderedBankNames(state.bancos)) {
-        const val = form.get(`b_${name}`);
-        if (val !== null) state.bancos[name] = parseFloat(val) || 0;
+      const selected = state.quickBalanceBank || null;
+      if (selected) {
+        const val = form.get(`b_${selected}`);
+        if (val !== null) state.bancos[selected] = parseFloat(val) || 0;
+      } else {
+        for (const name of getOrderedBankNames(state.bancos)) {
+          const val = form.get(`b_${name}`);
+          if (val !== null) state.bancos[name] = parseFloat(val) || 0;
+        }
       }
       await saveGlobalConfigToCloud();
       renderAirtmModule();
       closeModal('modal-quick-balance');
-      showToast('Saldos Guardados', 'Actualizados en Supabase Cloud.', true);
+      showToast(selected ? `${selected} actualizado` : 'Saldos Guardados', 'Actualizado en Supabase Cloud.', true);
+      state.quickBalanceBank = null;
     }
 
     async function refreshProfitAfterExpenseChange() {
