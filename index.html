@@ -891,13 +891,21 @@
       }
 
       .bank-editor-input-card {
-        padding: 10px !important;
+        padding: 12px !important;
+        border-radius: 18px !important;
       }
 
       .bank-editor-input-card .bank-editor-field {
-        font-size: 19px !important;
-        padding: 10px 12px !important;
-        min-height: 43px !important;
+        font-size: 20px !important;
+        line-height: 1.15 !important;
+        padding: 13px 14px !important;
+        min-height: 52px !important;
+        height: 52px !important;
+      }
+
+      .bank-editor-input-card:focus-within {
+        border-color: rgba(0,122,255,.24) !important;
+        box-shadow: 0 6px 20px rgba(0,122,255,.07) !important;
       }
 
       /*
@@ -908,8 +916,8 @@
         position: sticky !important;
         bottom: 0 !important;
         z-index: 12 !important;
-        margin: 10px -16px 0 !important;
-        padding: 10px 16px max(10px, env(safe-area-inset-bottom, 0px)) !important;
+        margin: 12px -16px 0 !important;
+        padding: 11px 16px max(11px, env(safe-area-inset-bottom, 0px)) !important;
         border-top: 1px solid rgba(60,60,67,.08);
         background: rgba(245,245,247,.94);
         -webkit-backdrop-filter: blur(22px) saturate(160%);
@@ -923,7 +931,14 @@
 
       .bank-editor-cancel,
       .bank-editor-save {
-        min-height: 48px !important;
+        min-height: 50px !important;
+      }
+
+      /* Espacio extra al final: permite que el campo activo se coloque
+         cómodamente por encima de la barra de acciones cuando aparece el teclado. */
+      .bank-editor-form {
+        scroll-padding-top: 18px !important;
+        scroll-padding-bottom: 112px !important;
       }
 
       /*
@@ -5085,37 +5100,33 @@
 
       const vv = window.visualViewport;
       const height = vv && Number.isFinite(vv.height) ? vv.height : window.innerHeight;
-      const safeTop = 8;
       const visualHeight = Math.max(320, Math.round(height));
+      const keyboardOpen = vv ? (window.innerHeight - vv.height > 120) : false;
 
-      modal.style.setProperty(
-        '--bank-editor-visual-height',
-        `${visualHeight}px`
-      );
+      modal.style.setProperty('--bank-editor-visual-height', `${visualHeight}px`);
+      modal.dataset.keyboardOpen = keyboardOpen ? '1' : '0';
 
-      // En iOS el teclado cambia el visual viewport. Dejamos que la hoja
-      // ocupe exactamente ese espacio y desplazamos solo el formulario.
       requestAnimationFrame(() => {
         const active = document.activeElement;
-        const sheet = modal.querySelector('.bank-editor-sheet');
         const form = modal.querySelector('.bank-editor-form');
-        if (!sheet) return;
+        if (!form || !active || !form.contains(active)) return;
+        if (!active.matches('input, textarea, select')) return;
 
-        if (form && active && form.contains(active) &&
-            active.matches('input, textarea, select, button')) {
-          const fieldRect = active.getBoundingClientRect();
-          const formRect = form.getBoundingClientRect();
+        const fieldRect = active.getBoundingClientRect();
+        const formRect = form.getBoundingClientRect();
+        // Reservamos espacio real para la barra sticky + respiración visual.
+        const topMargin = 24;
+        const bottomMargin = keyboardOpen ? 118 : 92;
+        let delta = 0;
 
-          // El botón sticky ocupa ~70-90px. Dejamos margen suficiente para
-          // que el teclado nunca tape el campo activo.
-          const topMargin = 18;
-          const bottomMargin = 92;
+        if (fieldRect.bottom > formRect.bottom - bottomMargin) {
+          delta = fieldRect.bottom - (formRect.bottom - bottomMargin);
+        } else if (fieldRect.top < formRect.top + topMargin) {
+          delta = fieldRect.top - (formRect.top + topMargin);
+        }
 
-          if (fieldRect.bottom > formRect.bottom - bottomMargin) {
-            form.scrollTop += fieldRect.bottom - (formRect.bottom - bottomMargin);
-          } else if (fieldRect.top < formRect.top + topMargin) {
-            form.scrollTop -= (formRect.top + topMargin) - fieldRect.top;
-          }
+        if (Math.abs(delta) > 1) {
+          form.scrollTop += delta;
         }
       });
     }
@@ -5130,9 +5141,25 @@
         window.visualViewport.addEventListener('scroll', sync, { passive: true });
       }
 
+      // iOS puede animar el teclado durante varios frames. Recalculamos
+      // mientras termina la transición para evitar saltos intermitentes.
+      let viewportRaf = 0;
+      const stableSync = () => {
+        cancelAnimationFrame(viewportRaf);
+        viewportRaf = requestAnimationFrame(() => {
+          syncBankEditorVisualViewport();
+          setTimeout(syncBankEditorVisualViewport, 120);
+        });
+      };
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', stableSync, { passive: true });
+      }
+
       document.addEventListener('focusin', (event) => {
         if (!event.target || !event.target.closest('#modal-quick-balance')) return;
-        setTimeout(syncBankEditorVisualViewport, 60);
+        requestAnimationFrame(syncBankEditorVisualViewport);
+        setTimeout(syncBankEditorVisualViewport, 90);
+        setTimeout(syncBankEditorVisualViewport, 220);
       });
     }
 
