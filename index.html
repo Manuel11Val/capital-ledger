@@ -815,16 +815,48 @@
     }
 
     @media (max-width: 639px) {
-      .bank-editor-sheet {
-        max-height: calc(100dvh - env(safe-area-inset-top));
-        padding-bottom: env(safe-area-inset-bottom);
+      .bank-editor-modal {
+        height: var(--bank-editor-visual-height, 100dvh) !important;
+        max-height: none !important;
+        overflow: hidden !important;
+        align-items: flex-end !important;
       }
+
+      .bank-editor-sheet {
+        width: 100%;
+        max-height: calc(
+          var(--bank-editor-visual-height, 100dvh)
+          - max(10px, env(safe-area-inset-top, 0px))
+        ) !important;
+        padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        scrollbar-width: none;
+      }
+
+      .bank-editor-sheet::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* El editor es una capa modal: la navegación inferior no debe tapar Guardar. */
+      html.bank-editor-open .ios-bottom-tabbar {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translate3d(-50%, 120%, 0) !important;
+        -webkit-transform: translate3d(-50%, 120%, 0) !important;
+      }
+
       .bank-editor-summary-grid {
         gap: 7px;
       }
+
       .bank-editor-summary-grid > div {
         padding: 9px;
       }
+
       .bank-editor-balance {
         font-size: clamp(30px, 10vw, 40px);
       }
@@ -4649,22 +4681,23 @@
         Sabadell: 'bancsabadell.com',
         Interbank: 'interbank.pe'
       };
-      const fallback = String(name || '?').slice(0, 2).toUpperCase();
+      const cleanName = String(name || '').trim();
+      const fallback = cleanName.slice(0, 2).toUpperCase();
 
-      if (name === 'BCP') {
+      if (cleanName.toUpperCase() === 'BCP') {
         return `<span class="bank-mini-logo bank-mini-logo-real w-8 h-8 shrink-0 rounded-[10px] bg-[#0057B8] flex items-center justify-center shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden" title="BCP">
-          <svg viewBox="0 0 64 64" width="25" height="25" aria-label="BCP" role="img">
+          <svg viewBox="0 0 64 64" width="25" height="25" aria-label="BCP" role="img" style="display:block">
             <circle cx="32" cy="32" r="29" fill="#0057B8"/>
             <path d="M19 18h13.5c7.5 0 12.5 3.8 12.5 9.5 0 3.3-1.8 6.1-4.8 7.6 3.7 1.3 5.8 4.2 5.8 8.1 0 6.2-5.2 10.8-13.4 10.8H19V18Zm9 7v10h4.2c3.5 0 5.7-1.9 5.7-5s-2.2-5-5.7-5H28Zm0 17v10h4.8c3.8 0 6.2-1.8 6.2-5s-2.4-5-6.2-5H28Z" fill="white"/>
           </svg>
         </span>`;
       }
 
-      const domain = domains[name];
+      const domain = domains[cleanName];
       const src = domain ? `https://cdn.brandfetch.io/${domain}/w/128/h/128` : '';
       const fallbackSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : '';
-      return `<span class="bank-mini-logo bank-mini-logo-real w-8 h-8 shrink-0 rounded-[10px] bg-white dark:bg-white flex items-center justify-center shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden" title="${name || ''}">` +
-        (src ? `<img src="${src}" alt="${name || ''}" class="bank-mini-logo-img" loading="eager" referrerpolicy="no-referrer" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='${fallbackSrc}';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">` : '') +
+      return `<span class="bank-mini-logo bank-mini-logo-real w-8 h-8 shrink-0 rounded-[10px] bg-white dark:bg-white flex items-center justify-center shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden" title="${cleanName || ''}">` +
+        (src ? `<img src="${src}" alt="${cleanName || ''}" class="bank-mini-logo-img" loading="eager" referrerpolicy="no-referrer" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='${fallbackSrc}';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">` : '') +
         `<span class="bank-mini-logo-fallback" style="${src ? 'display:none;' : ''}">${fallback}</span></span>`;
     }
 
@@ -4895,7 +4928,60 @@
       }
 
       m.classList.remove('hidden');
+
+      if (id === 'modal-quick-balance') {
+        document.documentElement.classList.add('bank-editor-open');
+        requestAnimationFrame(syncBankEditorVisualViewport);
+      }
     }
+
+    function syncBankEditorVisualViewport() {
+      const modal = document.getElementById('modal-quick-balance');
+      if (!modal || modal.classList.contains('hidden')) return;
+
+      const vv = window.visualViewport;
+      const height = vv && Number.isFinite(vv.height) ? vv.height : window.innerHeight;
+      modal.style.setProperty(
+        '--bank-editor-visual-height',
+        `${Math.max(320, Math.round(height))}px`
+      );
+
+      // Keep the active input visible when iOS opens/resizes the keyboard.
+      requestAnimationFrame(() => {
+        const active = document.activeElement;
+        const sheet = modal.querySelector('.bank-editor-sheet');
+        if (!active || !sheet || !sheet.contains(active)) return;
+        if (!active.matches('input, textarea, select, button')) return;
+
+        const fieldRect = active.getBoundingClientRect();
+        const sheetRect = sheet.getBoundingClientRect();
+        const margin = 18;
+
+        if (fieldRect.bottom > sheetRect.bottom - margin) {
+          sheet.scrollTop += fieldRect.bottom - (sheetRect.bottom - margin);
+        } else if (fieldRect.top < sheetRect.top + margin) {
+          sheet.scrollTop -= (sheetRect.top + margin) - fieldRect.top;
+        }
+      });
+    }
+
+    function initBankEditorViewportSync() {
+      const sync = () => syncBankEditorVisualViewport();
+
+      window.addEventListener('resize', sync, { passive: true });
+
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', sync, { passive: true });
+        window.visualViewport.addEventListener('scroll', sync, { passive: true });
+      }
+
+      document.addEventListener('focusin', (event) => {
+        if (!event.target || !event.target.closest('#modal-quick-balance')) return;
+        setTimeout(syncBankEditorVisualViewport, 60);
+      });
+    }
+
+    initBankEditorViewportSync();
 
     function closeModal(id) {
       const m = document.getElementById(id);
@@ -4908,6 +4994,8 @@
           saveButton.classList.remove('is-saving','is-saved');
           saveButton.disabled = false;
         }
+        document.documentElement.classList.remove('bank-editor-open');
+        m.style.removeProperty('--bank-editor-visual-height');
         state.quickBalanceBank = null;
       }
     }
@@ -5876,4 +5964,3 @@
         padding-top: 10px !important;
       }
     }
-
