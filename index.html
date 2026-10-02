@@ -1249,6 +1249,24 @@
     margin-top: 10px !important;
     padding-top: 10px !important;
   }
+
+  /* El teclado cambia el visual viewport de iOS; el modal sigue ese origen real. */
+  #modal-quick-balance.bank-editor-modal {
+    inset: auto 0 auto 0 !important;
+    top: var(--bank-editor-visual-top, 0px) !important;
+    height: var(--bank-editor-visual-height, 100dvh) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    align-items: flex-end !important;
+  }
+
+  #modal-quick-balance .bank-editor-sheet {
+    height: min(calc(var(--bank-editor-visual-height, 100dvh) - 8px), 94dvh) !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    flex: 0 1 auto;
+  }
 }
 </style>
 </head>
@@ -5040,7 +5058,13 @@
           const focusInput = selected
             ? document.getElementById(`quick-balance-input-${selected}`)
             : null;
-          if (focusInput) {
+
+          // En iPhone no abrimos el teclado automáticamente al mostrar el editor:
+          // Safari cambia el visual viewport y puede desplazar el modal de forma brusca.
+          // El usuario toca el campo cuando está listo; en pantallas grandes se conserva
+          // el enfoque automático habitual.
+          const isMobileViewport = window.matchMedia('(max-width: 639px)').matches;
+          if (focusInput && !isMobileViewport) {
             setTimeout(() => {
               focusInput.focus({ preventScroll: true });
               try { focusInput.select(); } catch (_) {}
@@ -5100,10 +5124,14 @@
 
       const vv = window.visualViewport;
       const height = vv && Number.isFinite(vv.height) ? vv.height : window.innerHeight;
-      const visualHeight = Math.max(320, Math.round(height));
+      const offsetTop = vv && Number.isFinite(vv.offsetTop) ? vv.offsetTop : 0;
+      // No imponemos un mínimo mayor que el área visible: con el teclado abierto
+      // eso haría que la hoja desbordase y Safari intentara recolocar la página.
+      const visualHeight = Math.max(220, Math.round(height));
       const keyboardOpen = vv ? (window.innerHeight - vv.height > 120) : false;
 
       modal.style.setProperty('--bank-editor-visual-height', `${visualHeight}px`);
+      modal.style.setProperty('--bank-editor-visual-top', `${Math.max(0, Math.round(offsetTop))}px`);
       modal.dataset.keyboardOpen = keyboardOpen ? '1' : '0';
 
       requestAnimationFrame(() => {
@@ -5178,6 +5206,8 @@
         }
         document.documentElement.classList.remove('bank-editor-open');
         m.style.removeProperty('--bank-editor-visual-height');
+        m.style.removeProperty('--bank-editor-visual-top');
+        delete m.dataset.keyboardOpen;
         state.quickBalanceBank = null;
       }
     }
