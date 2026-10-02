@@ -592,6 +592,13 @@
       height: 68%;
       object-fit: contain;
     }
+
+    .bank-mini-logo-img {
+      width: 72%;
+      height: 72%;
+      object-fit: contain;
+      display: block;
+    }
     .bank-real-logo-img {
       display: block;
     }
@@ -1103,7 +1110,7 @@
             </button>
             <button onclick="switchTab('personal')" id="tab-desktop-personal" class="px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 text-apple-gray-500 hover:text-apple-gray-800 dark:text-apple-gray-400 dark:hover:text-white flex items-center gap-1.5">
               <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
-              <span>Personal (15-14)</span>
+              <span>Personal</span>
             </button>
             <button onclick="switchTab('prestamos')" id="tab-desktop-prestamos" class="px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 text-apple-gray-500 hover:text-apple-gray-800 dark:text-apple-gray-400 dark:hover:text-white flex items-center gap-1.5">
               <i data-lucide="users" class="w-3.5 h-3.5"></i>
@@ -1208,45 +1215,41 @@
           <div class="grid grid-cols-2 xs:grid-cols-3 ipad:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3 mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50">
             <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
               <span class="text-[10px] font-medium text-apple-gray-400">Airtm (€)</span>
-              <p id="stat-airtm-balance" class="text-lg sm:text-xl md:text-2xl font-bold text-apple-green mt-0.5 leading-tight">€0.00</p>
+              <p id="stat-airtm-balance" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-green mt-0.5 leading-tight whitespace-nowrap tracking-tight">€0.00</p>
             </div>
             <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
               <span class="text-[10px] font-medium text-apple-gray-400">Bancos EUR</span>
-              <p id="stat-total-bancos" class="text-lg sm:text-xl md:text-2xl font-bold text-apple-gray-900 dark:text-white mt-0.5 leading-tight">€0.00</p>
+              <p id="stat-total-bancos" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-gray-900 dark:text-white mt-0.5 leading-tight whitespace-nowrap tracking-tight">€0.00</p>
             </div>
             <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
               <span class="text-[10px] font-medium text-apple-gray-400">Bancos PEN</span>
-              <p id="stat-total-bancos-soles" class="text-lg sm:text-xl md:text-2xl font-bold text-apple-orange mt-0.5 leading-tight">S/. 0.00</p>
+              <p id="stat-total-bancos-soles" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-orange mt-0.5 leading-tight whitespace-nowrap tracking-tight">S/. 0.00</p>
             </div>
-            <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
-              <span class="text-[10px] font-medium text-apple-gray-400">Acciones (€)</span>
-              <div class="flex items-center justify-between mt-0.5">
-                <p id="stat-acciones" class="text-sm sm:text-base md:text-lg font-bold text-apple-purple">€0.00</p>
-                <button onclick="openModal('modal-edit-acciones')" class="text-apple-blue text-[10px] font-semibold hover:underline flex items-center gap-0.5">
-                  <i data-lucide="plus-circle" class="w-3 h-3"></i> Variación
-                </button>
+            <div onclick="openModal('modal-edit-acciones')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('modal-edit-acciones')}" class="ios-tap p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40 cursor-pointer hover:bg-apple-gray-200/60 dark:hover:bg-apple-gray-700/50 transition group">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[10px] font-medium text-apple-gray-400">Acciones (€)</span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-apple-gray-300 group-hover:text-apple-purple transition"></i>
               </div>
+              <p id="stat-acciones" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-purple mt-0.5 leading-tight whitespace-nowrap tracking-tight">€0.00</p>
               <span id="stat-acciones-count" class="text-[9px] text-apple-gray-400">0 movimientos registrados</span>
             </div>
             <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
               <span class="text-[10px] font-medium text-apple-gray-400">Préstamos Netos (€)</span>
-              <p id="stat-loans-to-capital" class="text-sm sm:text-base md:text-lg font-bold text-apple-blue mt-0.5">€0.00</p>
+              <p id="stat-loans-to-capital" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-blue mt-0.5 leading-tight whitespace-nowrap tracking-tight">€0.00</p>
               <span class="text-[9px] text-apple-gray-400">Cobranza neta global</span>
             </div>
-            <div class="p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
-              <span class="text-[10px] font-medium text-apple-gray-400">Capital Madre (S/.)</span>
-              <div class="flex items-center justify-between mt-0.5">
-                <p id="stat-capital-soles" class="text-sm sm:text-base md:text-lg font-bold text-apple-orange">S/. 0.00</p>
-                <button onclick="openModal('modal-edit-madre')" class="text-apple-blue text-[10px] font-semibold hover:underline flex items-center gap-0.5">
-                  <i data-lucide="plus-circle" class="w-3 h-3"></i> Variación
-                </button>
+            <div onclick="openModal('modal-edit-madre')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('modal-edit-madre')}" class="ios-tap p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40 cursor-pointer hover:bg-apple-gray-200/60 dark:hover:bg-apple-gray-700/50 transition group">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[10px] font-medium text-apple-gray-400">Capital Madre (S/.)</span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-apple-gray-300 group-hover:text-apple-orange transition"></i>
               </div>
+              <p id="stat-capital-soles" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-orange mt-0.5 leading-tight whitespace-nowrap tracking-tight">S/. 0.00</p>
               <span id="stat-madre-count" class="text-[9px] text-apple-gray-400">0 movimientos registrados</span>
             </div>
             <div class="col-span-2 xs:col-span-1 p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
               <span class="text-[10px] font-medium text-apple-gray-400">Profit Hoy Estimado</span>
-              <p id="stat-profit-hoy" class="text-sm sm:text-base md:text-lg font-bold text-apple-green mt-0.5">+€0.00</p>
-              <span class="text-[9px] text-apple-gray-400">ΔCapital + Gastos Día</span>
+              <p id="stat-profit-hoy" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-green mt-0.5 leading-tight whitespace-nowrap tracking-tight">+€0.00</p>
+              <span class="text-[9px] text-apple-gray-400">Variación de capital + gastos</span>
             </div>
           </div>
         </div>
@@ -1548,7 +1551,12 @@
           <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
             <div class="flex items-center justify-between mb-3 gap-3">
               <h3 class="text-xs font-bold uppercase tracking-wider text-apple-gray-400">Directorio de Deudores</h3>
-              <button onclick="filterLoanByPerson('ALL')" class="text-xs text-apple-blue font-semibold hover:underline shrink-0">Ver todos</button>
+              <div class="flex items-center gap-2 shrink-0">
+                <button onclick="openNewDebtorFlow()" class="ios-tap inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-apple-blue text-white text-[10px] font-bold shadow-ios-sm hover:bg-blue-600 transition">
+                  <i data-lucide="user-plus" class="w-3 h-3"></i> Nuevo deudor
+                </button>
+                <button onclick="filterLoanByPerson('ALL')" class="text-[10px] text-apple-blue font-semibold hover:underline">Ver todos</button>
+              </div>
             </div>
 
             <div class="flex items-center justify-center mb-3">
@@ -1575,7 +1583,7 @@
               </div>
               <button onclick="openLoanModal()" class="ios-tap px-4 py-2 bg-apple-blue text-white rounded-2xl text-xs font-bold shadow-ios-sm flex items-center gap-1.5 self-start">
                 <i data-lucide="plus" class="w-4 h-4"></i>
-                <span>Nuevo Movimiento</span>
+                <span id="dossier-new-loan-label">Nuevo Movimiento</span>
               </button>
             </div>
 
@@ -1882,7 +1890,7 @@
             <div id="bank-editor-logo" class="bank-editor-logo-shell"></div>
             <div class="min-w-0">
               <div id="bank-editor-name" class="text-sm font-bold text-apple-gray-900 dark:text-white truncate">Cuenta</div>
-              <div id="bank-editor-currency" class="text-[10px] uppercase tracking-[.12em] font-semibold text-apple-gray-400 mt-0.5">EUR · Euros</div>
+              <div id="bank-editor-currency" class="text-[10px] uppercase tracking-[.12em] font-semibold text-apple-gray-400 mt-0.5">EUR</div>
             </div>
           </div>
 
@@ -2550,6 +2558,7 @@
     let activeContactLoanFilter = 'ALL';
     let activeDebtorsDirectoryView = 'active';
     let selectedCycleKey = null;
+    let cycleSelectionIsManual = false;
 
     function showToast(title, message, isSuccess = true) {
       const toast = document.getElementById('toast-notify');
@@ -3087,6 +3096,11 @@
           todayStr,
           getArqueoDateOnly(previousDaySnap.timestamp)
         );
+
+        // PROFIT REAL: el cambio de balance NO es la ganancia.
+        // Si el capital pasa de 100 a 102 porque se gastaron 8 y se generaron 10,
+        // la variación es +2, pero el resultado económico es +10.
+        // Por eso: Profit = Variación de capital + Gastos realizados.
         profitHoy = Number((difHoy + movimientoPendiente + gastosHoy).toFixed(2));
       }
 
@@ -3180,7 +3194,7 @@
             <div class="mt-2.5">
               <p class="text-base sm:text-lg font-mono font-bold tracking-tight text-apple-gray-900 dark:text-white">${isSoles ? formatPEN(balance) : formatEUR(balance)}</p>
               <div class="mt-1 flex items-center justify-between gap-2">
-                <span class="text-[9px] uppercase tracking-wide text-apple-gray-400">${isSoles ? 'PEN · Soles' : 'EUR · Euros'}</span>
+                <span class="text-[9px] uppercase tracking-wide text-apple-gray-400">${isSoles ? 'PEN' : 'EUR'}</span>
                 ${vaultDelta !== null ? `<span class="text-[9px] font-bold ${deltaClass} truncate">${deltaText}</span>` : ''}
               </div>
             </div>
@@ -3570,10 +3584,13 @@
       });
       snap.capitalTotal = Number(newTotal.toFixed(2));
 
-      // Recalcular siempre Variación y Profit a partir de la fecha/capital,
-      // evitando que el usuario pueda dejar cifras incoherentes manualmente.
+      // Recalcular siempre Variación y Profit con la misma regla patrimonial.
+      // El Profit no es el DIF: recupera los gastos que explican la salida de dinero.
       const referenceSnap = getPreviousArqueoReference(snap.timestamp, snap.id);
       snap.dif = Number(((referenceSnap ? snap.capitalTotal - Number(referenceSnap.capitalTotal || 0) : 0)).toFixed(2));
+      const editDate = getArqueoDateOnly(snap.timestamp);
+      const editPreviousDate = referenceSnap ? getArqueoDateOnly(referenceSnap.timestamp) : null;
+      snap.gastosDia = getExpensesForArqueoClosure(editDate, editPreviousDate);
       snap.profitHoy = Number((snap.dif + snap.gastosDia).toFixed(2));
 
       if (supabaseClient) {
@@ -3673,7 +3690,7 @@
       const now = new Date();
       const startDay = state.cycleStartDay || 15;
       const currentCycleKey = getCycleKeyForDate(now, startDay);
-      const activeKey = targetCycleKey || selectedCycleKey || currentCycleKey;
+      const activeKey = targetCycleKey || (cycleSelectionIsManual ? selectedCycleKey : currentCycleKey) || currentCycleKey;
       selectedCycleKey = activeKey;
 
       const [cYr, cMo] = activeKey.split('-').map(Number);
@@ -3685,9 +3702,19 @@
       if (!state.cycleBudgets) state.cycleBudgets = {};
       const budget = Number(state.cycleBudgets[activeKey] || state.personalBudget || 600);
 
-      // Gastos variables hechos en el ciclo
+      // Gastos variables hechos en el ciclo.
+      // Los gastos fijos pagados también viven en `personalExpenses` para que
+      // formen parte del balance general, pero NO deben volver a contarse aquí
+      // como variables porque ya se contabilizan mediante totalFixedPaid/totalFixed.
+      const fixedExpenseIdsInCycle = new Set(
+        Object.values((state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) || {})
+          .filter(info => info && info.paid && info.expenseId)
+          .map(info => String(info.expenseId))
+      );
+
       let totalSpent = 0;
       (state.personalExpenses || []).forEach(exp => {
+        if (fixedExpenseIdsInCycle.has(String(exp.id))) return;
         const d = new Date(exp.date);
         if (d >= cycleStart && d <= cycleEnd) {
           totalSpent += Number(exp.amount || 0);
@@ -3762,6 +3789,7 @@
 
     function changeActiveCycle(key) {
       selectedCycleKey = key;
+      cycleSelectionIsManual = true;
       renderPersonalModule();
     }
 
@@ -4013,28 +4041,65 @@
 
       const cyc = calculatePersonalCycle();
       const activeKey = cyc.activeKey;
+      const amount = Number(f.amount || 0);
+      const fixedExpenseId = `g_fixed_${activeKey}_${fixedId}`;
 
       if (!state.fixedExpensesCycleState) state.fixedExpensesCycleState = {};
       if (!state.fixedExpensesCycleState[activeKey]) state.fixedExpensesCycleState[activeKey] = {};
 
-      state.fixedExpensesCycleState[activeKey][fixedId] = {
-        paid: true,
-        paidAt: date,
-        bank: bank,
-        amountDebited: autodebit ? Number(f.amount) : 0
-      };
-
-      // Débito automático del banco seleccionado
-      if (autodebit) {
-        const curBal = Number(state.bancos[bank] || 0);
-        state.bancos[bank] = Math.max(0, curBal - Number(f.amount));
+      // Si ya estaba pagado, no duplicar el gasto personal.
+      const previousPayment = state.fixedExpensesCycleState[activeKey][fixedId];
+      if (previousPayment?.paid) {
+        closeModal('modal-pay-fixed');
+        showToast('Ya estaba pagado', `"${f.concept}" ya está registrado en este ciclo.`, false);
+        return;
       }
 
-      await saveGlobalConfigToCloud();
-      renderPersonalModule();
-      renderAirtmModule();
-      closeModal('modal-pay-fixed');
-      showToast('Gasto Fijo Pagado', `Se ha marcado "${f.concept}" como pagado${autodebit ? ` y se debitaron ${formatEUR(f.amount)} de ${bank}` : ''}.`, true);
+      try {
+        // Un gasto fijo pagado ES también un gasto personal real: sale de una cuenta
+        // y por eso debe entrar en gastos, Profit y el balance consolidado.
+        const expenseObj = {
+          id: fixedExpenseId,
+          fecha: date,
+          monto: amount,
+          concepto: f.concept,
+          banco: bank
+        };
+
+        if (supabaseClient) {
+          const { error } = await supabaseClient.from('gastos').insert(expenseObj);
+          if (error) throw error;
+        }
+
+        if (!state.personalExpenses) state.personalExpenses = [];
+        state.personalExpenses = [
+          { id: expenseObj.id, date: expenseObj.fecha, amount: expenseObj.monto, concept: expenseObj.concepto, bank: expenseObj.banco },
+          ...state.personalExpenses.filter(x => String(x.id) !== String(expenseObj.id))
+        ];
+
+        state.fixedExpensesCycleState[activeKey][fixedId] = {
+          paid: true,
+          paidAt: date,
+          bank: bank,
+          amountDebited: autodebit ? amount : 0,
+          expenseId: fixedExpenseId
+        };
+
+        // El débito bancario mantiene el balance patrimonial sincronizado con el gasto.
+        if (autodebit) {
+          const curBal = Number(state.bancos[bank] || 0);
+          state.bancos[bank] = Math.max(0, curBal - amount);
+        }
+
+        await saveGlobalConfigToCloud();
+        renderPersonalModule();
+        renderAirtmModule();
+        closeModal('modal-pay-fixed');
+        showToast('Gasto Fijo Pagado', `"${f.concept}" añadido a Gastos Personales${autodebit ? ` y debitado de ${bank}` : ''}.`, true);
+      } catch (error) {
+        console.error('Error registrando gasto fijo:', error);
+        showToast('No se registró el gasto fijo', error?.message || 'La operación no pudo completarse.', false);
+      }
     }
 
     function openUnpayFixedModal(fixedId) {
@@ -4057,22 +4122,35 @@
       const activeKey = cyc.activeKey;
       const paymentInfo = (state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) ? state.fixedExpensesCycleState[activeKey][fixedId] : null;
 
-      // Restituir el dinero al banco si corresponde
-      if (refund && paymentInfo && paymentInfo.amountDebited > 0) {
-        const bank = paymentInfo.bank || f.bank;
-        const curBal = Number(state.bancos[bank] || 0);
-        state.bancos[bank] = curBal + paymentInfo.amountDebited;
-      }
+      try {
+        // Deshacer también el gasto personal asociado para que no quede un gasto fantasma.
+        const expenseId = paymentInfo?.expenseId || `g_fixed_${activeKey}_${fixedId}`;
+        if (supabaseClient) {
+          const { error } = await supabaseClient.from('gastos').delete().eq('id', expenseId);
+          if (error) throw error;
+        }
+        state.personalExpenses = (state.personalExpenses || []).filter(x => String(x.id) !== String(expenseId));
 
-      if (state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) {
-        delete state.fixedExpensesCycleState[activeKey][fixedId];
-      }
+        // Restituir el dinero al banco si corresponde.
+        if (refund && paymentInfo && paymentInfo.amountDebited > 0) {
+          const bank = paymentInfo.bank || f.bank;
+          const curBal = Number(state.bancos[bank] || 0);
+          state.bancos[bank] = curBal + paymentInfo.amountDebited;
+        }
 
-      await saveGlobalConfigToCloud();
-      renderPersonalModule();
-      renderAirtmModule();
-      closeModal('modal-unpay-fixed');
-      showToast('Gasto Restituido', `"${f.concept}" vuelve a estar como pendiente en este ciclo.`, true);
+        if (state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) {
+          delete state.fixedExpensesCycleState[activeKey][fixedId];
+        }
+
+        await saveGlobalConfigToCloud();
+        renderPersonalModule();
+        renderAirtmModule();
+        closeModal('modal-unpay-fixed');
+        showToast('Gasto Restituido', `"${f.concept}" vuelve a estar pendiente y se retiró de Gastos Personales.`, true);
+      } catch (error) {
+        console.error('Error deshaciendo gasto fijo:', error);
+        showToast('No se pudo deshacer', error?.message || 'La operación no pudo completarse.', false);
+      }
     }
 
     function renderPersonalExpensesList() {
@@ -4300,6 +4378,8 @@
       const dSub = document.getElementById('dossier-person-subtitle');
       if (dName) dName.innerText = activeContactLoanFilter === 'ALL' ? 'Todos los Deudores' : activeContactLoanFilter;
       if (dSub) dSub.innerText = activeContactLoanFilter === 'ALL' ? 'Viendo la totalidad de operaciones' : `Historial discriminado de operaciones con ${activeContactLoanFilter}`;
+      const dossierNewLoanLabel = document.getElementById('dossier-new-loan-label');
+      if (dossierNewLoanLabel) dossierNewLoanLabel.innerText = activeContactLoanFilter === 'ALL' ? 'Nuevo movimiento' : `Nuevo con ${activeContactLoanFilter}`;
 
       let totalPrestadoEur = 0;
       let totalPrestadoPen = 0;
@@ -4553,7 +4633,8 @@
     }
 
     function getBankMiniLogo(name, grad = 'from-gray-500 to-gray-700') {
-      /* Logos por dominio oficial mediante Brandfetch CDN. */
+      // Los logos normales usan Brandfetch. BCP usa SVG inline para que nunca
+      // dependa de CDN, favicons o bloqueos de red.
       const domains = {
         Airtm: 'airtm.com',
         N26: 'n26.com',
@@ -4566,14 +4647,24 @@
         ING: 'ing.es',
         Vivid: 'vivid.money',
         Sabadell: 'bancsabadell.com',
-        BCP: 'viabcp.com',
         Interbank: 'interbank.pe'
       };
       const fallback = String(name || '?').slice(0, 2).toUpperCase();
+
+      if (name === 'BCP') {
+        return `<span class="bank-mini-logo bank-mini-logo-real w-8 h-8 shrink-0 rounded-[10px] bg-[#0057B8] flex items-center justify-center shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden" title="BCP">
+          <svg viewBox="0 0 64 64" width="25" height="25" aria-label="BCP" role="img">
+            <circle cx="32" cy="32" r="29" fill="#0057B8"/>
+            <path d="M19 18h13.5c7.5 0 12.5 3.8 12.5 9.5 0 3.3-1.8 6.1-4.8 7.6 3.7 1.3 5.8 4.2 5.8 8.1 0 6.2-5.2 10.8-13.4 10.8H19V18Zm9 7v10h4.2c3.5 0 5.7-1.9 5.7-5s-2.2-5-5.7-5H28Zm0 17v10h4.8c3.8 0 6.2-1.8 6.2-5s-2.4-5-6.2-5H28Z" fill="white"/>
+          </svg>
+        </span>`;
+      }
+
       const domain = domains[name];
       const src = domain ? `https://cdn.brandfetch.io/${domain}/w/128/h/128` : '';
+      const fallbackSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : '';
       return `<span class="bank-mini-logo bank-mini-logo-real w-8 h-8 shrink-0 rounded-[10px] bg-white dark:bg-white flex items-center justify-center shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden" title="${name || ''}">` +
-        (src ? `<img src="${src}" alt="${name || ''}" class="bank-mini-logo-img" loading="eager" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">` : '') +
+        (src ? `<img src="${src}" alt="${name || ''}" class="bank-mini-logo-img" loading="eager" referrerpolicy="no-referrer" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='${fallbackSrc}';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">` : '') +
         `<span class="bank-mini-logo-fallback" style="${src ? 'display:none;' : ''}">${fallback}</span></span>`;
     }
 
@@ -4655,7 +4746,7 @@
           if (hero) hero.classList.remove('hidden');
           if (logoWrap) logoWrap.innerHTML = getBankMiniLogo(selected, gradMap[selected] || 'from-gray-500 to-gray-700');
           if (bankName) bankName.innerText = selected;
-          if (currencyLabel) currencyLabel.innerText = isSoles ? 'PEN · Soles' : 'EUR · Euros';
+          if (currencyLabel) currencyLabel.innerText = isSoles ? 'PEN' : 'EUR';
           if (currencyChip) currencyChip.innerText = isSoles ? 'PEN' : 'EUR';
           if (balanceEl) balanceEl.innerText = formatted;
           if (current) current.innerText = formatted;
@@ -4726,7 +4817,7 @@
                   ${getBankMiniLogo(name, gradMap[name] || 'from-gray-500 to-gray-700')}
                   <div class="min-w-0">
                     <div class="text-xs font-bold text-apple-gray-900 dark:text-white truncate">${name}</div>
-                    <div class="text-[9px] text-apple-gray-400">${isSoles ? 'PEN · Soles' : 'EUR · Euros'}</div>
+                    <div class="text-[9px] text-apple-gray-400">${isSoles ? 'PEN' : 'EUR'}</div>
                   </div>
                 </div>
                 <input id="quick-balance-input-${name}" type="number" step="0.01"
@@ -5322,6 +5413,21 @@
       });
     }
 
+    function openNewDebtorFlow() {
+      // El deudor se crea al guardar su primer movimiento; no duplicamos contactos
+      // en una tabla separada. Abrimos directamente el flujo de alta y enfocamos el nombre.
+      activeContactLoanFilter = 'ALL';
+      openLoanModal();
+      requestAnimationFrame(() => {
+        const person = document.querySelector('#form-loan [name="person"]');
+        if (person) person.focus();
+      });
+      const title = document.getElementById('loan-modal-title');
+      const subtitle = document.getElementById('loan-modal-subtitle');
+      if (title) title.innerText = 'Nuevo deudor';
+      if (subtitle) subtitle.innerText = 'Escribe su nombre y registra el primer movimiento.';
+    }
+
     function openLoanModal(id = null) {
       const form = document.getElementById('form-loan');
       const title = document.getElementById('loan-modal-title');
@@ -5357,8 +5463,16 @@
         if (subtitle) subtitle.innerText = 'Corrige los datos y guarda los cambios.';
         if (saveLabel) saveLabel.innerText = 'Guardar cambios';
       } else {
-        if (title) title.innerText = 'Nuevo Movimiento de Préstamo';
-        if (subtitle) subtitle.innerText = 'Verifica el tipo de cambio oficial antes de guardar';
+        // Si el usuario está dentro del dossier de una persona, el nuevo movimiento
+        // hereda automáticamente esa persona para evitar volver a buscarla.
+        if (activeContactLoanFilter && activeContactLoanFilter !== 'ALL') {
+          form.person.value = activeContactLoanFilter;
+          if (title) title.innerText = `Nuevo movimiento · ${activeContactLoanFilter}`;
+          if (subtitle) subtitle.innerText = 'La persona seleccionada ya está preseleccionada';
+        } else {
+          if (title) title.innerText = 'Nuevo Movimiento de Préstamo';
+          if (subtitle) subtitle.innerText = 'Verifica el tipo de cambio oficial antes de guardar';
+        }
         if (saveLabel) saveLabel.innerText = 'Verificar FX & Guardar';
       }
 
@@ -5731,3 +5845,35 @@
 
 </body>
 </html>
+    @media (max-width: 639px) {
+      .bank-editor-sheet {
+        max-height: 88dvh !important;
+      }
+      .bank-editor-sheet > .px-5 {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        padding-top: 10px !important;
+        padding-bottom: 11px !important;
+      }
+      .bank-editor-hero {
+        margin-top: 10px !important;
+        padding: 12px !important;
+        border-radius: 20px !important;
+      }
+      .bank-editor-summary,
+      .bank-editor-edit-block {
+        margin-top: 10px !important;
+        padding: 11px !important;
+        border-radius: 17px !important;
+      }
+      .bank-editor-input-card { padding: 10px !important; }
+      .bank-editor-input-card .bank-editor-field {
+        font-size: 19px !important;
+        padding: 10px 12px !important;
+      }
+      .bank-editor-actions {
+        margin-top: 10px !important;
+        padding-top: 10px !important;
+      }
+    }
+
