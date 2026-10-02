@@ -1251,67 +1251,105 @@
   }
 }
 </style>
-<style>
+
+<style id="bank-editor-mobile-keyboard-fix-v4">
   @media (max-width: 639px) {
-    /* Ancla la hoja al viewport realmente visible, incluido el desplazamiento de iOS. */
+    /* El modal sigue al viewport visible de iOS, no al documento desplazado. */
     #modal-quick-balance.bank-editor-modal {
       position: fixed !important;
       top: var(--bank-editor-visual-top, 0px) !important;
-      right: 0 !important;
       bottom: auto !important;
       left: 0 !important;
+      right: 0 !important;
       height: var(--bank-editor-visual-height, 100dvh) !important;
       min-height: 0 !important;
-      transform: none !important;
+      max-height: none !important;
       align-items: flex-end !important;
+      overflow: hidden !important;
     }
-
     #modal-quick-balance .bank-editor-sheet {
       height: min(var(--bank-editor-visual-height, 100dvh), 94dvh) !important;
       max-height: var(--bank-editor-visual-height, 100dvh) !important;
       min-height: 0 !important;
+      flex: 0 1 auto !important;
     }
-
-    /* Al abrir el teclado, libera espacio para que se vean el campo y Guardar. */
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-sheet > .px-5 {
-      padding-top: 6px !important;
+    /* Cuando se edita una sola cuenta y aparece el teclado, el resumen se
+       comprime: logo/nombre a la izquierda, saldo a la derecha y variación debajo. */
+    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] .bank-editor-sheet > .px-5 {
+      padding-top: 7px !important;
       padding-bottom: 5px !important;
     }
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-hero,
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-summary {
+    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #quick-balance-subtitle {
       display: none !important;
     }
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-form {
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
+    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] .bank-editor-hero {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      align-items: center !important;
+      column-gap: 10px !important;
+      row-gap: 5px !important;
+      margin-top: 6px !important;
+      padding: 8px 10px !important;
+      border-radius: 16px !important;
+    }
+    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #bank-editor-identity {
+      min-width: 0 !important;
+      gap: 8px !important;
+    }
+    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] .bank-editor-logo-shell {
+      width: 38px !important;
+      height: 38px !important;
+      min-width: 38px !important;
+    }
+    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #bank-editor-balance-wrap {
+      margin-top: 0 !important;
+      text-align: right !important;
+      min-width: 0 !important;
+    }
+    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #bank-editor-balance {
+      font-size: clamp(20px, 6.3vw, 29px) !important;
+      line-height: 1.05 !important;
+      white-space: nowrap !important;
+    }
+    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #bank-editor-balance-label {
+      font-size: 8px !important;
+      margin-top: 2px !important;
+    }
+    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #bank-editor-delta-pill {
+      grid-column: 1 / -1 !important;
+      margin-top: 0 !important;
+      padding: 5px 8px !important;
+      font-size: 10px !important;
+      min-height: 0 !important;
+      justify-self: start !important;
+    }
+    #modal-quick-balance[data-keyboard-open="1"] #bank-editor-summary {
+      display: none !important;
     }
     #modal-quick-balance[data-keyboard-open="1"] .bank-editor-edit-block {
-      margin-top: 0 !important;
-      padding-top: 8px !important;
-      padding-bottom: 8px !important;
+      margin-top: 5px !important;
+      padding: 8px !important;
     }
     #modal-quick-balance[data-keyboard-open="1"] .bank-editor-edit-block > .flex.items-end {
-      margin-bottom: 6px !important;
+      margin-bottom: 5px !important;
+    }
+    #modal-quick-balance[data-keyboard-open="1"] #bank-editor-edit-hint {
+      display: none !important;
     }
     #modal-quick-balance[data-keyboard-open="1"] .bank-editor-input-card {
       padding: 8px !important;
     }
     #modal-quick-balance[data-keyboard-open="1"] .bank-editor-input-card .bank-editor-field {
-      min-height: 46px !important;
-      height: 46px !important;
-      font-size: 20px !important;
-      padding: 9px 12px !important;
+      min-height: 48px !important;
+      height: 48px !important;
+      font-size: 23px !important;
+      line-height: 1.2 !important;
+      padding: 10px 12px !important;
     }
     #modal-quick-balance[data-keyboard-open="1"] .bank-editor-actions {
-      position: sticky !important;
-      bottom: 0 !important;
-      margin-top: 6px !important;
+      margin-top: 5px !important;
       padding-top: 7px !important;
       padding-bottom: max(7px, env(safe-area-inset-bottom, 0px)) !important;
-    }
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-cancel,
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-save {
-      min-height: 44px !important;
     }
   }
 </style>
@@ -4969,6 +5007,8 @@
         const saveButton = document.getElementById('bank-editor-save-button');
 
         const selected = state.quickBalanceBank || null;
+        const editorModal = document.getElementById('modal-quick-balance');
+        if (editorModal) editorModal.classList.toggle('bank-editor-single', Boolean(selected));
         const latest = [...(state.arqueoHistory || [])]
           .sort((a,b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))[0] || null;
 
@@ -5105,10 +5145,7 @@
           const focusInput = selected
             ? document.getElementById(`quick-balance-input-${selected}`)
             : null;
-          // En móvil no enfocamos automáticamente: iOS puede desplazar
-          // toda la página al abrir el teclado. El usuario toca el saldo
-          // cuando está listo para editarlo. En escritorio se conserva.
-          if (focusInput && window.matchMedia('(min-width: 640px)').matches) {
+          if (focusInput && !window.matchMedia('(max-width: 639px)').matches) {
             setTimeout(() => {
               focusInput.focus({ preventScroll: true });
               try { focusInput.select(); } catch (_) {}
@@ -5158,6 +5195,23 @@
 
       if (id === 'modal-quick-balance') {
         document.documentElement.classList.add('bank-editor-open');
+        if (window.matchMedia('(max-width: 639px)').matches && !window.__bankEditorBodyLock) {
+          const body = document.body;
+          const scrollY = window.scrollY || window.pageYOffset || 0;
+          window.__bankEditorBodyLock = {
+            scrollY,
+            position: body.style.position,
+            top: body.style.top,
+            left: body.style.left,
+            right: body.style.right,
+            width: body.style.width
+          };
+          body.style.position = 'fixed';
+          body.style.top = `-${scrollY}px`;
+          body.style.left = '0';
+          body.style.right = '0';
+          body.style.width = '100%';
+        }
         requestAnimationFrame(syncBankEditorVisualViewport);
       }
     }
@@ -5168,29 +5222,44 @@
 
       const vv = window.visualViewport;
       const height = vv && Number.isFinite(vv.height) ? vv.height : window.innerHeight;
-      const offsetTop = vv && Number.isFinite(vv.offsetTop) ? vv.offsetTop : 0;
-      const visualHeight = Math.max(280, Math.round(height));
-      const keyboardOpen = vv ? (window.innerHeight - vv.height > 100) : false;
+      const visualHeight = Math.max(260, Math.round(height));
+      const visualTop = vv && Number.isFinite(vv.offsetTop) ? Math.max(0, Math.round(vv.offsetTop)) : 0;
+      const keyboardOpen = vv ? (window.innerHeight - vv.height > 120) : false;
 
       modal.style.setProperty('--bank-editor-visual-height', `${visualHeight}px`);
-      modal.style.setProperty('--bank-editor-visual-top', `${Math.max(0, Math.round(offsetTop))}px`);
+      modal.style.setProperty('--bank-editor-visual-top', `${visualTop}px`);
       modal.dataset.keyboardOpen = keyboardOpen ? '1' : '0';
     }
 
     function initBankEditorViewportSync() {
-      const sync = () => requestAnimationFrame(syncBankEditorVisualViewport);
+      const sync = () => syncBankEditorVisualViewport();
+
       window.addEventListener('resize', sync, { passive: true });
 
       if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', sync, { passive: true });
+        window.visualViewport.addEventListener('scroll', sync, { passive: true });
+      }
+
+      // iOS puede animar el teclado durante varios frames. Recalculamos
+      // mientras termina la transición para evitar saltos intermitentes.
+      let viewportRaf = 0;
+      const stableSync = () => {
+        cancelAnimationFrame(viewportRaf);
+        viewportRaf = requestAnimationFrame(() => {
+          syncBankEditorVisualViewport();
+          setTimeout(syncBankEditorVisualViewport, 120);
+        });
+      };
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', stableSync, { passive: true });
       }
 
       document.addEventListener('focusin', (event) => {
         if (!event.target || !event.target.closest('#modal-quick-balance')) return;
-        // Espera a que iOS actualice el visual viewport, sin cambiar scrollTop
-        // de forma automática (esa era la causa de los saltos intermitentes).
-        setTimeout(sync, 80);
-        setTimeout(sync, 220);
+        requestAnimationFrame(syncBankEditorVisualViewport);
+        setTimeout(syncBankEditorVisualViewport, 90);
+        setTimeout(syncBankEditorVisualViewport, 220);
       });
     }
 
@@ -5209,6 +5278,20 @@
         }
         document.documentElement.classList.remove('bank-editor-open');
         m.style.removeProperty('--bank-editor-visual-height');
+        m.style.removeProperty('--bank-editor-visual-top');
+        m.removeAttribute('data-keyboard-open');
+        m.classList.remove('bank-editor-single');
+        const lock = window.__bankEditorBodyLock;
+        if (lock) {
+          const body = document.body;
+          body.style.position = lock.position;
+          body.style.top = lock.top;
+          body.style.left = lock.left;
+          body.style.right = lock.right;
+          body.style.width = lock.width;
+          window.__bankEditorBodyLock = null;
+          window.scrollTo(0, lock.scrollY);
+        }
         state.quickBalanceBank = null;
       }
     }
