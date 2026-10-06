@@ -1592,6 +1592,7 @@
                   <th class="py-3 px-3 text-right text-apple-green font-bold">Profit Diario</th>
                   <th class="py-3 px-2 text-right">Airtm</th>
                   <th class="py-3 px-2 text-right">N26</th>
+                  <th class="py-3 px-2 text-right text-apple-red font-bold">Openbank</th>
                   <th class="py-3 px-2 text-right">BBVA</th>
                   <th class="py-3 px-2 text-right">Imagin</th>
                   <th class="py-3 px-2 text-right">Santan.</th>
@@ -2011,6 +2012,7 @@
           <label class="block text-xs font-semibold text-apple-gray-500 mb-1">¿Desde qué banco se debitó?</label>
           <select id="pay-fixed-bank-select" class="w-full px-3 py-2 text-xs font-bold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
             <option value="N26">N26</option>
+              <option value="Openbank">Openbank</option>
             <option value="Bunq">Bunq</option>
             <option value="Imagin">Imagin</option>
             <option value="Santander">Santander</option>
@@ -2267,11 +2269,23 @@
           <label class="block text-xs font-medium text-apple-gray-500 mb-1">Concepto / Motivo</label>
           <input type="text" required name="concept" placeholder="Ej: Mercadona, Cena, Abono..." class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
         </div>
-        <div class="grid grid-cols-2 gap-2.5">
-          <div>
-            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Banco / Tarjeta</label>
-            <select name="bank" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+        <div class="rounded-2xl border border-apple-gray-200/70 dark:border-apple-gray-700/70 bg-apple-gray-50/80 dark:bg-apple-gray-800/60 p-3">
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-xs font-semibold text-apple-gray-800 dark:text-white">Descontar de una cuenta</div>
+              <div class="text-[10px] text-apple-gray-400 mt-0.5">Úsalo solo si todavía no has actualizado el saldo del banco.</div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+              <input type="checkbox" name="autodebit" id="expense-autodebit" class="sr-only peer">
+              <div class="w-11 h-6 bg-apple-gray-300 dark:bg-apple-gray-600 rounded-full peer peer-checked:bg-apple-green transition-colors"></div>
+              <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></div>
+            </label>
+          </div>
+          <div id="expense-autodebit-panel" class="hidden mt-3 pt-3 border-t border-apple-gray-200/60 dark:border-apple-gray-700/60">
+            <label class="block text-[10px] font-semibold text-apple-gray-500 mb-1">Cuenta que pagó el gasto</label>
+            <select name="bank" id="expense-bank-select" class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-apple-gray-900 border border-apple-gray-300 dark:border-apple-gray-700">
               <option value="N26">N26</option>
+              <option value="Openbank">Openbank</option>
               <option value="Bunq">Bunq</option>
               <option value="Imagin">Imagin</option>
               <option value="Santander">Santander</option>
@@ -2282,6 +2296,14 @@
               <option value="Airtm">Airtm</option>
               <option value="Otro">Otro</option>
             </select>
+            <div id="expense-bank-preview" class="text-[10px] text-apple-gray-400 mt-1.5"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Banco / Tarjeta</label>
+<div class="text-[10px] text-apple-gray-400 py-2">Se selecciona arriba al activar el descuento.</div>
           </div>
           <div>
             <label class="block text-xs font-medium text-apple-gray-500 mb-1">Fecha y hora</label>
@@ -2333,6 +2355,7 @@
           <label class="block text-xs font-medium text-apple-gray-500 mb-1">Banco Habitual de Débito</label>
           <select name="bank" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
             <option value="N26">N26</option>
+              <option value="Openbank">Openbank</option>
             <option value="Bunq">Bunq</option>
             <option value="Imagin">Imagin</option>
             <option value="Santander">Santander</option>
@@ -2792,7 +2815,7 @@
       ],
       bcp: { pen: 1240.50, usd: 0.00, cutDay: 20 },
       bancos: {
-        'Airtm': 920.00, 'N26': 137.00, 'BBVA': 5.00, 'Imagin': 83.00, 'Santander': 202.00,
+        'Airtm': 920.00, 'N26': 137.00, 'Openbank': 0.00, 'BBVA': 5.00, 'Imagin': 83.00, 'Santander': 202.00,
         'Bunq': 8.00, 'Trade': 58.00, 'Wise': 193.00, 'ING': 316.00, 'Vivid': 30.00,
         'Sabadell': 0.00, 'BCP': 314.00, 'Interbank': 401.00
       },
@@ -2826,7 +2849,7 @@
           fxPen: 3.88,
           fxUsd: 1.08,
           bancos: {
-            'Airtm': 920.0, 'N26': 137.0, 'BBVA': 5.0, 'Imagin': 83.0, 'Santander': 202.0,
+            'Airtm': 920.0, 'N26': 137.0, 'Openbank': 0.0, 'BBVA': 5.0, 'Imagin': 83.0, 'Santander': 202.0,
             'Bunq': 8.0, 'Trade': 58.0, 'Wise': 193.0, 'ING': 316.0, 'Vivid': 30.0,
             'Sabadell': 0.0, 'BCP': 314.0, 'Interbank': 401.0
           },
@@ -2838,6 +2861,7 @@
     };
 
     let state = JSON.parse(JSON.stringify(DEFAULT_SEED));
+    ensureBankSchema();
     let activeContactLoanFilter = 'ALL';
     let activeDebtorsDirectoryView = 'active';
     let selectedCycleKey = null;
@@ -2939,7 +2963,7 @@
 
     // Orden visual fijo: Airtm siempre aparece primero en Bóvedas/Cuentas y editores.
     const BANK_ORDER = [
-      'Airtm', 'N26', 'BBVA', 'Imagin', 'Santander', 'Bunq',
+      'Airtm', 'N26', 'Openbank', 'BBVA', 'Imagin', 'Santander', 'Bunq',
       'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell', 'BCP', 'Interbank'
     ];
 
@@ -2948,6 +2972,15 @@
       const known = BANK_ORDER.filter(name => Object.prototype.hasOwnProperty.call(data, name));
       const extra = Object.keys(data).filter(name => !BANK_ORDER.includes(name));
       return [...known, ...extra];
+    }
+
+    // Migración ligera: versiones anteriores no tenían Openbank.
+    // Se inicializa en 0 sin alterar ningún saldo existente.
+    function ensureBankSchema() {
+      if (!state.bancos) state.bancos = {};
+      if (state.bancos['Openbank'] === undefined) state.bancos['Openbank'] = 0;
+      if (state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0;
+      return state.bancos;
     }
 
     let realtimeSyncTimer = null;
@@ -2985,6 +3018,7 @@
             hasCloudMainState = true;
             state.bancos = mainState.value.bancos || state.bancos;
             if (state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0.00;
+            if (state.bancos['Openbank'] === undefined) state.bancos['Openbank'] = 0.00;
             state.acciones = mainState.value.acciones !== undefined ? mainState.value.acciones : state.acciones;
             state.accionesLog = mainState.value.accionesLog || state.accionesLog || [];
             state.capitalSolesMadre = mainState.value.capitalSolesMadre || state.capitalSolesMadre;
@@ -3010,7 +3044,9 @@
             date: g.fecha,
             amount: parseFloat(g.monto) || 0,
             concept: g.concepto || 'Gasto',
-            bank: g.banco || 'N26'
+            bank: g.banco || 'N26',
+            autoDebit: !!g.descontar_cuenta,
+            debitAmount: parseFloat(g.monto_debitado) || (g.descontar_cuenta ? (parseFloat(g.monto) || 0) : 0)
           }));
         }
 
@@ -3055,6 +3091,7 @@
             bancos: {
               'Airtm': parseFloat(a.airtm) || 0,
               'N26': parseFloat(a.n26) || 0,
+              'Openbank': parseFloat(a.openbank) || 0,
               'BBVA': parseFloat(a.bbva) || 0,
               'Imagin': parseFloat(a.imagin) || 0,
               'Santander': parseFloat(a.santander) || 0,
@@ -3083,6 +3120,7 @@
               state.acciones = Number(latest.accionesEur || 0);
               state.capitalSolesMadre = Number(latest.capitalSolesMadre || state.capitalSolesMadre || 1365);
               if (state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0;
+              if (state.bancos['Openbank'] === undefined) state.bancos['Openbank'] = 0;
 
               // Creamos también main_state para que a partir de ahora PC,
               // iPhone e iPad compartan exactamente el mismo estado base.
@@ -3209,7 +3247,7 @@
     // Airtm es una cuenta operativa separada y NO forma parte
     // de la suma de bancos EUR. BCP + Interbank son PEN.
     // ==========================================================
-    const EURO_BANK_KEYS = ['N26', 'BBVA', 'Imagin', 'Santander', 'Bunq', 'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell'];
+    const EURO_BANK_KEYS = ['N26', 'Openbank', 'BBVA', 'Imagin', 'Santander', 'Bunq', 'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell'];
     const PEN_BANK_KEYS = ['BCP', 'Interbank'];
 
     function getBankBalance(bankName, source = state.bancos) {
@@ -3431,6 +3469,7 @@
         const bankGradients = {
           'Airtm': 'from-blue-600 to-sky-400',
           'N26': 'from-teal-600 to-emerald-700',
+          'Openbank': 'from-red-600 to-red-800',
           'BBVA': 'from-blue-700 to-indigo-900',
           'Imagin': 'from-sky-500 to-cyan-700',
           'Santander': 'from-red-600 to-rose-800',
@@ -3603,6 +3642,7 @@
           <td class="py-3 px-3 text-right" title="Variación + gastos del día">${profitBadge}</td>
           <td class="py-3 px-2 text-right">${b['Airtm'] !== undefined ? formatEUR(b['Airtm']) : '—'}</td>
           <td class="py-3 px-2 text-right">${b['N26'] !== undefined ? formatEUR(b['N26']) : '—'}</td>
+          <td class="py-3 px-2 text-right text-apple-red font-bold">${b['Openbank'] !== undefined ? formatEUR(b['Openbank']) : '—'}</td>
           <td class="py-3 px-2 text-right">${b['BBVA'] !== undefined ? formatEUR(b['BBVA']) : '—'}</td>
           <td class="py-3 px-2 text-right">${b['Imagin'] !== undefined ? formatEUR(b['Imagin']) : '—'}</td>
           <td class="py-3 px-2 text-right">${b['Santander'] !== undefined ? formatEUR(b['Santander']) : '—'}</td>
@@ -3760,6 +3800,7 @@
         fecha: timeStr,
         airtm: state.bancos['Airtm'] || 0,
         n26: state.bancos['N26'] || 0,
+        openbank: state.bancos['Openbank'] || 0,
         bbva: state.bancos['BBVA'] || 0,
         imagin: state.bancos['Imagin'] || 0,
         santander: state.bancos['Santander'] || 0,
@@ -3789,7 +3830,7 @@
           id: newSnap.id, timestamp: newSnap.fecha, capitalTotal: newSnap.suma, dif: newSnap.dif,
           gastosDia: newSnap.gasto_personal_dia, profitHoy: newSnap.profit, fxPen: state.fxRates?.PEN || 3.88,
           fxUsd: state.fxRates?.USD || 1.08, bancos: {
-            Airtm:newSnap.airtm,N26:newSnap.n26,BBVA:newSnap.bbva,Imagin:newSnap.imagin,Santander:newSnap.santander,
+            Airtm:newSnap.airtm,N26:newSnap.n26,Openbank:newSnap.openbank,BBVA:newSnap.bbva,Imagin:newSnap.imagin,Santander:newSnap.santander,
             Bunq:newSnap.bunq,Trade:newSnap.trade,Wise:newSnap.wise,ING:newSnap.ing,Vivid:newSnap.vivid,Sabadell:newSnap.sabadell,
             BCP:newSnap.bcp,Interbank:newSnap.interbank
           }, porCobrarEur:newSnap.por_cobrar, accionesEur:newSnap.acciones, capitalSolesMadre:newSnap.capital_soles
@@ -3881,6 +3922,7 @@
           fecha: snap.timestamp,
           airtm: updatedBanks['Airtm'] || 0,
           n26: updatedBanks['N26'] || 0,
+          openbank: updatedBanks['Openbank'] || 0,
           bbva: updatedBanks['BBVA'] || 0,
           imagin: updatedBanks['Imagin'] || 0,
           santander: updatedBanks['Santander'] || 0,
@@ -4921,6 +4963,7 @@
       const domains = {
         Airtm: 'airtm.com',
         N26: 'n26.com',
+        Openbank: 'openbank.es',
         BBVA: 'bbva.com',
         Imagin: 'imagin.com',
         Santander: 'santander.com',
@@ -5437,6 +5480,24 @@
       renderArqueoHistoryTable(document.getElementById('arqueo-search')?.value || '');
     }
 
+    function updateExpenseAutoDebitUI() {
+      const toggle = document.getElementById('expense-autodebit');
+      const panel = document.getElementById('expense-autodebit-panel');
+      const select = document.getElementById('expense-bank-select');
+      const preview = document.getElementById('expense-bank-preview');
+      if (!toggle || !panel) return;
+      const enabled = !!toggle.checked;
+      panel.classList.toggle('hidden', !enabled);
+      if (enabled && select && preview) {
+        const bal = Number(state.bancos?.[select.value] || 0);
+        preview.textContent = `Saldo actual: ${formatEUR(bal)} · después del gasto: ${formatEUR(bal - (parseFloat(document.querySelector('#form-expense [name="amount"]')?.value) || 0))}`;
+      }
+    }
+
+    document.getElementById('expense-autodebit')?.addEventListener('change', updateExpenseAutoDebitUI);
+    document.getElementById('expense-bank-select')?.addEventListener('change', updateExpenseAutoDebitUI);
+    document.querySelector('#form-expense [name="amount"]')?.addEventListener('input', updateExpenseAutoDebitUI);
+
     async function handleSaveExpense(e) {
       e.preventDefault();
 
@@ -5460,7 +5521,9 @@
         fecha: form.date.value,
         monto: parseFloat(form.amount.value) || 0,
         concepto: form.concept.value.trim(),
-        banco: form.bank.value
+        banco: (document.getElementById('expense-bank-select')?.value || 'N26'),
+        descontar_cuenta: !!form.autodebit.checked,
+        monto_debitado: !!form.autodebit.checked ? (parseFloat(form.amount.value) || 0) : 0
       };
 
       if (!expenseObj.concepto || expenseObj.monto <= 0) {
@@ -5491,14 +5554,24 @@
             date: expenseObj.fecha,
             amount: expenseObj.monto,
             concept: expenseObj.concepto,
-            bank: expenseObj.banco
+            bank: expenseObj.banco,
+            autoDebit: !!expenseObj.descontar_cuenta,
+            debitAmount: Number(expenseObj.monto_debitado || 0)
           },
           ...state.personalExpenses.filter(x => String(x.id) !== String(expenseObj.id))
         ];
 
+        // Si se eligió descuento automático, el gasto también modifica el saldo de la cuenta.
+        if (expenseObj.descontar_cuenta && state.bancos[expenseObj.banco] !== undefined) {
+          const currentBalance = Number(state.bancos[expenseObj.banco] || 0);
+          state.bancos[expenseObj.banco] = Number((currentBalance - expenseObj.monto_debitado).toFixed(2));
+          await saveGlobalConfigToCloud();
+        }
+
         renderPersonalModule();
 
         form.reset();
+        document.getElementById('expense-autodebit-panel')?.classList.add('hidden');
         closeModal('modal-add-expense');
         form.dataset.saving = '0';
 
@@ -5548,6 +5621,7 @@
     }
 
     async function deleteExpense(id) {
+      const expense = (state.personalExpenses || []).find(x => String(x.id) === String(id));
       if (supabaseClient) {
         const { error } = await supabaseClient.from('gastos').delete().eq('id', id);
         if (error) {
@@ -5555,6 +5629,10 @@
           showToast('No se eliminó el gasto', error.message || 'Supabase rechazó la operación.');
           return;
         }
+      }
+      if (expense?.autoDebit && expense?.debitAmount > 0 && state.bancos?.[expense.bank] !== undefined) {
+        state.bancos[expense.bank] = Number((Number(state.bancos[expense.bank] || 0) + Number(expense.debitAmount)).toFixed(2));
+        await saveGlobalConfigToCloud();
       }
       await refreshProfitAfterExpenseChange();
     }
@@ -6100,6 +6178,7 @@
 
               const airtm = parseFloat(row[1]) || 0;
               const n26 = parseFloat(row[2]) || 0;
+              const openbank = Number(state.bancos?.Openbank || 0);
               const bbva = parseFloat(row[3]) || 0;
               const imagin = parseFloat(row[4]) || 0;
               const santan = parseFloat(row[5]) || 0;
@@ -6117,7 +6196,7 @@
 
               latestImported = {
                 timestamp: ts,
-                bancos: { Airtm: airtm, N26: n26, BBVA: bbva, Imagin: imagin, Santander: santan, Bunq: bunq, Trade: trade, Wise: wise, ING: ing, Vivid: vivid, Sabadell: 0, BCP: bcp, Interbank: interbank },
+                bancos: { Airtm: airtm, N26: n26, Openbank: openbank, BBVA: bbva, Imagin: imagin, Santander: santan, Bunq: bunq, Trade: trade, Wise: wise, ING: ing, Vivid: vivid, Sabadell: 0, BCP: bcp, Interbank: interbank },
                 acciones: parseFloat(row[25]) || 0,
                 capitalSolesMadre: parseFloat(row[27]) || 1365
               };
@@ -6126,7 +6205,7 @@
                 const { error: upsertError } = await supabaseClient.from('arqueos').upsert({
                   id: `arq_mig_${r}`,
                   fecha: ts,
-                  airtm, n26, bbva, imagin, santander: santan, bunq, trade, wise, ing, vivid, sabadell: 0, bcp, interbank,
+                  airtm, n26, openbank: 0, bbva, imagin, santander: santan, bunq, trade, wise, ing, vivid, sabadell: 0, bcp, interbank,
                   por_cobrar: porCobrar,
                   deudas: 0,
                   suma: capTotal,
@@ -6144,7 +6223,12 @@
             // app_config el estado actual que verá un dispositivo nuevo.
             if (supabaseClient && latestImported) {
               const mainStateFromExcel = {
-                bancos: latestImported.bancos,
+                // El Excel antiguo no tiene columna Openbank: conservamos el saldo
+                // actual para que una importación histórica nunca lo borre.
+                bancos: {
+                  ...latestImported.bancos,
+                  Openbank: Number(state.bancos?.Openbank || 0)
+                },
                 acciones: latestImported.acciones,
                 accionesLog: state.accionesLog || [],
                 capitalSolesMadre: latestImported.capitalSolesMadre,
@@ -6184,6 +6268,7 @@
         if (cached) {
           state = JSON.parse(cached);
           if (state.bancos && state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0.00;
+          if (state.bancos && state.bancos['Openbank'] === undefined) state.bancos['Openbank'] = 0.00;
           if (!state.fixedExpensesCycleState) state.fixedExpensesCycleState = {};
         }
       } catch (e) {}
