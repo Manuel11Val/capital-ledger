@@ -331,6 +331,20 @@
     }
 
     @media (max-width: 679px) {
+      /* Los formularios largos siguen siendo desplazables con el teclado móvil abierto. */
+      #modal-add-loan {
+        align-items: flex-start !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        padding-top: max(12px, env(safe-area-inset-top, 0px)) !important;
+        padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+      }
+      #modal-add-loan > .apple-card {
+        max-height: calc(100dvh - 24px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+      }
       .ios-bottom-tabbar {
         left: 12px !important;
         right: 12px !important;
@@ -1178,6 +1192,20 @@
       }
     }
 
+
+    /* ==========================================================
+       DEBT CENTER RESPONSIVE LAYER
+       Desktop shows all three balances; mobile keeps one compact list.
+       Scoped to the loans directory so other tabs/breakpoints are untouched.
+    ========================================================== */
+    @media (max-width: 767px) {
+      .debtors-desktop-grid { display: none !important; }
+      .debtors-mobile-list { display: block !important; }
+    }
+    @media (min-width: 768px) {
+      .debtors-desktop-grid { display: grid !important; }
+      .debtors-mobile-list { display: none !important; }
+    }
 </style>
 
 <style>
@@ -1627,7 +1655,7 @@
       <!-- ========================================================== -->
       <section id="view-personal" class="space-y-5 sm:space-y-6 hidden">
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 min-w-0">
 
           <!-- Activity Ring & Cycle Breakdown Card -->
           <div class="lg:col-span-2 apple-card rounded-3xl p-5 sm:p-7 shadow-ios-card">
@@ -1809,22 +1837,22 @@
       <!-- ========================================================== -->
       <section id="view-prestamos" class="space-y-5 sm:space-y-6 hidden">
 
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4">
-          <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
-            <span class="text-[10px] uppercase font-bold tracking-wider text-apple-gray-400">Balance Neto Unificado</span>
-            <h3 id="prestamos-net-eur" class="text-xl sm:text-2xl md:text-3xl font-black font-mono text-apple-blue mt-1">€0.00</h3>
-            <p class="text-[10px] text-apple-gray-400 mt-1">Sumatoria neta convertida en vivo</p>
+        <!-- Resumen actual: importes pendientes, no movimientos históricos -->
+        <div class="grid grid-cols-3 gap-2 sm:gap-4">
+          <div class="apple-card min-w-0 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-ios-card border border-apple-blue/10">
+            <div class="flex items-center gap-1.5 text-apple-blue"><i data-lucide="arrow-down-left" class="w-3.5 h-3.5 shrink-0"></i><span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-wide">Te deben</span></div>
+            <h3 id="prestamos-total-prestado" class="text-sm sm:text-2xl md:text-3xl font-black font-mono text-apple-blue mt-2 break-words">€0,00</h3>
+            <p id="prestamos-count-receivable" class="text-[9px] sm:text-[10px] text-apple-gray-400 mt-1 leading-tight">0 personas pendientes</p>
           </div>
-          <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
-            <span class="text-[10px] uppercase font-bold tracking-wider text-apple-gray-400">Total Dinero Prestado</span>
-            <h3 id="prestamos-total-prestado" class="text-xl sm:text-2xl md:text-3xl font-black font-mono text-apple-orange mt-1">€0.00</h3>
-            <p class="text-[10px] text-apple-gray-400 mt-1">Flujos "Yo presté"</p>
+          <div class="apple-card min-w-0 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-ios-card border border-apple-red/10">
+            <div class="flex items-center gap-1.5 text-apple-red"><i data-lucide="arrow-up-right" class="w-3.5 h-3.5 shrink-0"></i><span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-wide">Tú debes</span></div>
+            <h3 id="prestamos-total-cobrado" class="text-sm sm:text-2xl md:text-3xl font-black font-mono text-apple-red mt-2 break-words">€0,00</h3>
+            <p id="prestamos-count-payable" class="text-[9px] sm:text-[10px] text-apple-gray-400 mt-1 leading-tight">0 personas pendientes</p>
           </div>
-          <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
-            <span class="text-[10px] uppercase font-bold tracking-wider text-apple-gray-400">Total Cobrado / Pagado</span>
-            <h3 id="prestamos-total-cobrado" class="text-xl sm:text-2xl md:text-3xl font-black font-mono text-apple-green mt-1">€0.00</h3>
-            <p class="text-[10px] text-apple-gray-400 mt-1">Liquidado por deudores</p>
+          <div class="apple-card min-w-0 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-ios-card border border-apple-gray-200/70 dark:border-apple-gray-700/70">
+            <div class="flex items-center gap-1.5 text-apple-gray-500"><i data-lucide="scale" class="w-3.5 h-3.5 shrink-0"></i><span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-wide">Balance</span></div>
+            <h3 id="prestamos-net-eur" class="text-sm sm:text-2xl md:text-3xl font-black font-mono text-apple-blue mt-2 break-words">€0,00</h3>
+            <p class="text-[9px] sm:text-[10px] text-apple-gray-400 mt-1 leading-tight">Balance neto</p>
           </div>
         </div>
 
@@ -1832,9 +1860,9 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
 
           <!-- Contacts Directory -->
-          <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
+          <div class="apple-card min-w-0 rounded-3xl p-3.5 sm:p-5 shadow-ios-card">
             <div class="flex items-center justify-between mb-3 gap-3">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-apple-gray-400">Directorio de Deudores</h3>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-apple-gray-400">Deudas</h3>
               <div class="flex items-center gap-2 shrink-0">
                 <button onclick="openNewDebtorFlow()" class="ios-tap inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-apple-blue text-white text-[10px] font-bold shadow-ios-sm hover:bg-blue-600 transition">
                   <i data-lucide="user-plus" class="w-3 h-3"></i> Nuevo deudor
@@ -1843,43 +1871,65 @@
               </div>
             </div>
 
+            <!-- Debt overview: on desktop everything is visible; on mobile it collapses into the same pill navigation. -->
+            <div class="grid grid-cols-3 gap-2 mb-3">
+              <button onclick="setDebtorsDirectoryView('active')" class="text-left p-2.5 rounded-2xl bg-apple-blue/8 dark:bg-apple-blue/10 border border-apple-blue/10 hover:border-apple-blue/25 transition">
+                <span class="text-[9px] font-bold uppercase tracking-wider text-apple-blue">Deudores</span>
+                <p id="debtors-total-receivable" class="text-sm sm:text-base font-black font-mono text-apple-blue mt-0.5">€0.00</p>
+                <span id="debtors-count-receivable" class="text-[9px] text-apple-gray-400">0 personas</span>
+              </button>
+              <button onclick="setDebtorsDirectoryView('payable')" class="text-left p-2.5 rounded-2xl bg-apple-red/5 dark:bg-apple-red/10 border border-apple-red/10 hover:border-apple-red/25 transition">
+                <span class="text-[9px] font-bold uppercase tracking-wider text-apple-red">Deudas</span>
+                <p id="debtors-total-payable" class="text-sm sm:text-base font-black font-mono text-apple-red mt-0.5">€0.00</p>
+                <span id="debtors-count-payable" class="text-[9px] text-apple-gray-400">0 personas</span>
+              </button>
+              <button onclick="setDebtorsDirectoryView('history')" class="text-left p-2.5 rounded-2xl bg-apple-gray-100/70 dark:bg-apple-gray-800/50 border border-apple-gray-200/50 dark:border-apple-gray-700/50 hover:border-apple-gray-300 transition">
+                <span class="text-[9px] font-bold uppercase tracking-wider text-apple-gray-500">Balance neto</span>
+                <p id="debtors-net-balance" class="text-sm sm:text-base font-black font-mono text-apple-gray-900 dark:text-white mt-0.5">€0.00</p>
+                <span id="debtors-count-history" class="text-[9px] text-apple-gray-400">0 saldadas</span>
+              </button>
+            </div>
+
             <div class="flex items-center justify-center mb-3">
-              <div class="inline-flex items-center p-1 rounded-full bg-apple-gray-100/80 dark:bg-apple-gray-800/70 border border-apple-gray-200/60 dark:border-apple-gray-700/60">
-                <button id="debtors-view-active" onclick="setDebtorsDirectoryView('active')" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 bg-white dark:bg-apple-gray-700 text-apple-gray-900 dark:text-white shadow-sm">Activos</button>
-                <button id="debtors-view-history" onclick="setDebtorsDirectoryView('history')" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 text-apple-gray-400">Historial</button>
+              <div class="inline-flex items-center p-1 rounded-full bg-apple-gray-100/80 dark:bg-apple-gray-800/70 border border-apple-gray-200/60 dark:border-apple-gray-700/60 w-full sm:w-auto">
+                <button id="debtors-view-active" onclick="setDebtorsDirectoryView('active')" class="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold transition-all duration-200 bg-white dark:bg-apple-gray-700 text-apple-gray-900 dark:text-white shadow-sm">Deudores</button>
+                <button id="debtors-view-payable" onclick="setDebtorsDirectoryView('payable')" class="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold transition-all duration-200 text-apple-gray-400">Deudas</button>
+                <button id="debtors-view-history" onclick="setDebtorsDirectoryView('history')" class="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold transition-all duration-200 text-apple-gray-400">Saldadas</button>
               </div>
             </div>
 
-            <div id="debtors-directory-list" class="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-              <!-- Dynamically populated -->
+            <div class="mb-1.5 flex items-center justify-between px-1">
+              <span id="debtors-current-list-title" class="text-[9px] font-bold uppercase tracking-wider text-apple-blue">Deudores</span>
+              <span id="debtors-current-list-count" class="text-[9px] text-apple-gray-400">0</span>
             </div>
+            <div id="debtors-directory-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
             <div id="debtors-history-count" class="hidden">0</div>
             <div id="debtors-history-list" class="hidden"></div>
           </div>
 
           <!-- Dossier / Individual Account Sheet -->
-          <div class="lg:col-span-2 apple-card rounded-3xl p-5 sm:p-6 shadow-ios-card">
+          <div class="lg:col-span-2 apple-card min-w-0 rounded-3xl p-4 sm:p-6 shadow-ios-card">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
               <div>
                 <span class="text-[10px] uppercase font-bold text-apple-blue">Estado de Cuenta Individual</span>
                 <h3 id="dossier-person-name" class="text-xl sm:text-2xl font-black text-apple-gray-900 dark:text-white">Selecciona una persona</h3>
                 <p id="dossier-person-subtitle" class="text-xs text-apple-gray-400">Historial discriminado de cobros y pagos</p>
               </div>
-              <button onclick="openLoanModal()" class="ios-tap px-4 py-2 bg-apple-blue text-white rounded-2xl text-xs font-bold shadow-ios-sm flex items-center gap-1.5 self-start">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                <span id="dossier-new-loan-label">Nuevo Movimiento</span>
+              <button onclick="openRelationPaymentModal()" class="ios-tap px-4 py-2 bg-apple-blue text-white rounded-2xl text-xs font-bold shadow-ios-sm flex items-center gap-1.5 self-start max-w-full">
+                <i data-lucide="plus" class="w-4 h-4 shrink-0"></i>
+                <span id="dossier-new-loan-label">Nuevo movimiento</span>
               </button>
             </div>
 
             <!-- Quantitative Summary -->
             <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-6">
               <div class="p-2.5 sm:p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
-                <span class="text-[9px] sm:text-[10px] font-semibold text-apple-gray-400">Prestado</span>
+                <span id="dossier-label-prestado" class="text-[9px] sm:text-[10px] font-semibold text-apple-gray-400">Prestado por ti</span>
                 <p id="dossier-total-prestado" class="text-sm sm:text-base font-bold font-mono text-apple-orange mt-0.5">€0.00</p>
                 <span id="dossier-prestado-breakdown" class="text-[8px] sm:text-[9px] text-apple-gray-400 block truncate"></span>
               </div>
               <div class="p-2.5 sm:p-3 rounded-2xl bg-apple-gray-100/60 dark:bg-apple-gray-800/40">
-                <span class="text-[9px] sm:text-[10px] font-semibold text-apple-gray-400">Pagado</span>
+                <span id="dossier-label-pagado" class="text-[9px] sm:text-[10px] font-semibold text-apple-gray-400">Devuelto</span>
                 <p id="dossier-total-pagado" class="text-sm sm:text-base font-bold font-mono text-apple-green mt-0.5">€0.00</p>
                 <span id="dossier-pagado-breakdown" class="text-[8px] sm:text-[9px] text-apple-gray-400 block truncate"></span>
               </div>
@@ -1890,13 +1940,13 @@
               </div>
             </div>
 
-            <!-- Why I Charge vs Payments Received -->
+            <!-- Debt origin vs repayments -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
               <div>
                 <div class="flex items-center justify-between mb-2">
                   <h4 class="text-xs font-bold uppercase tracking-wider text-apple-orange flex items-center gap-1">
                     <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-                    ¿Por qué le cobro?
+                    Origen de la deuda
                   </h4>
                   <span id="badge-count-prestado" class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-apple-orange/10 text-apple-orange">0</span>
                 </div>
@@ -1909,7 +1959,7 @@
                 <div class="flex items-center justify-between mb-2">
                   <h4 class="text-xs font-bold uppercase tracking-wider text-apple-green flex items-center gap-1">
                     <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i>
-                    Historial de Pagos / Abonos
+                    Pagos y devoluciones
                   </h4>
                   <span id="badge-count-pagado" class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-apple-green/10 text-apple-green">0</span>
                 </div>
@@ -2616,10 +2666,10 @@
           <div>
             <label class="block text-xs font-medium text-apple-gray-500 mb-1">Tipo de Flujo</label>
             <select name="type" class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
-              <option value="YO_PRESTE">Yo presté (+ por cobrar)</option>
-              <option value="ME_PAGARON">Me pagaron (- cobranza)</option>
-              <option value="ME_PRESTARON">Me prestaron (- deuda)</option>
-              <option value="YO_PAGUE">Yo pagué (+ liquidado)</option>
+              <option value="YO_PRESTE">Le presté · aumenta lo que me debe</option>
+              <option value="ME_PAGARON">Me devolvió · reduce lo que me debe</option>
+              <option value="ME_PRESTARON">Me prestó · aumenta lo que le debo</option>
+              <option value="YO_PAGUE">Le pagué · reduce lo que le debo</option>
             </select>
           </div>
         </div>
@@ -2863,6 +2913,7 @@
     let state = JSON.parse(JSON.stringify(DEFAULT_SEED));
     ensureBankSchema();
     let activeContactLoanFilter = 'ALL';
+    let activeContactLoanSide = 'ALL';
     let activeDebtorsDirectoryView = 'active';
     let selectedCycleKey = null;
     let cycleSelectionIsManual = false;
@@ -3062,7 +3113,7 @@
             date: p.fecha,
             person: p.persona,
             notes: p.asunto,
-            type: p.categoria === 'Yo presté' ? 'YO_PRESTE' : (p.categoria === 'Me pagaron' ? 'ME_PAGARON' : (p.categoria === 'Me prestaron' ? 'ME_PRESTARON' : 'YO_PAGUE')),
+            type: (p.categoria === 'Yo presté' || p.categoria === 'Le presté') ? 'YO_PRESTE' : ((p.categoria === 'Me pagaron' || p.categoria === 'Me devolvió') ? 'ME_PAGARON' : ((p.categoria === 'Me prestaron' || p.categoria === 'Me prestó') ? 'ME_PRESTARON' : 'YO_PAGUE')),
             currency: p.moneda || 'EUR',
             amount: parseFloat(p.monto) || 0,
             lockedRate: p.moneda === 'PEN' ? 3.88 : (p.moneda === 'USD' ? 1.08 : 1)
@@ -4561,39 +4612,110 @@
     // MODULE 3: LOANS & DEBTORS
     // ==========================================================
     function renderLoansModule() {
-      const netEur = calculateConsolidatedLoansNetEUR();
+      const relations = buildLoanRelations();
+      const netEur = relations.totalTheyOwe - relations.totalIOwe;
       const prestNet = document.getElementById('prestamos-net-eur');
-      if (prestNet) animateNumericValue(prestNet, netEur, formatEUR);
-
-      let prestado = 0;
-      let cobrado = 0;
-      const curPenRate = state.fxRates?.PEN || 3.88;
-      const curUsdRate = state.fxRates?.USD || 1.08;
-
-      (state.loans || []).forEach(l => {
-        const rate = l.lockedRate || (l.currency === 'PEN' ? curPenRate : (l.currency === 'USD' ? curUsdRate : 1));
-        const val = l.currency === 'EUR' ? Number(l.amount) : (Number(l.amount) / rate);
-
-        if (l.type === 'YO_PRESTE' || l.type === 'YO_PAGUE') {
-          prestado += val;
-        } else {
-          cobrado += val;
-        }
-      });
+      if (prestNet) {
+        animateNumericValue(prestNet, netEur, formatEUR);
+        prestNet.className = `text-sm sm:text-2xl md:text-3xl font-black font-mono mt-2 break-words ${netEur >= 0 ? 'text-apple-green' : 'text-apple-red'}`;
+      }
 
       const totPrest = document.getElementById('prestamos-total-prestado');
-      if (totPrest) animateNumericValue(totPrest, prestado, formatEUR);
-
+      if (totPrest) animateNumericValue(totPrest, relations.totalTheyOwe, formatEUR);
       const totCob = document.getElementById('prestamos-total-cobrado');
-      if (totCob) animateNumericValue(totCob, cobrado, formatEUR);
+      if (totCob) animateNumericValue(totCob, relations.totalIOwe, formatEUR);
+      const receivableCount = document.getElementById('prestamos-count-receivable');
+      if (receivableCount) receivableCount.innerText = `${relations.receivableList.length} ${relations.receivableList.length === 1 ? 'persona pendiente' : 'personas pendientes'}`;
+      const payableCount = document.getElementById('prestamos-count-payable');
+      if (payableCount) payableCount.innerText = `${relations.payableList.length} ${relations.payableList.length === 1 ? 'persona pendiente' : 'personas pendientes'}`;
 
       renderDebtorsDirectory();
       renderLoansTable();
+      if (window.lucide) lucide.createIcons();
     }
 
     function setDebtorsDirectoryView(view) {
-      activeDebtorsDirectoryView = view === 'history' ? 'history' : 'active';
+      activeDebtorsDirectoryView = ['active', 'payable', 'history'].includes(view) ? view : 'active';
       renderDebtorsDirectory();
+    }
+
+    function getLoanEURValue(l) {
+      const curPenRate = state.fxRates?.PEN || 3.88;
+      const curUsdRate = state.fxRates?.USD || 1.08;
+      const rate = Number(l.lockedRate) > 0
+        ? Number(l.lockedRate)
+        : (l.currency === 'PEN' ? curPenRate : (l.currency === 'USD' ? curUsdRate : 1));
+      const amount = Number(l.amount || 0);
+      return l.currency === 'EUR' ? amount : (amount / rate);
+    }
+
+    // Construye DOS relaciones independientes por persona:
+    //   ME DEBEN = YO_PRESTE - ME_PAGARON
+    //   YO DEBO   = ME_PRESTARON - YO_PAGUE
+    // Nunca se compensan entre sí aunque la persona sea la misma.
+    function buildLoanRelations() {
+      const map = {};
+      const curPenRate = state.fxRates?.PEN || 3.88;
+      const curUsdRate = state.fxRates?.USD || 1.08;
+      const EPSILON = 0.005;
+
+      (state.loans || []).forEach(l => {
+        const name = String(l.person || 'Sin Nombre').trim() || 'Sin Nombre';
+        if (!map[name]) {
+          map[name] = {
+            name,
+            receivable: { originEur: 0, paidEur: 0, netEqEur: 0, originPen: 0, paidPen: 0, originUsd: 0, paidUsd: 0 },
+            payable: { originEur: 0, paidEur: 0, netEqEur: 0, originPen: 0, paidPen: 0, originUsd: 0, paidUsd: 0 }
+          };
+        }
+
+        const amount = Number(l.amount || 0);
+        const rate = Number(l.lockedRate) > 0
+          ? Number(l.lockedRate)
+          : (l.currency === 'PEN' ? curPenRate : (l.currency === 'USD' ? curUsdRate : 1));
+        const eur = l.currency === 'EUR' ? amount : amount / rate;
+        const relation = (l.type === 'YO_PRESTE' || l.type === 'ME_PAGARON') ? map[name].receivable : map[name].payable;
+        const isOrigin = l.type === 'YO_PRESTE' || l.type === 'ME_PRESTARON';
+
+        if (isOrigin) {
+          relation.originEur += eur;
+          if (l.currency === 'PEN') relation.originPen += amount;
+          if (l.currency === 'USD') relation.originUsd += amount;
+        } else {
+          relation.paidEur += eur;
+          if (l.currency === 'PEN') relation.paidPen += amount;
+          if (l.currency === 'USD') relation.paidUsd += amount;
+        }
+        relation.netEqEur = Number((relation.originEur - relation.paidEur).toFixed(6));
+      });
+
+      const all = Object.values(map);
+      const receivableList = all
+        .filter(c => c.receivable.originEur > EPSILON || c.receivable.paidEur > EPSILON)
+        .map(c => ({ ...c, ...c.receivable, side: 'receivable' }))
+        .filter(c => c.netEqEur > EPSILON)
+        .sort((a, b) => b.netEqEur - a.netEqEur);
+
+      const payableList = all
+        .filter(c => c.payable.originEur > EPSILON || c.payable.paidEur > EPSILON)
+        .map(c => ({ ...c, ...c.payable, side: 'payable' }))
+        .filter(c => c.netEqEur > EPSILON)
+        .sort((a, b) => b.netEqEur - a.netEqEur);
+
+      // Historial independiente: una persona puede tener una relación saldada
+      // y otra todavía activa, por lo que puede aparecer en historial y activa.
+      const completedList = [];
+      all.forEach(c => {
+        if ((c.receivable.originEur > EPSILON || c.receivable.paidEur > EPSILON) && Math.abs(c.receivable.netEqEur) <= EPSILON) {
+          completedList.push({ ...c, ...c.receivable, side: 'receivable' });
+        }
+        if ((c.payable.originEur > EPSILON || c.payable.paidEur > EPSILON) && Math.abs(c.payable.netEqEur) <= EPSILON) {
+          completedList.push({ ...c, ...c.payable, side: 'payable' });
+        }
+      });
+      completedList.sort((a, b) => a.name.localeCompare(b.name) || a.side.localeCompare(b.side));
+
+      return { all, receivableList, payableList, completedList, totalTheyOwe: receivableList.reduce((s,c)=>s+c.netEqEur,0), totalIOwe: payableList.reduce((s,c)=>s+c.netEqEur,0) };
     }
 
     function renderDebtorsDirectory() {
@@ -4601,88 +4723,105 @@
       if (!container) return;
       container.innerHTML = '';
 
-      const historyCount = document.getElementById('debtors-history-count');
-      const historyContainer = document.getElementById('debtors-history-list');
+      const { all, receivableList, payableList, completedList, totalTheyOwe, totalIOwe } = buildLoanRelations();
+      const netBalance = totalTheyOwe - totalIOwe;
 
-      const contactsMap = {};
-      const curPenRate = state.fxRates?.PEN || 3.88;
-      const curUsdRate = state.fxRates?.USD || 1.08;
-      const EPSILON = 0.005;
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = value;
+      };
+      const peopleLabel = n => `${n} ${n === 1 ? 'persona' : 'personas'}`;
 
-      (state.loans || []).forEach(l => {
-        const p = l.person || 'Sin Nombre';
-        if (!contactsMap[p]) {
-          contactsMap[p] = { name: p, totalEur: 0, totalPen: 0, netEqEur: 0 };
-        }
+      setText('debtors-total-receivable', formatEUR(totalTheyOwe));
+      setText('debtors-total-payable', formatEUR(totalIOwe));
+      setText('debtors-net-balance', `${netBalance >= 0 ? '+' : '-'}${formatEUR(Math.abs(netBalance))}`);
+      setText('debtors-count-receivable', peopleLabel(receivableList.length));
+      setText('debtors-count-payable', peopleLabel(payableList.length));
+      setText('debtors-count-history', `${completedList.length} ${completedList.length === 1 ? 'saldada' : 'saldadas'}`);
+      setText('debtors-history-count', String(completedList.length));
 
-        const factor = (l.type === 'YO_PRESTE' || l.type === 'YO_PAGUE') ? 1 : -1;
-        const rate = l.lockedRate || (l.currency === 'PEN' ? curPenRate : (l.currency === 'USD' ? curUsdRate : 1));
-        const amount = Number(l.amount || 0);
-
-        if (l.currency === 'EUR') {
-          contactsMap[p].totalEur += amount * factor;
-          contactsMap[p].netEqEur += amount * factor;
-        } else if (l.currency === 'PEN') {
-          contactsMap[p].totalPen += amount * factor;
-          contactsMap[p].netEqEur += (amount / rate) * factor;
-        } else if (l.currency === 'USD') {
-          contactsMap[p].netEqEur += (amount / rate) * factor;
-        }
-      });
-
-      const allContacts = Object.values(contactsMap).sort((a, b) => b.netEqEur - a.netEqEur);
-      const activeList = allContacts.filter(c => c.netEqEur > EPSILON);
-      const completedList = allContacts.filter(c => Math.abs(c.netEqEur) <= EPSILON);
-
-      if (activeContactLoanFilter !== 'ALL' && !activeList.some(c => c.name === activeContactLoanFilter)) {
-        activeContactLoanFilter = activeList[0]?.name || 'ALL';
+      const netEl = document.getElementById('debtors-net-balance');
+      if (netEl) {
+        netEl.className = `text-sm sm:text-base font-black font-mono mt-0.5 ${netBalance >= 0 ? 'text-apple-green' : 'text-apple-red'}`;
       }
-      if (activeContactLoanFilter === 'ALL' && activeList.length > 0) {
-        activeContactLoanFilter = activeList[0].name;
+
+      const currentExists = all.some(c => c.name === activeContactLoanFilter);
+      if (activeContactLoanFilter !== 'ALL' && !currentExists) {
+        activeContactLoanFilter = 'ALL';
+        activeContactLoanSide = 'ALL';
       }
 
       const activeBtn = document.getElementById('debtors-view-active');
+      const payableBtn = document.getElementById('debtors-view-payable');
       const historyBtn = document.getElementById('debtors-view-history');
-      if (activeBtn && historyBtn) {
-        const active = activeDebtorsDirectoryView === 'active';
-        activeBtn.className = `px-4 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${active ? 'bg-white dark:bg-apple-gray-700 text-apple-gray-900 dark:text-white shadow-sm' : 'text-apple-gray-400'}`;
-        historyBtn.className = `px-4 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${!active ? 'bg-white dark:bg-apple-gray-700 text-apple-gray-900 dark:text-white shadow-sm' : 'text-apple-gray-400'}`;
-      }
+      [[activeBtn, 'active'], [payableBtn, 'payable'], [historyBtn, 'history']].forEach(([btn, view]) => {
+        if (!btn) return;
+        const active = activeDebtorsDirectoryView === view;
+        btn.className = `flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold transition-all duration-200 ${active ? 'bg-white dark:bg-apple-gray-700 text-apple-gray-900 dark:text-white shadow-sm' : 'text-apple-gray-400'}`;
+      });
 
-      const renderPerson = (c, completed = false) => {
-        const isSelected = activeContactLoanFilter === c.name;
+      const viewMap = {
+        active: { list: receivableList, title: 'Deudores', color: 'text-apple-blue' },
+        payable: { list: payableList, title: 'Deudas', color: 'text-apple-red' },
+        history: { list: completedList, title: 'Saldadas', color: 'text-apple-gray-500' }
+      };
+      const currentView = viewMap[activeDebtorsDirectoryView] || viewMap.active;
+      setText('debtors-current-list-title', currentView.title);
+      setText('debtors-current-list-count', String(currentView.list.length));
+      const listTitle = document.getElementById('debtors-current-list-title');
+      if (listTitle) listTitle.className = `text-[9px] font-bold uppercase tracking-wider ${currentView.color}`;
+
+      const renderPerson = (c, side) => {
+        const isPayable = side === 'payable';
+        const isCompleted = side === 'history';
+        const isSelected = activeContactLoanFilter === c.name && activeContactLoanSide === (isCompleted ? c.side : side);
+        const displayAmount = isCompleted ? 'Liquidado' : formatEUR(Math.abs(c.netEqEur));
+        const amountClass = isCompleted ? 'text-apple-gray-400' : (isPayable ? 'text-apple-red' : 'text-apple-blue');
+        const borderClass = isSelected
+          ? 'bg-apple-blue/15 border border-apple-blue/30'
+          : 'bg-apple-gray-100/60 dark:bg-apple-gray-800/40 hover:bg-apple-gray-200/50 border border-transparent';
+
         const item = document.createElement('div');
-        item.className = `p-3 rounded-2xl cursor-pointer transition flex items-center justify-between ${isSelected ? 'bg-apple-blue/15 border border-apple-blue/30 text-apple-blue' : 'bg-apple-gray-100/60 dark:bg-apple-gray-800/40 hover:bg-apple-gray-200/50'}`;
-        item.onclick = () => filterLoanByPerson(c.name);
-
-        item.innerHTML = `
-          <div>
-            <p class="text-xs font-bold text-apple-gray-900 dark:text-white">${c.name}</p>
-            <div class="flex items-center gap-2 mt-0.5 text-[10px] text-apple-gray-400">
-              ${c.totalEur !== 0 ? `<span>${formatEUR(c.totalEur)}</span>` : ''}
-              ${c.totalPen !== 0 ? `<span>${formatPEN(c.totalPen)}</span>` : ''}
-            </div>
+        item.className = `p-2.5 sm:p-3 rounded-2xl cursor-pointer transition flex items-center justify-between gap-2 ${borderClass}`;
+        item.onclick = () => filterLoanByPerson(c.name, isCompleted ? c.side : side);
+        const paidPercent = c.originEur > 0 ? Math.max(0, Math.min(100, (c.paidEur / c.originEur) * 100)) : (isCompleted ? 100 : 0);
+        const progressMarkup = isCompleted ? '' : `
+          <div class="h-1 rounded-full bg-apple-gray-200/80 dark:bg-apple-gray-700/80 overflow-hidden mt-2 max-w-[230px]">
+            <div class="h-full rounded-full ${isPayable ? 'bg-apple-red' : 'bg-apple-blue'} transition-all duration-500" style="width:${paidPercent.toFixed(1)}%"></div>
           </div>
-          <span class="font-mono font-bold text-xs ${completed ? 'text-apple-gray-400' : 'text-apple-blue'}">${completed ? 'Liquidado' : formatEUR(c.netEqEur)}</span>
+          <p class="text-[9px] text-apple-gray-400 mt-1">${Math.round(paidPercent)}% devuelto/pagado</p>`;
+        item.innerHTML = `
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-bold text-apple-gray-900 dark:text-white truncate">${c.name}</p>
+            <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-0.5 text-[9px] text-apple-gray-400">
+              ${isPayable ? '<span class="text-apple-red font-semibold">Tú debes</span>' : isCompleted ? `<span>${c.side === 'payable' ? 'Tú debías' : 'Te debía'}</span>` : '<span class="text-apple-blue font-semibold">Te debe</span>'}
+              ${c.originEur > 0 ? `<span>· origen ${formatEUR(c.originEur)}</span>` : ''}
+              ${c.paidEur > 0 ? `<span>· pagos ${formatEUR(c.paidEur)}</span>` : ''}
+            </div>
+            ${progressMarkup}
+          </div>
+          <span class="font-mono font-bold text-xs whitespace-nowrap ${amountClass}">${displayAmount}</span>
         `;
         return item;
       };
 
-      const visibleList = activeDebtorsDirectoryView === 'history' ? completedList : activeList;
-      if (visibleList.length === 0) {
-        container.innerHTML = activeDebtorsDirectoryView === 'history'
-          ? '<p class="text-[10px] text-apple-gray-400 py-3 text-center">Sin préstamos liquidados.</p>'
-          : '<p class="text-[10px] text-apple-gray-400 py-3 text-center">No hay deudores activos.</p>';
+      const emptyMessage = side => side === 'payable'
+        ? 'No tienes deudas pendientes.'
+        : side === 'history'
+          ? 'Sin deudas saldadas.'
+          : 'No hay personas que te deban.';
+
+      if (!currentView.list.length) {
+        container.innerHTML = `<p class="text-[10px] text-apple-gray-400 py-4 text-center">${emptyMessage(activeDebtorsDirectoryView === 'active' ? 'receivable' : activeDebtorsDirectoryView)}</p>`;
       } else {
-        visibleList.forEach(c => container.appendChild(renderPerson(c, activeDebtorsDirectoryView === 'history')));
+        currentView.list.forEach(c => container.appendChild(renderPerson(c, activeDebtorsDirectoryView === 'active' ? 'receivable' : activeDebtorsDirectoryView)));
       }
 
-      if (historyCount) historyCount.innerText = String(completedList.length);
-      if (historyContainer) historyContainer.innerHTML = '';
+      if (window.lucide) lucide.createIcons();
     }
-
-    function filterLoanByPerson(personName) {
-      activeContactLoanFilter = personName;
+    function filterLoanByPerson(personName, side = 'ALL') {
+      activeContactLoanFilter = personName || 'ALL';
+      activeContactLoanSide = ['receivable', 'payable'].includes(side) ? side : 'ALL';
       renderLoansModule();
     }
 
@@ -4696,15 +4835,31 @@
 
       const filtered = (state.loans || []).filter(l => {
         if (activeContactLoanFilter === 'ALL') return true;
-        return l.person === activeContactLoanFilter;
+        if (String(l.person || '').trim() !== String(activeContactLoanFilter).trim()) return false;
+        if (activeContactLoanSide === 'receivable') return l.type === 'YO_PRESTE' || l.type === 'ME_PAGARON';
+        if (activeContactLoanSide === 'payable') return l.type === 'ME_PRESTARON' || l.type === 'YO_PAGUE';
+        return true;
       });
 
       const dName = document.getElementById('dossier-person-name');
+      const dLabelPrest = document.getElementById('dossier-label-prestado');
+      const dLabelPag = document.getElementById('dossier-label-pagado');
+      const dOriginHeading = document.querySelector('#list-dossier-prestamos')?.parentElement?.querySelector('h4');
+      const dPaymentsHeading = document.querySelector('#list-dossier-pagos')?.parentElement?.querySelector('h4');
       const dSub = document.getElementById('dossier-person-subtitle');
-      if (dName) dName.innerText = activeContactLoanFilter === 'ALL' ? 'Todos los Deudores' : activeContactLoanFilter;
-      if (dSub) dSub.innerText = activeContactLoanFilter === 'ALL' ? 'Viendo la totalidad de operaciones' : `Historial discriminado de operaciones con ${activeContactLoanFilter}`;
+      if (dName) dName.innerText = activeContactLoanFilter === 'ALL' ? 'Todas las relaciones' : activeContactLoanFilter;
+      if (dSub) dSub.innerText = activeContactLoanFilter === 'ALL'
+        ? 'Viendo la totalidad de operaciones'
+        : (activeContactLoanSide === 'payable'
+          ? 'Relación independiente · Tú debes'
+          : activeContactLoanSide === 'receivable'
+            ? 'Relación independiente · Te debe'
+            : `Historial completo con ${activeContactLoanFilter}`);
       const dossierNewLoanLabel = document.getElementById('dossier-new-loan-label');
-      if (dossierNewLoanLabel) dossierNewLoanLabel.innerText = activeContactLoanFilter === 'ALL' ? 'Nuevo movimiento' : `Nuevo con ${activeContactLoanFilter}`;
+      if (dossierNewLoanLabel) dossierNewLoanLabel.innerText = activeContactLoanFilter === 'ALL'
+        ? 'Nuevo movimiento'
+        : activeContactLoanSide === 'receivable' ? 'Registrar devolución'
+        : activeContactLoanSide === 'payable' ? 'Registrar pago' : `Nuevo con ${activeContactLoanFilter}`;
 
       let totalPrestadoEur = 0;
       let totalPrestadoPen = 0;
@@ -4738,7 +4893,7 @@
                 <div class="flex items-center gap-2 mt-0.5 text-[10px] text-apple-gray-400">
                   <span>${l.date}</span>
                   <span>•</span>
-                  <span class="font-semibold text-apple-orange">${l.type === 'YO_PRESTE' ? 'Yo presté' : 'Me prestaron'}</span>
+                  <span class="font-semibold text-apple-orange">${l.type === 'YO_PRESTE' ? 'Le presté' : 'Me prestó'}</span>
                 </div>
               </div>
               <span class="font-mono font-bold text-apple-orange">
@@ -4761,7 +4916,7 @@
                 <div class="flex items-center gap-2 mt-0.5 text-[10px] text-apple-gray-400">
                   <span>${l.date}</span>
                   <span>•</span>
-                  <span class="font-semibold text-apple-green">${l.type === 'ME_PAGARON' ? 'Me pagaron' : 'Yo pagué'}</span>
+                  <span class="font-semibold text-apple-green">${l.type === 'ME_PAGARON' ? 'Me devolvió' : 'Le pagué'}</span>
                 </div>
               </div>
               <span class="font-mono font-bold text-apple-green">
@@ -4784,7 +4939,19 @@
 
       const equivPrestado = totalPrestadoEur + (totalPrestadoPen / curPenRate);
       const equivPagado = totalPagadoEur + (totalPagadoPen / curPenRate);
-      const restaEquiv = equivPrestado - equivPagado;
+      const restaEquiv = activeContactLoanSide === 'payable'
+        ? (equivPrestado - equivPagado)
+        : (equivPrestado - equivPagado);
+
+      const isPayableDossier = activeContactLoanSide === 'payable';
+      if (dLabelPrest) dLabelPrest.innerText = activeContactLoanFilter === 'ALL' ? 'Origen de movimientos' : (isPayableDossier ? 'Me prestaron' : 'Yo presté');
+      if (dLabelPag) dLabelPag.innerText = activeContactLoanFilter === 'ALL' ? 'Pagos y devoluciones' : (isPayableDossier ? 'Yo pagué' : 'Me pagaron');
+      if (dOriginHeading) {
+        dOriginHeading.innerHTML = `<i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>${activeContactLoanFilter === 'ALL' ? 'Origen de la relación' : (isPayableDossier ? 'Origen de lo que debes' : 'Origen de lo que te deben')}`;
+      }
+      if (dPaymentsHeading) {
+        dPaymentsHeading.innerHTML = `<i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i>${activeContactLoanFilter === 'ALL' ? 'Pagos y devoluciones' : (isPayableDossier ? 'Pagos que hiciste' : 'Pagos recibidos')}`;
+      }
 
       const dosTotPrest = document.getElementById('dossier-total-prestado');
       if (dosTotPrest) animateNumericValue(dosTotPrest, equivPrestado, formatEUR);
@@ -4805,7 +4972,10 @@
       }
 
       const dosRestaBreak = document.getElementById('dossier-resta-breakdown');
-      if (dosRestaBreak) dosRestaBreak.innerText = restaEquiv >= 0 ? 'Te debe este monto' : 'Saldo a su favor';
+      if (dosRestaBreak) {
+        if (activeContactLoanFilter === 'ALL') dosRestaBreak.innerText = 'Balance neto de todos los movimientos';
+        else dosRestaBreak.innerText = isPayableDossier ? (restaEquiv >= 0 ? 'Debes este monto' : 'Saldo revisado') : (restaEquiv >= 0 ? 'Te debe este monto' : 'Saldo revisado');
+      }
 
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-xs text-apple-gray-400">Sin movimientos que mostrar</td></tr>`;
@@ -4813,10 +4983,10 @@
       }
 
       const flowTags = {
-        'YO_PRESTE': { label: 'Yo presté', cls: 'text-apple-orange bg-apple-orange/10' },
-        'ME_PAGARON': { label: 'Me pagaron', cls: 'text-apple-green bg-apple-green/10' },
-        'ME_PRESTARON': { label: 'Me prestaron', cls: 'text-apple-purple bg-apple-purple/10' },
-        'YO_PAGUE': { label: 'Yo pagué', cls: 'text-apple-blue bg-apple-blue/10' }
+        'YO_PRESTE': { label: 'Le presté', cls: 'text-apple-orange bg-apple-orange/10' },
+        'ME_PAGARON': { label: 'Me devolvió', cls: 'text-apple-green bg-apple-green/10' },
+        'ME_PRESTARON': { label: 'Me prestó', cls: 'text-apple-purple bg-apple-purple/10' },
+        'YO_PAGUE': { label: 'Le pagué', cls: 'text-apple-blue bg-apple-blue/10' }
       };
 
       filtered.forEach(l => {
@@ -4831,9 +5001,11 @@
         if (l.currency === 'PEN') amtFormatted = formatPEN(l.amount);
         if (l.currency === 'USD') amtFormatted = formatUSD(l.amount);
 
+        const rowSide = (l.type === 'YO_PRESTE' || l.type === 'ME_PAGARON') ? 'receivable' : 'payable';
+        const safePersonForClick = JSON.stringify(String(l.person || ''));
         tr.innerHTML = `
           <td class="py-3 px-3 font-mono text-[11px] text-apple-gray-500">${l.date}</td>
-          <td class="py-3 px-3 font-bold text-apple-gray-900 dark:text-white cursor-pointer hover:text-apple-blue" onclick="filterLoanByPerson('${l.person}')">${l.person}</td>
+          <td class="py-3 px-3 font-bold text-apple-gray-900 dark:text-white cursor-pointer hover:text-apple-blue" onclick='filterLoanByPerson(${safePersonForClick}, "${rowSide}")'>${l.person}</td>
           <td class="py-3 px-3 text-apple-gray-700 dark:text-apple-gray-300 font-medium">${l.notes || '—'}</td>
           <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${tag.cls}">${tag.label}</span></td>
           <td class="py-3 px-3 font-medium text-apple-gray-600 dark:text-apple-gray-300">${l.currency}</td>
@@ -5879,6 +6051,7 @@
       // El deudor se crea al guardar su primer movimiento; no duplicamos contactos
       // en una tabla separada. Abrimos directamente el flujo de alta y enfocamos el nombre.
       activeContactLoanFilter = 'ALL';
+      activeContactLoanSide = 'ALL';
       openLoanModal();
       requestAnimationFrame(() => {
         const person = document.querySelector('#form-loan [name="person"]');
@@ -5929,8 +6102,14 @@
         // hereda automáticamente esa persona para evitar volver a buscarla.
         if (activeContactLoanFilter && activeContactLoanFilter !== 'ALL') {
           form.person.value = activeContactLoanFilter;
+          if (activeContactLoanSide === 'receivable') form.type.value = 'YO_PRESTE';
+          if (activeContactLoanSide === 'payable') form.type.value = 'ME_PRESTARON';
           if (title) title.innerText = `Nuevo movimiento · ${activeContactLoanFilter}`;
-          if (subtitle) subtitle.innerText = 'La persona seleccionada ya está preseleccionada';
+          if (subtitle) subtitle.innerText = activeContactLoanSide === 'receivable'
+            ? 'Añade un préstamo o una devolución de esta deuda.'
+            : activeContactLoanSide === 'payable'
+              ? 'Añade dinero recibido o un pago de esta deuda.'
+              : 'La persona seleccionada ya está preseleccionada';
         } else {
           if (title) title.innerText = 'Nuevo Movimiento de Préstamo';
           if (subtitle) subtitle.innerText = 'Verifica el tipo de cambio oficial antes de guardar';
@@ -5939,6 +6118,46 @@
       }
 
       openModal('modal-add-loan');
+    }
+
+
+    function openRelationPaymentModal() {
+      if (!activeContactLoanFilter || activeContactLoanFilter === 'ALL' || !['receivable', 'payable'].includes(activeContactLoanSide)) {
+        openLoanModal();
+        return;
+      }
+      openLoanModal();
+      const form = document.getElementById('form-loan');
+      const title = document.getElementById('loan-modal-title');
+      const subtitle = document.getElementById('loan-modal-subtitle');
+      if (!form) return;
+      form.person.value = activeContactLoanFilter;
+      if (activeContactLoanSide === 'receivable') {
+        form.type.value = 'ME_PAGARON';
+        if (title) title.innerText = `Registrar devolución · ${activeContactLoanFilter}`;
+        if (subtitle) subtitle.innerText = 'El importe se descontará de lo que esta persona te debe.';
+      } else {
+        form.type.value = 'YO_PAGUE';
+        if (title) title.innerText = `Registrar pago · ${activeContactLoanFilter}`;
+        if (subtitle) subtitle.innerText = 'El importe se descontará de lo que tú debes a esta persona.';
+      }
+    }
+
+    function getRelationBalanceEUR(person, side, excludeId = '') {
+      let balance = 0;
+      (state.loans || []).forEach(l => {
+        if (excludeId && String(l.id) === String(excludeId)) return;
+        if (String(l.person || '').trim() !== String(person || '').trim()) return;
+        const eur = getLoanEURValue(l);
+        if (side === 'receivable') {
+          if (l.type === 'YO_PRESTE') balance += eur;
+          if (l.type === 'ME_PAGARON') balance -= eur;
+        } else if (side === 'payable') {
+          if (l.type === 'ME_PRESTARON') balance += eur;
+          if (l.type === 'YO_PAGUE') balance -= eur;
+        }
+      });
+      return Math.max(0, Number(balance.toFixed(6)));
     }
 
     async function handleSaveLoan(e) {
@@ -5958,10 +6177,10 @@
         const rates = await fetchLiveFxRates();
 
         const catMap = {
-          'YO_PRESTE': 'Yo presté',
-          'ME_PAGARON': 'Me pagaron',
-          'ME_PRESTARON': 'Me prestaron',
-          'YO_PAGUE': 'Yo pagué'
+          'YO_PRESTE': 'Le presté',
+          'ME_PAGARON': 'Me devolvió',
+          'ME_PRESTARON': 'Me prestó',
+          'YO_PAGUE': 'Le pagué'
         };
 
         const currency = form.currency.value;
@@ -5978,6 +6197,19 @@
 
         if (!loanObj.persona || loanObj.monto <= 0) {
           throw new Error('Completa la persona y un monto válido.');
+        }
+
+        // Aviso, no bloqueo: un pago superior al saldo puede ser intencional,
+        // pero merece confirmación para evitar errores de registro.
+        const paymentSide = form.type.value === 'ME_PAGARON' ? 'receivable' : (form.type.value === 'YO_PAGUE' ? 'payable' : null);
+        if (paymentSide) {
+          const currentDebt = getRelationBalanceEUR(loanObj.persona, paymentSide, editId);
+          const paymentEUR = currency === 'EUR' ? loanObj.monto : (loanObj.monto / lockedRate);
+          if (paymentEUR > currentDebt + 0.005) {
+            const excess = paymentEUR - currentDebt;
+            const ok = confirm(`Este pago supera el saldo actual de ${loanObj.persona}.\n\nSaldo de la relación: ${formatEUR(currentDebt)}\nPago registrado: ${formatEUR(paymentEUR)}\nExceso: ${formatEUR(excess)}\n\n¿Quieres registrarlo igualmente?`);
+            if (!ok) throw new Error('Registro cancelado. El pago supera el saldo actual.');
+          }
         }
 
         if (supabaseClient) {
