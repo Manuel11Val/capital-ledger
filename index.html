@@ -87,8 +87,7 @@
   <!-- Supabase JS Client v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- SheetJS Excel Library -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- SheetJS se carga bajo demanda al importar Excel. -->
 
   <!-- Tailwind Apple Design System Tokens -->
   <script>
@@ -1206,7 +1205,159 @@
       .debtors-desktop-grid { display: grid !important; }
       .debtors-mobile-list { display: none !important; }
     }
-</style>
+body.liquidity-modal-open { overflow: hidden; }
+
+    /* Línea de tiempo compacta de la rotación diaria. */
+    .liquidity-rotation-timeline {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:0;
+      overflow-x:auto;
+      overflow-y:hidden;
+      padding:5px 2px 8px;
+      margin:0 0 10px;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+    }
+    .liquidity-rotation-timeline::-webkit-scrollbar { display:none; }
+    .liquidity-rotation-step {
+      position:relative;
+      flex:0 0 auto;
+      width:48px;
+      min-width:48px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:transform .28s cubic-bezier(.2,.8,.2,1), opacity .22s ease;
+      opacity:.52;
+    }
+    .liquidity-rotation-step::after {
+      content:'';
+      width:18px;
+      height:1px;
+      margin-left:5px;
+      background:rgba(60,60,67,.12);
+    }
+    .dark .liquidity-rotation-step::after { background:rgba(255,255,255,.10); }
+    .liquidity-rotation-step:last-child::after { display:none; }
+    .liquidity-rotation-step .rotation-logo {
+      width:30px;
+      height:30px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transform:scale(.9);
+      transition:transform .28s cubic-bezier(.2,.8,.2,1), filter .22s ease;
+    }
+    .liquidity-rotation-step.is-today {
+      width:62px;
+      min-width:62px;
+      opacity:1;
+      transform:translateY(-1px);
+    }
+    .liquidity-rotation-step.is-today .rotation-logo {
+      transform:scale(1.42);
+      filter:drop-shadow(0 5px 8px rgba(0,0,0,.12));
+    }
+    .liquidity-rotation-step.is-today::before {
+      content:'';
+      position:absolute;
+      bottom:-5px;
+      left:50%;
+      width:4px;
+      height:4px;
+      border-radius:999px;
+      background:currentColor;
+      transform:translateX(-50%);
+      opacity:.75;
+    }
+    @media (max-width:639px) {
+      .liquidity-rotation-timeline { padding-left:0; padding-right:0; justify-content:flex-start; }
+      .liquidity-rotation-step { width:44px; min-width:44px; }
+      .liquidity-rotation-step.is-today { width:58px; min-width:58px; }
+    }
+
+    /* Avisos compactos de rotación: hoy + mañana. */
+    .liquidity-bank-notices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .liquidity-bank-notice {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 11px;
+      border-radius: 17px;
+      border: 1px solid rgba(60,60,67,.07);
+      background: rgba(242,242,247,.62);
+      transition: transform .18s cubic-bezier(.2,.8,.2,1), background .18s ease;
+    }
+    .dark .liquidity-bank-notice {
+      background: rgba(44,44,46,.55);
+      border-color: rgba(255,255,255,.06);
+    }
+    .liquidity-bank-notice.is-today {
+      border-color: rgba(0,122,255,.14);
+      background: rgba(0,122,255,.055);
+    }
+    .liquidity-bank-notice:active { transform: scale(.985); }
+    .liquidity-bank-notice .notice-copy { min-width: 0; flex: 1; }
+    .liquidity-bank-notice .notice-kicker {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 8px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: #8e8e93;
+      margin-bottom: 4px;
+    }
+    .liquidity-bank-notice .notice-title {
+      font-size: 11px;
+      line-height: 1.15;
+      font-weight: 800;
+      color: #1d1d1f;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dark .liquidity-bank-notice .notice-title { color: #f5f5f7; }
+    .liquidity-bank-notice .notice-subtitle {
+      margin-top: 3px;
+      font-size: 9px;
+      line-height: 1.2;
+      color: #8e8e93;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .liquidity-bank-notice .notice-bank { flex: 0 0 auto; }
+    .liquidity-bank-notice .notice-bank .bank-mini-logo {
+      width: 34px !important;
+      height: 34px !important;
+      border-radius: 11px !important;
+    }
+    @media (max-width: 430px) {
+      .liquidity-bank-notices { gap: 6px; }
+      .liquidity-bank-notice { gap: 7px; padding: 9px; border-radius: 15px; }
+      .liquidity-bank-notice .notice-bank .bank-mini-logo {
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 10px !important;
+      }
+      .liquidity-bank-notice .notice-title { font-size: 10px; }
+      .liquidity-bank-notice .notice-subtitle { font-size: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .liquidity-bank-notice { transition: none !important; }
+    }
+    </style>
 
 <style>
   @media (max-width: 679px) {
@@ -1836,26 +1987,12 @@
       <!-- TAB 3: PRÉSTAMOS, DEUDORES & DOSSIER MULTIDIVISA           -->
       <!-- ========================================================== -->
       <section id="view-prestamos" class="space-y-5 sm:space-y-6 hidden">
-
-        <!-- Resumen actual: importes pendientes, no movimientos históricos -->
-        <div class="grid grid-cols-3 gap-2 sm:gap-4">
-          <div class="apple-card min-w-0 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-ios-card border border-apple-blue/10">
-            <div class="flex items-center gap-1.5 text-apple-blue"><i data-lucide="arrow-down-left" class="w-3.5 h-3.5 shrink-0"></i><span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-wide">Te deben</span></div>
-            <h3 id="prestamos-total-prestado" class="text-sm sm:text-2xl md:text-3xl font-black font-mono text-apple-blue mt-2 break-words">€0,00</h3>
-            <p id="prestamos-count-receivable" class="text-[9px] sm:text-[10px] text-apple-gray-400 mt-1 leading-tight">0 personas pendientes</p>
-          </div>
-          <div class="apple-card min-w-0 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-ios-card border border-apple-red/10">
-            <div class="flex items-center gap-1.5 text-apple-red"><i data-lucide="arrow-up-right" class="w-3.5 h-3.5 shrink-0"></i><span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-wide">Tú debes</span></div>
-            <h3 id="prestamos-total-cobrado" class="text-sm sm:text-2xl md:text-3xl font-black font-mono text-apple-red mt-2 break-words">€0,00</h3>
-            <p id="prestamos-count-payable" class="text-[9px] sm:text-[10px] text-apple-gray-400 mt-1 leading-tight">0 personas pendientes</p>
-          </div>
-          <div class="apple-card min-w-0 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-ios-card border border-apple-gray-200/70 dark:border-apple-gray-700/70">
-            <div class="flex items-center gap-1.5 text-apple-gray-500"><i data-lucide="scale" class="w-3.5 h-3.5 shrink-0"></i><span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-wide">Balance</span></div>
-            <h3 id="prestamos-net-eur" class="text-sm sm:text-2xl md:text-3xl font-black font-mono text-apple-blue mt-2 break-words">€0,00</h3>
-            <p class="text-[9px] sm:text-[10px] text-apple-gray-400 mt-1 leading-tight">Balance neto</p>
-          </div>
+        <div class="apple-card rounded-3xl p-4 sm:p-5 shadow-ios-card">
+          <div class="flex items-center gap-2 mb-3"><i data-lucide="wallet" class="w-4 h-4 text-apple-blue"></i><h3 class="text-sm font-bold">Liquidez y recomendaciones</h3></div>
+          <div id="liquidity-advisor-content"><p class="text-xs text-apple-gray-400">Calculando distribución de saldos…</p></div>
         </div>
 
+        <!-- Resumen unificado: los importes y filtros viven en el directorio de deudas. -->
         <!-- Debtors Directory & Dossier -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
 
@@ -3224,7 +3361,8 @@
         return true;
       } catch (err) {
         console.warn("Sincronización fallback local:", err);
-        setCloudStatus(false, "Desconectado");
+        setCloudStatus(false, navigator.onLine ? "Error de nube" : "Sin conexión");
+        if (manualTrigger || !navigator.onLine) showToast('No se pudo sincronizar', navigator.onLine ? 'La nube rechazó la operación o no respondió. Tus datos locales se conservan; vuelve a sincronizar.' : 'No hay cobertura. Los cambios en la nube quedan pendientes hasta recuperar conexión.', false);
         return false;
       } finally {
         if (syncIcon) syncIcon.classList.remove('animate-spin');
@@ -4091,7 +4229,7 @@
       let totalSpent = 0;
       (state.personalExpenses || []).forEach(exp => {
         if (fixedExpenseIdsInCycle.has(String(exp.id))) return;
-        const d = new Date(exp.date);
+        const d = typeof exp.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(exp.date) ? new Date(`${exp.date}T12:00:00`) : new Date(exp.date);
         if (d >= cycleStart && d <= cycleEnd) {
           totalSpent += Number(exp.amount || 0);
         }
@@ -4382,7 +4520,7 @@
       document.getElementById('pay-fixed-id').value = f.id;
       document.getElementById('pay-fixed-concept').innerText = f.concept;
       document.getElementById('pay-fixed-amount').innerText = formatEUR(f.amount);
-      document.getElementById('pay-fixed-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('pay-fixed-date').value = getLocalDateISO(new Date());
 
       const selBank = document.getElementById('pay-fixed-bank-select');
       if (selBank) {
@@ -4608,6 +4746,226 @@
       requestAnimationFrame(tick);
     }
 
+
+    // Fecha ISO en hora local: evita que toISOString() desplace el día en UTC.
+    function getLocalDateISO(date = new Date()) {
+      const d = date instanceof Date ? date : new Date(date);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    // ROTACIÓN DE LIQUIDEZ — FUENTE ÚNICA
+    // La fecha determina el banco; el orden nunca se reinicia.
+    // 08/10/2026 = Santander (índice 0), según la rotación fijada para esta versión.
+    const DAILY_FUNDING_ROTATION = [
+      'Santander', 'BBVA', 'Imagin', 'Sabadell',
+      'ING', 'N26', 'Trade', 'Openbank'
+    ];
+
+    function getDailyFundingBank(date = new Date()) {
+      const rotation = DAILY_FUNDING_ROTATION;
+      const start = new Date(2026, 9, 8, 12, 0, 0);
+      const current = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+      const elapsed = Math.floor((current.getTime() - start.getTime()) / 86400000);
+      const index = ((elapsed % rotation.length) + rotation.length) % rotation.length;
+      return { bank: rotation[index], index, elapsed, rotation };
+    }
+
+    // La calculadora se abre como ventana flotante, igual que el editor de saldos.
+    // Solo propone operaciones: nunca ejecuta ni registra transferencias.
+    function openLiquidityCalculator() {
+      window.__liquidityModalOpen = true;
+      renderLiquidityAdvisor();
+      document.body.classList.add('liquidity-modal-open');
+    }
+
+    function closeLiquidityCalculator() {
+      window.__liquidityModalOpen = false;
+      const modal = document.getElementById('liquidity-calculator-modal');
+      if (modal) modal.classList.add('hidden');
+      document.body.classList.remove('liquidity-modal-open');
+    }
+
+    function renderLiquidityAdvisor() {
+      const host = document.getElementById('liquidity-advisor-content');
+      if (!host) return;
+      // Capturar los valores ANTES de retirar el modal del DOM. Si se elimina
+      // primero, los campos desaparecen y el objetivo vuelve erróneamente a 350.
+      const previousTarget = document.getElementById('liquidity-target-bank')?.value;
+      const previousAmount = document.getElementById('liquidity-amount')?.value;
+      const previousReserve = document.getElementById('liquidity-reserve')?.value;
+      // La ventana se monta directamente en body para que ningún apple-card,
+      // contenedor con overflow o transform la recorte dentro del módulo.
+      document.getElementById('liquidity-calculator-modal')?.remove();
+      const banks = state.bancos || {};
+      const today = new Date();
+      const todayRotation = getDailyFundingBank(today);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const rotation = getDailyFundingBank(tomorrow);
+      const bankNames = DAILY_FUNDING_ROTATION;
+      const dailyBank = rotation.bank;
+      const targetBank = previousTarget || dailyBank;
+      const amount = Math.max(0, Number(previousAmount ?? 350) || 0);
+      const reserve = Math.max(0, Number(previousReserve ?? 50) || 0);
+      const currentBalance = Math.max(0, Number(banks[targetBank] || 0));
+      const needed = Math.max(0, amount - currentBalance);
+
+      // Se conserva el cálculo original: solo cuentas de la rotación, reserva por banco
+      // y prioridad para las cuentas con mayor excedente disponible.
+      const sources = bankNames
+        .filter(name => name !== targetBank)
+        .map(name => ({ name, balance: Math.max(0, Number(banks[name] || 0)), surplus: Math.max(0, Number(banks[name] || 0) - reserve) }))
+        .filter(item => item.surplus > 0)
+        .sort((a, b) => b.surplus - a.surplus);
+      let remaining = needed;
+      const route = [];
+      for (const source of sources) {
+        if (remaining <= 0.005) break;
+        const transfer = Math.min(source.surplus, remaining);
+        if (transfer > 0.005) {
+          route.push({ ...source, transfer: Math.round(transfer * 100) / 100, after: Math.round((source.balance - transfer) * 100) / 100 });
+          remaining = Math.max(0, Math.round((remaining - transfer) * 100) / 100);
+        }
+      }
+      const covered = remaining <= 0.005;
+      const fixed = (state.personalFixedExpenses || []).filter(x => Number(x.amount) > 0);
+      const day = today.getDate();
+      const warnings = fixed.filter(x => Number(x.chargeDay || 1) >= day && Number(banks[x.bank] || 0) < Number(x.amount || 0));
+      const fmt = value => formatEUR(Number(value) || 0);
+      const dateText = tomorrow.toLocaleDateString('es-ES', { day: '2-digit', month: 'long' });
+      const targetBalance = Math.max(0, Number(banks[dailyBank] || 0));
+      const targetMissing = Math.max(0, 350 - targetBalance);
+      // Movimientos sugeridos para la tarjeta principal: siempre calculados
+      // para el banco que toca mañana y el objetivo orientativo de 350 €.
+      const quickSources = bankNames
+        .filter(name => name !== dailyBank)
+        .map(name => ({ name, balance: Math.max(0, Number(banks[name] || 0)), surplus: Math.max(0, Number(banks[name] || 0) - 50) }))
+        .filter(item => item.surplus > 0)
+        .sort((a, b) => b.surplus - a.surplus);
+      let quickRemaining = targetMissing;
+      const quickRoute = [];
+      for (const source of quickSources) {
+        if (quickRemaining <= 0.005) break;
+        const transfer = Math.min(source.surplus, quickRemaining);
+        if (transfer > 0.005) {
+          quickRoute.push({ ...source, transfer: Math.round(transfer * 100) / 100, after: Math.round((source.balance - transfer) * 100) / 100 });
+          quickRemaining = Math.max(0, Math.round((quickRemaining - transfer) * 100) / 100);
+        }
+      }
+      const modalOpen = !!window.__liquidityModalOpen;
+
+      host.innerHTML = `
+        <div class="liquidity-rotation-timeline" aria-label="Línea de tiempo de la rotación de bancos">
+          ${DAILY_FUNDING_ROTATION.map((name, i) => `
+            <div class="liquidity-rotation-step ${name === todayRotation.bank ? 'is-today' : ''}" aria-label="${name}${name === todayRotation.bank ? ', banco de hoy' : ''}">
+              <div class="rotation-logo">${getBankMiniLogo(name)}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="liquidity-bank-notices" aria-label="Rotación de bancos">
+          <div class="liquidity-bank-notice is-today">
+            <div class="notice-bank">${getBankMiniLogo(todayRotation.bank)}</div>
+            <div class="notice-copy">
+              <div class="notice-kicker">
+                <span>Hoy</span><span>·</span>
+                <span>${today.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }).replace('.', '').toUpperCase()}</span>
+              </div>
+              <div class="notice-title">Utilizar ${todayRotation.bank}</div>
+              <div class="notice-subtitle">Banco asignado para hoy</div>
+            </div>
+          </div>
+
+          <div class="liquidity-bank-notice">
+            <div class="notice-bank">${getBankMiniLogo(dailyBank)}</div>
+            <div class="notice-copy">
+              <div class="notice-kicker">
+                <span>Mañana</span><span>·</span><span>${dateText}</span>
+              </div>
+              <div class="notice-title">Preparar ${dailyBank}</div>
+              <div class="notice-subtitle">Siguiente banco de la rotación</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl p-3.5 sm:p-4 bg-apple-blue/8 dark:bg-apple-blue/10 border border-apple-blue/15">
+          <div class="flex items-center gap-3">
+            <div class="shrink-0">${getBankMiniLogo(dailyBank)}</div>
+            <div class="min-w-0 flex-1">
+              <p class="text-[10px] uppercase tracking-wider font-bold text-apple-gray-400">Preparación · ${dateText}</p>
+              <p class="font-bold text-base sm:text-lg">Toca cargar ${dailyBank}</p>
+              <p class="text-[11px] text-apple-gray-500 mt-0.5">Saldo actual: ${fmt(targetBalance)}</p>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="text-[9px] text-apple-gray-400">Objetivo</p>
+              <p class="font-mono font-black text-base sm:text-lg">350 €</p>
+              <p class="text-[10px] ${targetMissing > 0.005 ? 'text-apple-blue' : 'text-apple-green'} font-semibold">${targetMissing > 0.005 ? `+${fmt(targetMissing)}` : 'Cubierto'}</p>
+            </div>
+          </div>
+          <button type="button" onclick="openLiquidityCalculator()" class="ios-tap mt-3 w-full flex items-center justify-center gap-2 rounded-xl bg-apple-blue text-white text-xs font-bold px-3 py-2.5 shadow-ios-sm hover:bg-blue-600 transition">
+            <i data-lucide="calculator" class="w-4 h-4"></i> Ver operaciones recomendadas
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 opacity-80"></i>
+          </button>
+        </div>
+
+        <div class="mt-3 rounded-2xl border border-apple-gray-200/70 dark:border-apple-gray-700/70 p-3">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-apple-gray-500">Movimientos recomendados</p>
+            <span class="text-[9px] text-apple-gray-400">Solo sugerencias</span>
+          </div>
+          ${targetMissing <= 0.005 ? `<div class="flex items-center gap-2 rounded-xl bg-apple-green/10 px-2.5 py-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-apple-green"></i><p class="text-[11px] font-semibold">${dailyBank} ya tiene al menos 350 €. No haría falta mover dinero.</p></div>` : quickRoute.length ? `<div class="space-y-1.5">${quickRoute.map(item => `<div class="flex items-center gap-2 rounded-xl px-2 py-2 bg-apple-gray-100/60 dark:bg-apple-gray-800/40"><div class="shrink-0">${getBankMiniLogo(item.name)}</div><div class="min-w-0 flex-1"><p class="text-[11px] font-semibold">${item.name} <span class="text-apple-gray-400 font-normal">→ ${dailyBank}</span></p><p class="text-[9px] text-apple-gray-500">Quedarían ${fmt(item.after)} en ${item.name}</p></div><p class="font-mono text-[11px] font-bold whitespace-nowrap">${fmt(item.transfer)}</p></div>`).join('')}</div>${quickRemaining > 0.005 ? `<p class="mt-2 text-[10px] text-apple-orange">Conservando 50 € por cuenta, aún faltarían ${fmt(quickRemaining)} para llegar a 350 €.</p>` : ''}` : `<p class="text-[11px] text-apple-gray-500">No hay saldo disponible para recomendar una transferencia sin bajar de la reserva de 50 €.</p>`}
+          ${warnings.length ? `<div class="mt-2 pt-2 border-t border-apple-gray-200/70 dark:border-apple-gray-700/70 space-y-1">${warnings.slice(0, 3).map(x => `<div class="flex items-start gap-1.5 text-[10px] text-apple-orange"><i data-lucide="calendar-clock" class="w-3 h-3 mt-0.5 shrink-0"></i><span>${x.concept}: ${x.bank} tiene ${fmt(banks[x.bank] || 0)}; gasto previsto ${fmt(x.amount)} (día ${x.chargeDay || 1}).</span></div>`).join('')}</div>` : ''}
+        </div>
+
+        <div id="liquidity-calculator-modal" class="${modalOpen ? '' : 'hidden'} fixed inset-0 z-[10020] flex items-center justify-center p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="liquidity-modal-title">
+          <button type="button" aria-label="Cerrar calculadora" onclick="closeLiquidityCalculator()" class="absolute inset-0 bg-black/40 backdrop-blur-[3px]"></button>
+          <div class="relative w-full max-w-xl max-h-[88dvh] overflow-y-auto rounded-3xl bg-white dark:bg-apple-gray-900 border border-apple-gray-200/70 dark:border-apple-gray-700 shadow-ios-float p-4 sm:p-5 animate-in">
+            <div class="flex items-start gap-3 mb-4">
+              <div class="w-10 h-10 rounded-2xl bg-apple-blue/10 flex items-center justify-center text-apple-blue"><i data-lucide="calculator" class="w-5 h-5"></i></div>
+              <div class="min-w-0 flex-1"><h3 id="liquidity-modal-title" class="text-base font-bold">Calculadora de liquidez</h3><p class="text-[11px] text-apple-gray-500 mt-0.5">Ruta sugerida para cargar ${targetBank}. No realiza movimientos.</p></div>
+              <button type="button" onclick="closeLiquidityCalculator()" class="ios-tap w-8 h-8 rounded-full bg-apple-gray-100 dark:bg-apple-gray-800 flex items-center justify-center text-apple-gray-500" aria-label="Cerrar"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+              <div class="rounded-2xl p-3 bg-apple-gray-100/70 dark:bg-apple-gray-800/60"><span class="text-[10px] text-apple-gray-400">Saldo destino</span><p class="font-mono font-black text-lg">${fmt(currentBalance)}</p><p class="text-[10px] text-apple-gray-400">${targetBank}</p></div>
+              <div class="rounded-2xl p-3 bg-apple-gray-100/70 dark:bg-apple-gray-800/60"><span class="text-[10px] text-apple-gray-400">Disponible para mover</span><p class="font-mono font-black text-lg">${fmt(sources.reduce((sum, item) => sum + item.surplus, 0))}</p><p class="text-[10px] text-apple-gray-400">Tras reservar ${fmt(reserve)}</p></div>
+              <div class="col-span-2 sm:col-span-1 rounded-2xl p-3 ${warnings.length ? 'bg-apple-orange/10' : 'bg-apple-gray-100/70 dark:bg-apple-gray-800/60'}"><span class="text-[10px] text-apple-gray-400">Gastos próximos</span><p class="font-semibold text-sm">${warnings.length ? `${warnings.length} por revisar` : 'Sin alertas'}</p></div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <label class="min-w-0"><span class="block text-[10px] text-apple-gray-400 mb-1">Destino</span><select id="liquidity-target-bank" onchange="renderLiquidityAdvisor()" class="w-full min-w-0 rounded-xl px-2.5 py-2 text-sm bg-apple-gray-100 dark:bg-apple-gray-800">${bankNames.map(name => `<option value="${name}" ${name === targetBank ? 'selected' : ''}>${name}${name === dailyBank ? ' · mañana' : ''}</option>`).join('')}</select></label>
+              <label class="min-w-0"><span class="block text-[10px] text-apple-gray-400 mb-1">Objetivo (€)</span><input id="liquidity-amount" type="number" min="0" step="0.01" inputmode="decimal" value="${amount}" class="w-full min-w-0 rounded-xl px-2.5 py-2 text-sm bg-apple-gray-100 dark:bg-apple-gray-800" /></label>
+              <label class="min-w-0"><span class="block text-[10px] text-apple-gray-400 mb-1">Reserva (€)</span><input id="liquidity-reserve" type="number" min="0" step="0.01" inputmode="decimal" value="${reserve}" class="w-full min-w-0 rounded-xl px-2.5 py-2 text-sm bg-apple-gray-100 dark:bg-apple-gray-800" /></label>
+              <button type="button" onclick="window.__liquidityModalOpen=true;renderLiquidityAdvisor()" class="self-end rounded-xl bg-apple-blue text-white text-xs font-bold px-3 py-2.5">Calcular</button>
+            </div>
+            ${warnings.length ? `<div class="mt-3 rounded-xl bg-apple-orange/10 p-3 space-y-1">${warnings.map(x => `<p class="text-[10px] text-apple-orange">${x.concept}: ${x.bank} tiene ${fmt(banks[x.bank] || 0)} y el gasto es ${fmt(x.amount)} (día ${x.chargeDay || 1}).</p>`).join('')}</div>` : ''}
+            <div class="mt-3 rounded-2xl p-3 ${needed <= 0.005 ? 'bg-apple-green/10' : covered ? 'bg-apple-blue/8 dark:bg-apple-blue/10' : 'bg-apple-orange/10'}">
+              ${needed <= 0.005 ? `<p class="text-sm font-semibold">No necesitas transferir.</p><p class="text-xs text-apple-gray-500 mt-1">${targetBank} ya tiene ${fmt(currentBalance)}.</p>` : `
+                <p class="text-sm font-semibold">${covered ? `Ruta sugerida: ${route.length} transferencia(s)` : 'Saldo insuficiente'}</p>
+                <p class="text-xs text-apple-gray-500 mt-1">A ${targetBank} le faltan ${fmt(needed)} para llegar a ${fmt(amount)}.</p>
+                ${route.length ? `<ol class="mt-3 space-y-2">${route.map((item, i) => `<li class="flex items-center gap-2 text-xs"><span class="w-5 h-5 shrink-0 rounded-full bg-apple-blue/10 text-apple-blue flex items-center justify-center font-bold">${i + 1}</span><span class="min-w-0 flex-1 flex items-center gap-2">${getBankMiniLogo(item.name)}<span><strong>${item.name}</strong><span class="text-apple-gray-500"> · ${fmt(item.balance)} → ${fmt(item.after)}</span></span></span><strong class="font-mono">${fmt(item.transfer)}</strong></li>`).join('')}</ol>` : ''}
+                ${covered ? `<p class="text-xs text-apple-gray-500 mt-3">Saldo final estimado: ${fmt(currentBalance + needed)}.</p>` : `<p class="text-xs text-apple-orange mt-3">Faltarían ${fmt(remaining)}. Reduce el objetivo o la reserva.</p>`}`}
+            </div>
+            <p class="text-[10px] text-apple-gray-400 mt-3">Estimación basada en los saldos guardados. Las recomendaciones son informativas y no se marcan como realizadas.</p>
+            <button type="button" onclick="closeLiquidityCalculator()" class="ios-tap mt-3 w-full rounded-xl px-4 py-2.5 text-xs font-bold bg-apple-gray-100 dark:bg-apple-gray-800">Cerrar</button>
+          </div>
+        </div>`;
+      // Sacar el modal del bloque de liquidez: position:fixed queda anclado
+      // al viewport y el fondo cubre toda la pantalla, no solo la tarjeta.
+      const liquidityModal = host.querySelector('#liquidity-calculator-modal');
+      if (liquidityModal) document.body.appendChild(liquidityModal);
+      if (window.lucide?.createIcons) window.lucide.createIcons();
+      if (modalOpen) document.body.classList.add('liquidity-modal-open');
+      else document.body.classList.remove('liquidity-modal-open');
+    }
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && window.__liquidityModalOpen) closeLiquidityCalculator();
+    });
+
+    function installOfflineSupport() {
+      window.addEventListener('offline', () => { setCloudStatus(false, 'Sin conexión'); showToast('Modo sin conexión', 'Puedes consultar la copia local; los cambios en la nube no se sincronizarán hasta recuperar internet.', false); });
+      window.addEventListener('online', () => { setCloudStatus(true, 'Conexión recuperada'); syncAllFromCloud(false); });
+    }
+
     // ==========================================================
     // MODULE 3: LOANS & DEBTORS
     // ==========================================================
@@ -4631,6 +4989,7 @@
 
       renderDebtorsDirectory();
       renderLoansTable();
+      renderLiquidityAdvisor();
       if (window.lucide) lucide.createIcons();
     }
 
@@ -4965,16 +5324,34 @@
       const dosPagBreak = document.getElementById('dossier-pagado-breakdown');
       if (dosPagBreak) dosPagBreak.innerText = `${totalPagadoEur > 0 ? formatEUR(totalPagadoEur) : ''} ${totalPagadoPen > 0 ? formatPEN(totalPagadoPen) : ''}`;
 
+      // Saldo nativo: se calcula por divisa sin compensar monedas distintas.
+      const nativeNet = { EUR: 0, PEN: 0, USD: 0 };
+      filtered.forEach(l => {
+        const sign = isPayableDossier
+          ? (l.type === 'ME_PRESTARON' ? 1 : l.type === 'YO_PAGUE' ? -1 : 0)
+          : (l.type === 'YO_PRESTE' ? 1 : l.type === 'ME_PAGARON' ? -1 : 0);
+        if (sign) nativeNet[l.currency || 'EUR'] = (nativeNet[l.currency || 'EUR'] || 0) + sign * Number(l.amount || 0);
+      });
+      const activeCurrencies = Object.keys(nativeNet).filter(c => Math.abs(nativeNet[c]) >= 0.005);
+      const nativeParts = activeCurrencies.map(c => c === 'PEN' ? formatPEN(nativeNet[c]) : c === 'USD' ? formatUSD(nativeNet[c]) : formatEUR(nativeNet[c]));
+      const nativeOnly = activeCurrencies.length === 1 ? activeCurrencies[0] : null;
       const elResta = document.getElementById('dossier-resta');
       if (elResta) {
-        animateNumericValue(elResta, restaEquiv, formatEUR);
+        if (activeContactLoanFilter !== 'ALL' && nativeOnly) {
+          elResta.textContent = nativeOnly === 'PEN' ? formatPEN(nativeNet.PEN) : nativeOnly === 'USD' ? formatUSD(nativeNet.USD) : formatEUR(nativeNet.EUR);
+        } else if (activeContactLoanFilter !== 'ALL' && activeCurrencies.length > 1) {
+          elResta.textContent = nativeParts.join(' + ');
+        } else {
+          elResta.textContent = formatEUR(restaEquiv);
+        }
         elResta.className = `text-sm sm:text-base font-black font-mono mt-0.5 ${restaEquiv >= 0 ? 'text-apple-blue' : 'text-apple-red'}`;
       }
 
       const dosRestaBreak = document.getElementById('dossier-resta-breakdown');
       if (dosRestaBreak) {
-        if (activeContactLoanFilter === 'ALL') dosRestaBreak.innerText = 'Balance neto de todos los movimientos';
-        else dosRestaBreak.innerText = isPayableDossier ? (restaEquiv >= 0 ? 'Debes este monto' : 'Saldo revisado') : (restaEquiv >= 0 ? 'Te debe este monto' : 'Saldo revisado');
+        const contextLabel = activeContactLoanFilter === 'ALL' ? 'Balance neto de todos los movimientos' : (isPayableDossier ? (restaEquiv >= 0 ? 'Debes este monto' : 'Saldo revisado') : (restaEquiv >= 0 ? 'Te debe este monto' : 'Saldo revisado'));
+        const mixedEquivalent = activeContactLoanFilter !== 'ALL' && activeCurrencies.length > 1 ? `Equivalente aprox.: ${formatEUR(restaEquiv)} · ${contextLabel}` : contextLabel;
+        dosRestaBreak.innerText = mixedEquivalent;
       }
 
       if (filtered.length === 0) {
@@ -5174,8 +5551,8 @@
       const src = domain ? `https://cdn.brandfetch.io/${domain}/w/128/h/128` : '';
       const fallbackSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : '';
       return `<span class="bank-mini-logo bank-mini-logo-real w-8 h-8 shrink-0 rounded-[10px] bg-white dark:bg-white flex items-center justify-center shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden" title="${cleanName || ''}">` +
-        (src ? `<img src="${src}" alt="${cleanName || ''}" class="bank-mini-logo-img" loading="eager" referrerpolicy="no-referrer" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='${fallbackSrc}';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">` : '') +
-        `<span class="bank-mini-logo-fallback" style="${src ? 'display:none;' : ''}">${fallback}</span></span>`;
+        (src ? `<img src="${src}" data-fallback-src="${fallbackSrc}" alt="" class="bank-mini-logo-img" loading="lazy" referrerpolicy="no-referrer" onload="this.nextElementSibling.style.display='none'" onerror="if(this.dataset.fallbackTried!=='1'&&this.dataset.fallbackSrc){this.dataset.fallbackTried='1';this.src=this.dataset.fallbackSrc;}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">` : '') +
+        `<span class="bank-mini-logo-fallback bank-logo-fallback" style="${src ? 'display:none;' : 'display:flex;'}">${fallback}</span></span>`;
     }
 
     function openAllBankEditor() {
@@ -6326,14 +6703,31 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Capital_Ledger_Supabase_Backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `Capital_Ledger_Supabase_Backup_${getLocalDateISO(new Date())}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
 
+    let sheetJsLoadPromise = null;
+    async function ensureSheetJS() {
+      if (window.XLSX) return window.XLSX;
+      if (!sheetJsLoadPromise) sheetJsLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+        script.async = true;
+        script.onload = () => window.XLSX ? resolve(window.XLSX) : reject(new Error('SheetJS no se inicializó.'));
+        script.onerror = () => { sheetJsLoadPromise = null; reject(new Error('No se pudo cargar el importador Excel. Comprueba tu conexión.')); };
+        document.head.appendChild(script);
+      });
+      return sheetJsLoadPromise;
+    }
+
     async function handleExcelFileUpload(event) {
+      try { await ensureSheetJS(); }
+      catch (err) { showToast('Importador no disponible', err.message || 'Conéctate a internet e inténtalo de nuevo.', false); event.target.value = ''; return; }
+
       const file = event.target.files[0];
       if (!file) return;
 
@@ -6349,7 +6743,7 @@
             for (let r = 6; r < jsonPrest.length; r++) {
               const row = jsonPrest[r];
               if (!row || !row[0] || !row[1] || row[5] === null) continue;
-              let fechaVal = row[0] instanceof Date ? row[0].toISOString().split('T')[0] : String(row[0]).split(' ')[0];
+              let fechaVal = row[0] instanceof Date ? getLocalDateISO(row[0]) : String(row[0]).split(' ')[0];
               const persona = String(row[1]).trim();
               const asunto = row[2] ? String(row[2]).trim() : 'Préstamo';
               let categoria = row[3] ? String(row[3]).trim() : 'Yo presté';
@@ -6376,7 +6770,7 @@
             for (let r = 8; r < jsonPers.length; r++) {
               const row = jsonPers[r];
               if (!row || !row[0] || row[1] === null) continue;
-              let fechaVal = row[0] instanceof Date ? row[0].toISOString().split('T')[0] : String(row[0]).split(' ')[0];
+              let fechaVal = row[0] instanceof Date ? getLocalDateISO(row[0]) : String(row[0]).split(' ')[0];
               const gasto = parseFloat(row[1]) || 0;
               const concepto = row[2] ? String(row[2]).trim() : 'Gasto personal';
               const banco = row[3] ? String(row[3]).trim() : 'N26';
@@ -6495,6 +6889,7 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
+      installOfflineSupport();
       try {
         const cached = localStorage.getItem(LOCAL_STORAGE_BACKUP);
         if (cached) {
