@@ -30,6 +30,11 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231C1C1E'/%3E%3Cstop offset='100%25' stop-color='%23000000'/%3E%3C/linearGradient%3E%3ClinearGradient id='accent' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23007AFF'/%3E%3Cstop offset='100%25' stop-color='%2334C759'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='128' fill='url(%23bg)'/%3E%3Crect x='80' y='140' width='352' height='190' rx='28' fill='%232C2C2E' stroke='rgba(255,255,255,0.1)' stroke-width='6'/%3E%3Crect x='80' y='190' width='352' height='190' rx='28' fill='url(%23accent)'/%3E%3Ccircle cx='140' cy='245' r='20' fill='white' opacity='0.9'/%3E%3Crect x='180' y='235' width='160' height='20' rx='10' fill='white' opacity='0.85'/%3E%3C/svg%3E">
   <link rel="apple-touch-icon" id="dynamic-apple-icon">
 
+  <link rel="preconnect" href="https://twslpgpawqrxpadrrshb.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://cdn.brandfetch.io" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.brandfetch.io">
+  <link rel="dns-prefetch" href="https://joseolaya.com">
+
   <script>
     // Generador de PNG en alta resolución (180x180) para iOS Safari Home Screen
     (function generateCupertinoAppleTouchIcon() {
@@ -88,12 +93,59 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <script>
+    // Protege contra SecurityError en entornos sandbox (como Canvas) donde wss:// está restringido
+    (function guardRestrictedWebSocket() {
+      const NativeWebSocket = window.WebSocket;
+      if (!NativeWebSocket) return;
+      window.__WEBSOCKET_BLOCKED__ = false;
+
+      function SafeWebSocket(url, protocols) {
+        try {
+          return protocols !== undefined
+            ? new NativeWebSocket(url, protocols)
+            : new NativeWebSocket(url);
+        } catch (err) {
+          window.__WEBSOCKET_BLOCKED__ = true;
+          const dummy = {
+            url: String(url || ''),
+            readyState: 3, // CLOSED
+            protocol: '',
+            extensions: '',
+            bufferedAmount: 0,
+            binaryType: 'blob',
+             onopen: null,
+            onerror: null,
+            onclose: null,
+            onmessage: null,
+            send: function() {},
+            close: function() {},
+            addEventListener: function() {},
+            removeEventListener: function() {},
+            dispatchEvent: function() { return false; }
+          };
+          setTimeout(() => {
+            if (typeof dummy.onclose === 'function') {
+              dummy.onclose({ code: 1006, reason: 'WebSocket disabled in sandbox', wasClean: false });
+            }
+          }, 0);
+          return dummy;
+        }
+      }
+      SafeWebSocket.CONNECTING = NativeWebSocket.CONNECTING;
+      SafeWebSocket.OPEN = NativeWebSocket.OPEN;
+      SafeWebSocket.CLOSING = NativeWebSocket.CLOSING;
+      SafeWebSocket.CLOSED = NativeWebSocket.CLOSED;
+      SafeWebSocket.prototype = NativeWebSocket.prototype;
+      window.WebSocket = SafeWebSocket;
+    })();
+  </script>
+
   <!-- Supabase JS Client v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- SheetJS se carga bajo demanda al importar Excel. -->
 
-  <!-- Tailwind Apple Design System Tokens -->
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -164,10 +216,26 @@
       --sal: env(safe-area-inset-left, 0px);
       --sar: env(safe-area-inset-right, 0px);
     }
+    html, body {
+      overscroll-behavior-x: none;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-text-size-adjust: 100%;
+    }
     body {
       padding-top: var(--sat);
       padding-left: var(--sal);
       padding-right: var(--sar);
+      overscroll-behavior-y: none;
+    }
+
+    /* Optimización de pintado y GPU para evitar tirones al cambiar de pestaña */
+    #view-airtm, #view-personal, #view-prestamos {
+      will-change: opacity, transform;
+    }
+
+    /* Bloqueo limpio del scroll de fondo cuando el editor de bancos está abierto */
+    body.bank-editor-open {
+      overflow: hidden !important;
     }
 
     .apple-glass {
@@ -335,18 +403,37 @@
 
     @media (max-width: 679px) {
       /* Los formularios largos siguen siendo desplazables con el teclado móvil abierto. */
-      #modal-add-loan {
+      #modal-add-loan,
+      #modal-add-expense,
+      #modal-add-fixed-expense,
+      #modal-pay-fixed,
+      #modal-edit-acciones,
+      #modal-edit-madre {
         align-items: flex-start !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
         padding-top: max(12px, env(safe-area-inset-top, 0px)) !important;
         padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
       }
-      #modal-add-loan > .apple-card {
+      #modal-add-loan > .apple-card,
+      #modal-add-expense > .apple-card,
+      #modal-add-fixed-expense > .apple-card,
+      #modal-pay-fixed > .apple-card,
+      #modal-edit-acciones > .apple-card,
+      #modal-edit-madre > .apple-card {
         max-height: calc(100dvh - 24px);
         overflow-y: auto;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
+      }
+      /* Áreas de toque mínimas recomendadas por Apple HIG (44x44px) en controles móviles */
+      header button,
+      header label {
+        min-width: 38px;
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
       .ios-bottom-tabbar {
         left: 12px !important;
@@ -441,7 +528,7 @@
     .number-rolling {
       display: inline-block;
       transform-origin: 50% 60%;
-      animation: number-roll-in .55s cubic-bezier(.22,1,.36,1);
+      animation: number-roll-in .18s cubic-bezier(.2,.75,.25,1);
     }
 
     @keyframes number-roll-in {
@@ -452,12 +539,12 @@
 
     /* Final native-feel motion layer: restrained, fast and tactile. */
     .view-native-enter {
-      animation: view-native-enter .26s cubic-bezier(.22,1,.36,1) both;
+      animation: view-native-enter .12s cubic-bezier(.2,.75,.25,1) both;
       will-change: opacity, transform;
     }
 
     @keyframes view-native-enter {
-      from { opacity: .35; transform: translateY(7px); }
+      from { opacity: .75; transform: translateY(2px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
@@ -530,34 +617,53 @@
 
 
     /* ============================================================
-       BANK EDITOR — iOS / APPLE SHEET
-       Aislado del resto del responsive para no alterar las páginas.
+       BANK EDITOR — iOS / APPLE SHEET (COMPACTO Y DESPLAZABLE EN TODAS LAS PANTALLAS)
        ============================================================ */
     .bank-editor-modal {
       opacity: 1;
-      transition: opacity .24s ease;
+      transition: opacity .22s ease;
+      overscroll-behavior: contain;
     }
     .bank-editor-modal.hidden {
       opacity: 0;
       pointer-events: none;
     }
     .bank-editor-sheet {
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100%;
+      height: auto !important;
+      max-height: min(90dvh, calc(100dvh - 16px)) !important;
+      min-height: 0 !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      overscroll-behavior: contain !important;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      scrollbar-width: thin;
       transform: translateY(0) scale(1);
       transform-origin: center bottom;
-      transition: transform .38s cubic-bezier(.22,1,.36,1), opacity .28s ease;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .24s ease;
+    }
+    .bank-editor-sheet > .px-5 {
+      flex: 0 0 auto !important;
+    }
+    .bank-editor-sheet > .bank-editor-form {
+      flex: 0 0 auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
     }
     .bank-editor-modal.hidden .bank-editor-sheet {
-      transform: translateY(18px) scale(.985);
+      transform: translateY(20px) scale(.985);
       opacity: .01;
     }
     .bank-editor-grabber {
       width: 38px;
       height: 4px;
       border-radius: 999px;
-      margin: 9px auto 0;
-      background: rgba(120,120,128,.28);
+      margin: 10px auto 0;
+      background: rgba(120,120,128,.32);
+      flex-shrink: 0;
     }
     .bank-editor-kicker {
       font-size: 9px;
@@ -565,7 +671,7 @@
       letter-spacing: .14em;
       font-weight: 800;
       color: #8e8e93;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
     .bank-editor-close {
       transition: transform .18s ease, background .18s ease;
@@ -574,8 +680,8 @@
       transform: scale(.91);
     }
     .bank-editor-hero {
-      border-radius: 24px;
-      padding: 15px;
+      border-radius: 22px;
+      padding: 14px;
       background:
         radial-gradient(circle at 100% 0%, rgba(0,122,255,.11), transparent 42%),
         linear-gradient(145deg, rgba(242,242,247,.92), rgba(255,255,255,.96));
@@ -585,24 +691,24 @@
       background:
         radial-gradient(circle at 100% 0%, rgba(10,132,255,.16), transparent 42%),
         linear-gradient(145deg, rgba(44,44,46,.92), rgba(28,28,30,.96));
-      border-color: rgba(255,255,255,.07);
+      border-color: rgba(255,255,255,.08);
     }
     .bank-editor-logo-shell {
-      width: 48px;
-      height: 48px;
-      border-radius: 15px;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
       flex: 0 0 auto;
-      box-shadow: 0 8px 22px rgba(0,0,0,.10);
+      box-shadow: 0 6px 18px rgba(0,0,0,.10);
     }
     .bank-editor-logo-shell .bank-mini-logo {
-      width: 48px !important;
-      height: 48px !important;
-      border-radius: 15px !important;
-      box-shadow: 0 8px 22px rgba(0,0,0,.08) !important;
+      width: 44px !important;
+      height: 44px !important;
+      border-radius: 14px !important;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08) !important;
     }
     .bank-editor-logo-shell .bank-real-logo-img {
       width: 68%;
@@ -624,7 +730,7 @@
       justify-content: center;
     }
     .bank-editor-balance {
-      font-size: clamp(32px, 7vw, 46px);
+      font-size: clamp(30px, 7vw, 44px);
       line-height: .98;
       letter-spacing: -.045em;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -638,128 +744,31 @@
       align-items: center;
       gap: 6px;
       max-width: 100%;
-      padding: 7px 10px;
+      padding: 6px 10px;
       border-radius: 999px;
       font-size: 10px;
       font-weight: 750;
-      background: rgba(142,142,147,.10);
+      background: rgba(142,142,147,.12);
       color: #8e8e93;
       transition: color .22s ease, background .22s ease, transform .22s ease;
     }
     .bank-editor-delta.positive {
       color: #34c759;
-      background: rgba(52,199,89,.11);
+      background: rgba(52,199,89,.14);
     }
     .bank-editor-delta.negative {
       color: #ff3b30;
-      background: rgba(255,59,48,.10);
+      background: rgba(255,59,48,.14);
     }
     .bank-editor-delta.neutral {
       color: #8e8e93;
-      background: rgba(142,142,147,.10);
+      background: rgba(142,142,147,.12);
     }
     .bank-editor-delta.pulse {
       animation: bank-editor-delta-pulse .28s cubic-bezier(.22,1,.36,1);
     }
     @keyframes bank-editor-delta-pulse {
       50% { transform: scale(1.025); }
-    }
-    .bank-editor-summary,
-    .bank-editor-edit-block {
-      margin-top: 14px;
-      padding: 14px;
-      border-radius: 20px;
-      background: rgba(242,242,247,.64);
-      border: 1px solid rgba(60,60,67,.06);
-    }
-    .dark .bank-editor-summary,
-    .dark .bank-editor-edit-block {
-      background: rgba(44,44,46,.55);
-      border-color: rgba(255,255,255,.055);
-    }
-    .bank-editor-section-label {
-      font-size: 9px;
-      letter-spacing: .13em;
-      font-weight: 850;
-      color: #8e8e93;
-    }
-    .bank-editor-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(2,minmax(0,1fr));
-      gap: 10px;
-      margin-top: 11px;
-    }
-    .bank-editor-summary-grid > div {
-      min-width: 0;
-      padding: 10px 11px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.68);
-    }
-    .dark .bank-editor-summary-grid > div {
-      background: rgba(28,28,30,.60);
-    }
-    .bank-editor-summary-grid span {
-      display: block;
-      font-size: 9px;
-      color: #8e8e93;
-      margin-bottom: 4px;
-    }
-    .bank-editor-summary-grid strong {
-      display: block;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: 12px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-variant-numeric: tabular-nums;
-      color: #1d1d1f;
-    }
-    .dark .bank-editor-summary-grid strong { color: #f5f5f7; }
-    .bank-editor-inputs-grid {
-      display: grid;
-      grid-template-columns: minmax(0,1fr);
-      gap: 10px;
-    }
-    .bank-editor-input-card {
-      padding: 12px;
-      border-radius: 17px;
-      background: rgba(255,255,255,.78);
-      border: 1px solid rgba(60,60,67,.07);
-      animation: bank-editor-input-enter .32s cubic-bezier(.22,1,.36,1) both;
-    }
-    .dark .bank-editor-input-card {
-      background: rgba(28,28,30,.72);
-      border-color: rgba(255,255,255,.06);
-    }
-    @keyframes bank-editor-input-enter {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .bank-editor-input-card .bank-editor-field {
-      width: 100%;
-      border: 0;
-      outline: 0;
-      border-radius: 15px;
-      padding: 12px 13px;
-      background: rgba(242,242,247,.92);
-      color: #1d1d1f;
-      font-size: 22px;
-      line-height: 1;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      box-shadow: inset 0 0 0 1px rgba(60,60,67,.05);
-      transition: box-shadow .18s ease, background .18s ease, transform .18s ease;
-    }
-    .dark .bank-editor-input-card .bank-editor-field {
-      background: rgba(44,44,46,.92);
-      color: #fff;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-    }
-    .bank-editor-input-card .bank-editor-field:focus {
-      box-shadow: inset 0 0 0 2px rgba(0,122,255,.62), 0 5px 18px rgba(0,122,255,.08);
-      transform: translateY(-1px);
     }
     .bank-editor-currency-chip {
       padding: 4px 8px;
@@ -769,16 +778,21 @@
       font-weight: 800;
       letter-spacing: .08em;
       color: #007aff;
-      background: rgba(0,122,255,.10);
+      background: rgba(0,122,255,.12);
     }
     .bank-editor-actions {
+      position: sticky;
+      bottom: 0;
+      z-index: 12;
       display: flex;
       gap: 9px;
       margin-top: 14px;
-      padding-top: 14px;
+      padding-top: 12px;
+      padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
       border-top: 1px solid rgba(60,60,67,.08);
+      background: inherit;
     }
-    .dark .bank-editor-actions { border-top-color: rgba(255,255,255,.07); }
+    .dark .bank-editor-actions { border-top-color: rgba(255,255,255,.08); }
     .bank-editor-cancel,
     .bank-editor-save {
       min-height: 46px;
@@ -804,27 +818,17 @@
       gap: 7px;
       color: #fff;
       background: linear-gradient(135deg,#007aff,#0a84ff);
-      box-shadow: 0 9px 22px rgba(0,122,255,.20);
+      box-shadow: 0 9px 22px rgba(0,122,255,.22);
     }
     .bank-editor-cancel:active,
     .bank-editor-save:active { transform: scale(.985); }
     .bank-editor-save.is-saving { opacity: .72; pointer-events: none; }
     .bank-editor-save.is-saved { background: linear-gradient(135deg,#34c759,#30d158); }
-    .bank-editor-empty {
-      padding: 14px;
-      border-radius: 16px;
-      color: #8e8e93;
-      font-size: 11px;
-      text-align: center;
-      background: rgba(142,142,147,.08);
-    }
 
     @media (min-width: 640px) {
-      .bank-editor-inputs-grid.bank-editor-multi {
-        grid-template-columns: repeat(2,minmax(0,1fr));
-      }
       .bank-editor-sheet {
         transform-origin: center center;
+        max-height: min(88dvh, calc(100dvh - 32px)) !important;
       }
       .bank-editor-modal.hidden .bank-editor-sheet {
         transform: translateY(10px) scale(.975);
@@ -832,167 +836,37 @@
     }
 
     @media (max-width: 639px) {
-      /*
-       * BANK EDITOR — MOBILE / KEYBOARD SAFE
-       * La hoja usa el alto real del visual viewport cuando aparece el teclado.
-       * El contenido es el que hace scroll; las acciones quedan siempre accesibles.
-       */
-      .bank-editor-modal {
+      /* En móvil la hoja se ancla abajo con altura automática ajustada a su contenido,
+         y si la pantalla o el teclado reducen el espacio, hace scroll interno fluido. */
+      #modal-quick-balance.bank-editor-modal {
+        position: fixed !important;
+        top: var(--bank-editor-visual-top, 0px) !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: auto !important;
         height: var(--bank-editor-visual-height, 100dvh) !important;
-        max-height: none !important;
-        overflow: hidden !important;
         align-items: flex-end !important;
         padding: 0 !important;
-      }
-
-      .bank-editor-sheet {
-        width: 100%;
-        height: min(
-          calc(var(--bank-editor-visual-height, 100dvh) - max(8px, env(safe-area-inset-top, 0px))),
-          94dvh
-        ) !important;
-        max-height: none !important;
-        min-height: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        padding-bottom: 0 !important;
         overflow: hidden !important;
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
-        touch-action: pan-y;
-        scrollbar-width: none;
       }
 
-      .bank-editor-sheet::-webkit-scrollbar {
-        display: none;
+      #modal-quick-balance .bank-editor-sheet {
+        width: 100% !important;
+        height: auto !important;
+        max-height: calc(var(--bank-editor-visual-height, 100dvh) - max(8px, env(safe-area-inset-top, 0px))) !important;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
       }
 
-      /* Cabecera/hero no se mueve: solo se desplaza el contenido editable. */
-      .bank-editor-sheet > .px-5 {
-        flex: 0 0 auto !important;
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-        padding-top: 10px !important;
-        padding-bottom: 8px !important;
-      }
-
-      .bank-editor-sheet > .bank-editor-form {
-        flex: 1 1 auto !important;
-        min-height: 0 !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: contain;
-        touch-action: pan-y;
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-        padding-bottom: 12px !important;
-        scrollbar-width: none;
-      }
-
-      .bank-editor-sheet > .bank-editor-form::-webkit-scrollbar {
-        display: none;
-      }
-
-      .bank-editor-hero {
-        margin-top: 8px !important;
-        padding: 11px !important;
-        border-radius: 20px !important;
-      }
-
-      .bank-editor-summary,
-      .bank-editor-edit-block {
-        margin-top: 9px !important;
-        padding: 11px !important;
-        border-radius: 17px !important;
-      }
-
-      .bank-editor-input-card {
-        padding: 12px !important;
-        border-radius: 18px !important;
-      }
-
-      .bank-editor-input-card .bank-editor-field {
-        font-size: 20px !important;
-        line-height: 1.15 !important;
-        padding: 13px 14px !important;
-        min-height: 52px !important;
-        height: 52px !important;
-      }
-
-      .bank-editor-input-card:focus-within {
-        border-color: rgba(0,122,255,.24) !important;
-        box-shadow: 0 6px 20px rgba(0,122,255,.07) !important;
-      }
-
-      /*
-       * Guardar queda pegado al borde inferior del área desplazable.
-       * Así sigue disponible aunque el teclado reduzca el visual viewport.
-       */
-      .bank-editor-actions {
-        position: sticky !important;
-        bottom: 0 !important;
-        z-index: 12 !important;
-        margin: 12px -16px 0 !important;
-        padding: 11px 16px max(11px, env(safe-area-inset-bottom, 0px)) !important;
-        border-top: 1px solid rgba(60,60,67,.08);
-        background: rgba(245,245,247,.94);
-        -webkit-backdrop-filter: blur(22px) saturate(160%);
-        backdrop-filter: blur(22px) saturate(160%);
-      }
-
-      .dark .bank-editor-actions {
-        border-top-color: rgba(255,255,255,.07);
-        background: rgba(28,28,30,.94);
-      }
-
-      .bank-editor-cancel,
-      .bank-editor-save {
-        min-height: 50px !important;
-      }
-
-      /* Espacio extra al final: permite que el campo activo se coloque
-         cómodamente por encima de la barra de acciones cuando aparece el teclado. */
-      .bank-editor-form {
-        scroll-padding-top: 18px !important;
-        scroll-padding-bottom: 112px !important;
-      }
-
-      /*
-       * Mientras el editor está abierto, la navegación no compite con la hoja.
-       * No usamos transform para ocultarla: display:none evita cualquier capa
-       * que pueda interceptar gestos o crear un stacking context extraño.
-       */
-      html.bank-editor-open .ios-bottom-tabbar {
+      body.bank-editor-open .ios-bottom-tabbar {
         display: none !important;
-      }
-
-      .bank-editor-sheet input,
-      .bank-editor-sheet button,
-      .bank-editor-sheet select,
-      .bank-editor-sheet textarea {
-        scroll-margin-top: 20px;
-        scroll-margin-bottom: 92px;
-      }
-
-      .bank-editor-summary-grid {
-
-        gap: 7px;
-      }
-
-      .bank-editor-summary-grid > div {
-        padding: 9px;
-      }
-
-      .bank-editor-balance {
-        font-size: clamp(30px, 10vw, 40px);
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .bank-editor-sheet,
       .bank-editor-delta,
-      .bank-editor-input-card,
       .bank-editor-save,
       .bank-editor-cancel { transition: none !important; animation: none !important; }
     }
@@ -1374,28 +1248,208 @@ body.liquidity-modal-open { overflow: hidden; }
       pointer-events: none;
       z-index: 1;
       overflow: hidden;
-      opacity: 0.56;
+      opacity: 0.52;
       mask-image: linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.85) 26%, rgba(0,0,0,0.65) 70%, rgba(0,0,0,0) 100%);
       -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.85) 26%, rgba(0,0,0,0.65) 70%, rgba(0,0,0,0) 100%);
     }
     .dark .hero-sparkline-backdrop {
-      opacity: 0.72;
+      opacity: 0.68;
     }
+
+    /* Elevated Apple Glass Surface for Hero Card */
+    #hero-capital-card {
+      background:
+        radial-gradient(120% 110% at 0% 0%, rgba(0, 122, 255, 0.06) 0%, transparent 55%),
+        radial-gradient(100% 100% at 100% 0%, rgba(52, 199, 89, 0.07) 0%, transparent 50%),
+        linear-gradient(155deg, rgba(255, 255, 255, 0.98), rgba(246, 247, 251, 0.94));
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow:
+        0 20px 50px -14px rgba(15, 23, 42, 0.07),
+        0 2px 10px rgba(15, 23, 42, 0.03),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    .dark #hero-capital-card {
+      background:
+        radial-gradient(120% 110% at 0% 0%, rgba(10, 132, 255, 0.14) 0%, transparent 55%),
+        radial-gradient(100% 100% at 100% 0%, rgba(48, 209, 88, 0.12) 0%, transparent 50%),
+        linear-gradient(155deg, rgba(30, 31, 35, 0.96), rgba(18, 18, 21, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow:
+        0 24px 54px -14px rgba(0, 0, 0, 0.58),
+        0 2px 12px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    /* Barra de distribución patrimonial estilo Apple Wallet / Revolut */
+    .wealth-allocation-bar {
+      height: 7px;
+      width: 100%;
+      border-radius: 999px;
+      background: rgba(142, 142, 147, 0.14);
+      overflow: hidden;
+      display: flex;
+      gap: 2px;
+      padding: 1px;
+    }
+    .dark .wealth-allocation-bar {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .wealth-segment {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      min-width: 4px;
+    }
+
     .hero-metric-tile {
-      background: rgba(245, 245, 247, 0.76);
-      border: 1px solid rgba(60, 60, 67, 0.065);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      transition: transform 0.2s cubic-bezier(.2,.8,.2,1), border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(60, 60, 67, 0.075);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.025), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      transition: transform 0.2s cubic-bezier(.2,.8,.2,1), border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     }
     .dark .hero-metric-tile {
-      background: rgba(28, 28, 30, 0.66);
-      border-color: rgba(255, 255, 255, 0.065);
+      background: rgba(32, 32, 36, 0.78);
+      border-color: rgba(255, 255, 255, 0.075);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
     .hero-metric-tile:hover {
-      border-color: rgba(0, 122, 255, 0.24);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 122, 255, 0.28);
+      box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.07);
+      transform: translateY(-1.5px);
     }
+
+    .hero-metric-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .hero-metric-tile[data-accent="profit"] {
+      background: linear-gradient(140deg, rgba(52, 199, 89, 0.11), rgba(255, 255, 255, 0.88));
+      border-color: rgba(52, 199, 89, 0.28);
+    }
+    .dark .hero-metric-tile[data-accent="profit"] {
+      background: linear-gradient(140deg, rgba(48, 209, 88, 0.16), rgba(32, 34, 37, 0.86));
+      border-color: rgba(48, 209, 88, 0.30);
+    }
+
+    /* Interactive Big-Digit Input in Bank Hero (Option B) */
+    .bank-hero-interactive-field {
+      width: 100%;
+      background: transparent;
+      border: 0;
+      outline: none;
+      padding: 0;
+      margin: 0;
+      font-size: clamp(34px, 8vw, 48px);
+      line-height: 1;
+      letter-spacing: -0.045em;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 800;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
+      caret-color: #007aff;
+      box-shadow: none !important;
+    }
+    .dark .bank-hero-interactive-field {
+      color: #ffffff;
+    }
+    .bank-hero-interactive-field::placeholder {
+      color: rgba(142, 142, 147, 0.35);
+    }
+    .bank-hero-input-shell {
+      position: relative;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      padding: 6px 12px;
+      margin-top: 6px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1.5px solid rgba(0, 122, 255, 0.22);
+      box-shadow: 0 4px 14px rgba(0, 122, 255, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .dark .bank-hero-input-shell {
+      background: rgba(20, 20, 22, 0.75);
+      border-color: rgba(0, 122, 255, 0.35);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.04);
+    }
+    .bank-hero-input-shell:focus-within {
+      border-color: #007aff;
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18), 0 8px 24px rgba(0, 122, 255, 0.12);
+      background: #ffffff;
+    }
+    .dark .bank-hero-input-shell:focus-within {
+      background: #18181b;
+      border-color: #0a84ff;
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.28), 0 8px 26px rgba(0, 0, 0, 0.4);
+    }
+    .bank-hero-currency-prefix {
+      font-size: clamp(24px, 5.5vw, 32px);
+      font-weight: 800;
+      color: #007aff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      user-select: none;
+    }
+
+    /* Sleek 2-Row Audit & Projection Section (Point 5) */
+    .bank-editor-compact-audit {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+    .bank-editor-audit-cell {
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(242, 242, 247, 0.65);
+      border: 1px solid rgba(60, 60, 67, 0.06);
+    }
+    .dark .bank-editor-audit-cell {
+      background: rgba(44, 44, 46, 0.55);
+      border-color: rgba(255, 255, 255, 0.055);
+    }
+    .bank-editor-audit-cell span {
+      display: block;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8e8e93;
+      margin-bottom: 2px;
+    }
+    .bank-editor-audit-cell strong {
+      display: block;
+      font-size: 13px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: #1d1d1f;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dark .bank-editor-audit-cell strong {
+      color: #f5f5f7;
+    }
+    .bank-editor-audit-cell small {
+      display: block;
+      font-size: 9px;
+      color: #8e8e93;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     @media (max-width: 639px) {
       .hero-sparkline-backdrop {
         top: 52px;
@@ -1564,140 +1618,94 @@ body.liquidity-modal-open { overflow: hidden; }
 #app-shell {
   min-height: 100vh;
 }
-
-@media (max-width: 639px) {
-  .bank-editor-sheet {
-    max-height: none !important;
-  }
-  .bank-editor-sheet > .px-5 {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    padding-top: 10px !important;
-    padding-bottom: 8px !important;
-  }
-  .bank-editor-hero {
-    margin-top: 10px !important;
-    padding: 12px !important;
-    border-radius: 20px !important;
-  }
-  .bank-editor-summary,
-  .bank-editor-edit-block {
-    margin-top: 10px !important;
-    padding: 11px !important;
-    border-radius: 17px !important;
-  }
-  .bank-editor-input-card { 
-    padding: 10px !important; 
-  }
-  .bank-editor-input-card .bank-editor-field {
-    font-size: 19px !important;
-    padding: 10px 12px !important;
-  }
-  .bank-editor-actions {
-    margin-top: 10px !important;
-    padding-top: 10px !important;
-  }
-}
 </style>
 
-<style id="bank-editor-mobile-keyboard-fix-v4">
-  @media (max-width: 639px) {
-    /* El modal sigue al viewport visible de iOS, no al documento desplazado. */
-    #modal-quick-balance.bank-editor-modal {
-      position: fixed !important;
-      top: var(--bank-editor-visual-top, 0px) !important;
-      bottom: auto !important;
-      left: 0 !important;
-      right: 0 !important;
-      height: var(--bank-editor-visual-height, 100dvh) !important;
-      min-height: 0 !important;
-      max-height: none !important;
-      align-items: flex-end !important;
-      overflow: hidden !important;
-    }
-    #modal-quick-balance .bank-editor-sheet {
-      height: min(var(--bank-editor-visual-height, 100dvh), 94dvh) !important;
-      max-height: var(--bank-editor-visual-height, 100dvh) !important;
-      min-height: 0 !important;
-      flex: 0 1 auto !important;
-    }
-    /* Cuando se edita una sola cuenta y aparece el teclado, el resumen se
-       comprime: logo/nombre a la izquierda, saldo a la derecha y variación debajo. */
-    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] .bank-editor-sheet > .px-5 {
-      padding-top: 7px !important;
-      padding-bottom: 5px !important;
-    }
-    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #quick-balance-subtitle {
-      display: none !important;
-    }
-    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] .bank-editor-hero {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) auto !important;
-      align-items: center !important;
-      column-gap: 10px !important;
-      row-gap: 5px !important;
-      margin-top: 6px !important;
-      padding: 8px 10px !important;
-      border-radius: 16px !important;
-    }
-    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #bank-editor-identity {
-      min-width: 0 !important;
-      gap: 8px !important;
-    }
-    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] .bank-editor-logo-shell {
-      width: 38px !important;
-      height: 38px !important;
-      min-width: 38px !important;
-    }
-    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #bank-editor-balance-wrap {
-      margin-top: 0 !important;
-      text-align: right !important;
-      min-width: 0 !important;
-    }
-    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #bank-editor-balance {
-      font-size: clamp(20px, 6.3vw, 29px) !important;
-      line-height: 1.05 !important;
-      white-space: nowrap !important;
-    }
-    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #bank-editor-balance-label {
-      font-size: 8px !important;
-      margin-top: 2px !important;
-    }
-    #modal-quick-balance.bank-editor-single[data-keyboard-open="1"] #bank-editor-delta-pill {
-      grid-column: 1 / -1 !important;
-      margin-top: 0 !important;
-      padding: 5px 8px !important;
-      font-size: 10px !important;
-      min-height: 0 !important;
-      justify-self: start !important;
-    }
-    #modal-quick-balance[data-keyboard-open="1"] #bank-editor-summary {
-      display: none !important;
-    }
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-edit-block {
-      margin-top: 5px !important;
-      padding: 8px !important;
-    }
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-edit-block > .flex.items-end {
-      margin-bottom: 5px !important;
-    }
-    #modal-quick-balance[data-keyboard-open="1"] #bank-editor-edit-hint {
-      display: none !important;
-    }
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-input-card {
-      padding: 8px !important;
-    }
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-input-card .bank-editor-field {
-      min-height: 48px !important;
-      height: 48px !important;
-      font-size: 23px !important;
-      line-height: 1.2 !important;
-      padding: 10px 12px !important;
-    }
-    #modal-quick-balance[data-keyboard-open="1"] .bank-editor-actions {
-      margin-top: 5px !important;
-      padding-top: 7px !important;
-      padding-bottom: max(7px, env(safe-area-inset-bottom, 0px)) !important;
+
+<style id="scroll-stability-fixes">
+  /* Keep the document itself as the primary vertical scroller. */
+  html {
+    min-height: 100%;
+    height: auto;
+    overflow-x: clip;
+    overflow-y: auto;
+    scroll-behavior: auto;
+  }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto !important;
+    overflow-x: clip;
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
+  }
+  #app-shell {
+    height: auto !important;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  main {
+    min-height: 0;
+    overflow: visible;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  }
+  /* Modal backdrops can scroll if their content exceeds the visible viewport. */
+  [id^="modal-"]:not(.hidden) {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  @media (max-width: 679px) {
+    html, body { -webkit-overflow-scrolling: touch; }
+    main { scroll-padding-top: 5rem; scroll-padding-bottom: 7rem; }
+    /* Avoid trapping touch gestures on content panels; dedicated tables retain horizontal scroll. */
+    .apple-card { min-height: 0; }
+    .table-scroll { touch-action: pan-x pan-y; }
+  }
+</style>
+
+
+<style id="final-polish-and-navigation-fixes">
+  :root { color-scheme: light; }
+  html { scroll-padding-top: 1rem; }
+  body {
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+  /* Keep the background from moving behind overlays; the overlay's own panel remains scrollable. */
+  body.liquidity-modal-open { overflow: hidden !important; }
+  body.bank-editor-open { overflow: hidden !important; }
+  [id^="modal-"]:not(.hidden), #liquidity-calculator-modal:not(.hidden) {
+    overscroll-behavior: contain;
+  }
+  [id^="modal-"] > div, [id^="modal-"] .apple-card,
+  #liquidity-calculator-modal > div {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Clear keyboard focus without changing the existing visual language. */
+  button:focus-visible, [role="button"]:focus-visible, input:focus-visible,
+  select:focus-visible, textarea:focus-visible {
+    outline: 2px solid rgba(10, 132, 255, .78);
+    outline-offset: 2px;
+  }
+  button { touch-action: manipulation; }
+  input, select, textarea { scroll-margin-block: 1rem; }
+  #view-airtm, #view-personal, #view-prestamos { min-width: 0; }
+  .apple-card { min-width: 0; }
+  .ios-bottom-tabbar { padding-bottom: max(env(safe-area-inset-bottom, 0px), 4px); }
+  @media (max-width: 679px) {
+    html, body { overscroll-behavior-x: none; }
+    main { padding-bottom: max(7rem, calc(5rem + env(safe-area-inset-bottom, 0px))) !important; }
+    .ios-bottom-tabbar { z-index: 70; }
+    [id^="modal-"]:not(.hidden) { max-height: 100dvh; }
+    .table-scroll, .overflow-x-auto { max-width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
     }
   }
 </style>
@@ -1794,8 +1802,8 @@ body.liquidity-modal-open { overflow: hidden; }
       <!-- ========================================================== -->
       <section id="view-airtm" class="space-y-5 sm:space-y-6 block">
 
-        <!-- Hero Card: Total Capital Consolidated + Subtle Evolution Curve -->
-        <div id="hero-capital-card" class="apple-card rounded-3xl p-5 sm:p-7 lg:p-8 shadow-ios-card relative overflow-hidden">
+        <!-- Hero Card: Total Capital Consolidated + Apple Banking Portfolio Breakdown -->
+        <div id="hero-capital-card" class="apple-card rounded-[30px] p-5 sm:p-7 lg:p-8 shadow-ios-card relative overflow-hidden">
           <div id="airtm-halo" class="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-700 bg-apple-green/10"></div>
 
           <!-- Subtle Apple Stocks-style Evolution Backdrop -->
@@ -1803,34 +1811,36 @@ body.liquidity-modal-open { overflow: hidden; }
             <svg id="capital-evolution-svg" class="w-full h-full" viewBox="0 0 640 160" preserveAspectRatio="none"></svg>
           </div>
 
-          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3.5 sm:gap-5">
-            <div class="space-y-1 sm:space-y-2">
-              <div class="flex items-center justify-between sm:justify-start gap-2">
-                <div class="flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-apple-green shrink-0"></span>
-                  <span class="text-[11px] sm:text-xs font-semibold tracking-wider uppercase text-apple-gray-400 whitespace-nowrap">Capital Operativo Total</span>
+          <div class="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-4 sm:gap-6">
+            <div class="space-y-2 sm:space-y-2.5 flex-1 min-w-0">
+              <div class="flex items-center justify-between sm:justify-start gap-2.5">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-apple-gray-900/5 dark:bg-white/10 backdrop-blur-md">
+                  <span class="w-2 h-2 rounded-full bg-apple-green shrink-0 shadow-sm shadow-apple-green/60"></span>
+                  <span class="text-[10px] sm:text-[11px] font-extrabold tracking-wider uppercase text-apple-gray-600 dark:text-apple-gray-300 whitespace-nowrap">Patrimonio Operativo Neto</span>
                 </div>
-                <span id="airtm-status-badge" class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-apple-green/15 text-apple-green">
+                <span id="airtm-status-badge" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-apple-green/15 text-apple-green ring-1 ring-apple-green/25">
                   Supabase Live
                 </span>
               </div>
 
-              <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                <h1 id="stat-airtm-capital-total" class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-apple-gray-900 dark:text-white font-sans whitespace-nowrap">
+              <div class="flex flex-wrap items-baseline gap-2.5 sm:gap-3.5 pt-0.5">
+                <h1 id="stat-airtm-capital-total" class="text-4xl sm:text-5xl md:text-[54px] font-black tracking-tight text-apple-gray-900 dark:text-white font-sans whitespace-nowrap leading-none" style="font-variant-numeric: tabular-nums;">
                   €0.00
                 </h1>
-                <span id="capital-evolution-pill" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-mono font-bold bg-apple-gray-200/70 dark:bg-apple-gray-800/80 text-apple-gray-600 dark:text-apple-gray-300 border border-black/5 dark:border-white/5">
-                  <!-- Evolución reciente inyectada por JS -->
-                </span>
-                <span id="capital-evolution-range-label" class="hidden md:inline text-[11px] font-medium text-apple-gray-400 whitespace-nowrap"></span>
+                <div class="flex items-center gap-2">
+                  <span id="capital-evolution-pill" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-bold bg-apple-gray-200/70 dark:bg-apple-gray-800/80 text-apple-gray-600 dark:text-apple-gray-300 border border-black/5 dark:border-white/5">
+                    <!-- Evolución reciente inyectada por JS -->
+                  </span>
+                  <span id="capital-evolution-range-label" class="hidden lg:inline text-[11px] font-medium text-apple-gray-400 whitespace-nowrap"></span>
+                </div>
               </div>
 
               <!-- Mother Capital Balance Semaphore & Pending Commitments -->
-              <div class="pt-0.5 sm:pt-1 flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <div id="airtm-mother-badge" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-apple-gray-200/80 dark:bg-apple-gray-700/80 transition-all">
+              <div class="pt-1 flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <div id="airtm-mother-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-apple-gray-200/80 dark:bg-apple-gray-700/80 transition-all">
                   <!-- Semaphore inyectado dinámicamente -->
                 </div>
-                <div id="airtm-fijos-alert-badge" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-apple-orange/15 text-apple-orange border border-apple-orange/20 hidden">
+                <div id="airtm-fijos-alert-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-apple-orange/15 text-apple-orange border border-apple-orange/20 hidden">
                   <i data-lucide="info" class="w-3.5 h-3.5"></i>
                   <span id="airtm-fijos-alert-text">Fijos pendientes: €0.00</span>
                 </div>
@@ -1838,56 +1848,108 @@ body.liquidity-modal-open { overflow: hidden; }
             </div>
 
             <!-- Quick Action Button -->
-            <div class="flex items-center pt-0.5 md:pt-0">
-              <button onclick="takeArqueoSnapshot()" id="btn-snapshot-trigger" class="ios-tap w-full md:w-auto justify-center px-4 sm:px-5 py-2.5 sm:py-3 bg-apple-blue text-white rounded-2xl text-xs font-bold shadow-ios-float flex items-center gap-2 hover:bg-blue-600 transition whitespace-nowrap" title="Registra el estado actual de tus cuentas como snapshot en el histórico">
+            <div class="flex items-center pt-0.5 md:pt-1 shrink-0">
+              <button onclick="takeArqueoSnapshot()" id="btn-snapshot-trigger" class="ios-tap w-full md:w-auto justify-center px-4 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-b from-apple-blue to-[#0062CC] text-white rounded-2xl text-xs font-bold shadow-ios-float flex items-center gap-2 hover:brightness-105 transition whitespace-nowrap ring-1 ring-white/20" title="Registra el estado actual de tus cuentas como snapshot en el histórico">
                 <i data-lucide="camera" class="w-4 h-4 shrink-0"></i>
                 <span id="snapshot-btn-label">Registrar Snapshot</span>
               </button>
             </div>
           </div>
 
-          <!-- Secondary Metrics Grid -->
-          <div id="hero-metrics-grid" class="relative z-10 grid grid-cols-2 xs:grid-cols-3 ipad:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3 mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50">
-            <div class="hero-metric-tile p-3 rounded-2xl">
-              <span class="text-[9px] sm:text-[10px] font-medium text-apple-gray-400 block truncate">Airtm (€)</span>
-              <p id="stat-airtm-balance" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-green mt-0.5 leading-tight whitespace-nowrap tracking-tight">€0.00</p>
+          <!-- Apple Banking Portfolio Allocation Bar -->
+          <div class="relative z-10 mt-5 sm:mt-6 pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50">
+            <div class="flex items-center justify-between text-[10px] font-semibold text-apple-gray-400 mb-1.5">
+              <span class="uppercase tracking-wider font-bold">Distribución de Liquidez y Activos</span>
+              <span id="wealth-allocation-summary" class="font-mono text-[10px] text-apple-gray-500 dark:text-apple-gray-400">100% consolidado</span>
             </div>
-            <div class="hero-metric-tile p-3 rounded-2xl">
-              <span class="text-[9px] sm:text-[10px] font-medium text-apple-gray-400 block truncate">Bancos EUR</span>
-              <p id="stat-total-bancos" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-gray-900 dark:text-white mt-0.5 leading-tight whitespace-nowrap tracking-tight">€0.00</p>
+            <div class="wealth-allocation-bar" aria-hidden="true">
+              <div id="alloc-seg-airtm" class="wealth-segment bg-apple-green" style="width: 25%" title="Airtm"></div>
+              <div id="alloc-seg-eur" class="wealth-segment bg-apple-blue" style="width: 35%" title="Bancos EUR"></div>
+              <div id="alloc-seg-loans" class="wealth-segment bg-apple-indigo" style="width: 25%" title="Préstamos"></div>
+              <div id="alloc-seg-acc" class="wealth-segment bg-apple-purple" style="width: 15%" title="Acciones"></div>
             </div>
-            <div class="hero-metric-tile p-3 rounded-2xl">
-              <span class="text-[9px] sm:text-[10px] font-medium text-apple-gray-400 block truncate">Bancos PEN</span>
-              <p id="stat-total-bancos-soles" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-orange mt-0.5 leading-tight whitespace-nowrap tracking-tight">S/. 0.00</p>
-            </div>
-            <div onclick="openModal('modal-edit-acciones')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('modal-edit-acciones')}" class="ios-tap hero-metric-tile p-3 rounded-2xl cursor-pointer transition group">
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-[9px] sm:text-[10px] font-medium text-apple-gray-400 truncate">Acciones (€)</span>
-                <i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-apple-gray-300 group-hover:text-apple-purple transition shrink-0"></i>
+          </div>
+
+          <!-- Secondary Metrics Grid with Modern Fintech Squircle Icons -->
+          <div id="hero-metrics-grid" class="relative z-10 grid grid-cols-2 xs:grid-cols-3 ipad:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3 mt-4">
+            <div class="hero-metric-tile p-3 sm:p-3.5 rounded-2xl" data-accent="airtm">
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="text-[9px] sm:text-[10px] font-bold text-apple-gray-400 truncate uppercase tracking-wider">Airtm</span>
+                <span class="hero-metric-icon bg-apple-green/12 text-apple-green">
+                  <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                </span>
               </div>
-              <p id="stat-acciones" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-purple mt-0.5 leading-tight whitespace-nowrap tracking-tight">€0.00</p>
-              <span id="stat-acciones-count" class="hero-metric-sub text-[9px] text-apple-gray-400">0 movimientos registrados</span>
+              <p id="stat-airtm-balance" class="stat-metric-number text-lg sm:text-xl font-extrabold font-mono text-apple-gray-900 dark:text-white mt-1.5 leading-tight whitespace-nowrap tracking-tight" style="font-variant-numeric: tabular-nums;">€0.00</p>
+              <span id="stat-airtm-share" class="hero-metric-sub text-[9px] font-medium text-apple-green block mt-0.5">Liquidez USD/EUR</span>
             </div>
-            <div class="hero-metric-tile p-3 rounded-2xl">
-              <span class="text-[9px] sm:text-[10px] font-medium text-apple-gray-400 block truncate">Préstamos (€)</span>
-              <p id="stat-loans-to-capital" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-blue mt-0.5 leading-tight whitespace-nowrap tracking-tight">€0.00</p>
-              <span class="hero-metric-sub text-[9px] text-apple-gray-400">Cobranza neta global</span>
-            </div>
-            <div onclick="openModal('modal-edit-madre')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('modal-edit-madre')}" class="ios-tap hero-metric-tile p-3 rounded-2xl cursor-pointer transition group">
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-[9px] sm:text-[10px] font-medium text-apple-gray-400 truncate">Cap. Madre</span>
-                <i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-apple-gray-300 group-hover:text-apple-orange transition shrink-0"></i>
+
+            <div class="hero-metric-tile p-3 sm:p-3.5 rounded-2xl" data-accent="bancos-eur">
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="text-[9px] sm:text-[10px] font-bold text-apple-gray-400 truncate uppercase tracking-wider">Bancos EUR</span>
+                <span class="hero-metric-icon bg-apple-blue/12 text-apple-blue">
+                  <i data-lucide="landmark" class="w-3.5 h-3.5"></i>
+                </span>
               </div>
-              <p id="stat-capital-soles" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-orange mt-0.5 leading-tight whitespace-nowrap tracking-tight">S/. 0.00</p>
-              <span id="stat-madre-count" class="hero-metric-sub text-[9px] text-apple-gray-400">0 movimientos registrados</span>
+              <p id="stat-total-bancos" class="stat-metric-number text-lg sm:text-xl font-extrabold font-mono text-apple-gray-900 dark:text-white mt-1.5 leading-tight whitespace-nowrap tracking-tight" style="font-variant-numeric: tabular-nums;">€0.00</p>
+              <span id="stat-bancos-eur-share" class="hero-metric-sub text-[9px] text-apple-gray-400 block mt-0.5">11 cuentas SEPA</span>
             </div>
-            <div id="hero-profit-tile" class="col-span-2 xs:col-span-1 hero-metric-tile p-3 rounded-2xl">
-              <div>
-                <span class="text-[9px] sm:text-[10px] font-medium text-apple-gray-400 block">Profit Hoy Estimado</span>
-                <span class="text-[8px] text-apple-gray-400 sm:hidden">Variación de capital + gastos</span>
+
+            <div class="hero-metric-tile p-3 sm:p-3.5 rounded-2xl" data-accent="bancos-pen">
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="text-[9px] sm:text-[10px] font-bold text-apple-gray-400 truncate uppercase tracking-wider">Bancos PEN</span>
+                <span class="hero-metric-icon bg-apple-orange/15 text-apple-orange">
+                  <i data-lucide="coins" class="w-3.5 h-3.5"></i>
+                </span>
               </div>
-              <p id="stat-profit-hoy" class="stat-metric-number text-lg sm:text-xl md:text-2xl font-bold text-apple-green mt-0.5 leading-tight whitespace-nowrap tracking-tight">+€0.00</p>
-              <span class="hero-metric-sub text-[9px] text-apple-gray-400">Variación de capital + gastos</span>
+              <p id="stat-total-bancos-soles" class="stat-metric-number text-lg sm:text-xl font-extrabold font-mono text-apple-orange mt-1.5 leading-tight whitespace-nowrap tracking-tight" style="font-variant-numeric: tabular-nums;">S/. 0.00</p>
+              <span class="hero-metric-sub text-[9px] text-apple-gray-400 block mt-0.5">BCP + Interbank</span>
+            </div>
+
+            <div onclick="openModal('modal-edit-acciones')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('modal-edit-acciones')}" class="ios-tap hero-metric-tile p-3 sm:p-3.5 rounded-2xl cursor-pointer transition group" data-accent="acciones">
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="text-[9px] sm:text-[10px] font-bold text-apple-gray-400 truncate uppercase tracking-wider">Acciones</span>
+                <span class="hero-metric-icon bg-apple-purple/12 text-apple-purple group-hover:scale-105 transition">
+                  <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                </span>
+              </div>
+              <p id="stat-acciones" class="stat-metric-number text-lg sm:text-xl font-extrabold font-mono text-apple-purple mt-1.5 leading-tight whitespace-nowrap tracking-tight" style="font-variant-numeric: tabular-nums;">€0.00</p>
+              <span id="stat-acciones-count" class="hero-metric-sub text-[9px] text-apple-gray-400 block mt-0.5">0 movs • Editar</span>
+            </div>
+
+            <div class="hero-metric-tile p-3 sm:p-3.5 rounded-2xl" data-accent="prestamos">
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="text-[9px] sm:text-[10px] font-bold text-apple-gray-400 truncate uppercase tracking-wider">Préstamos</span>
+                <span class="hero-metric-icon bg-apple-indigo/12 text-apple-indigo">
+                  <i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i>
+                </span>
+              </div>
+              <p id="stat-loans-to-capital" class="stat-metric-number text-lg sm:text-xl font-extrabold font-mono text-apple-indigo mt-1.5 leading-tight whitespace-nowrap tracking-tight" style="font-variant-numeric: tabular-nums;">€0.00</p>
+              <span class="hero-metric-sub text-[9px] text-apple-gray-400 block mt-0.5">Por cobrar neto</span>
+            </div>
+
+            <div onclick="openModal('modal-edit-madre')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('modal-edit-madre')}" class="ios-tap hero-metric-tile p-3 sm:p-3.5 rounded-2xl cursor-pointer transition group" data-accent="madre">
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="text-[9px] sm:text-[10px] font-bold text-apple-gray-400 truncate uppercase tracking-wider">Cap. Madre</span>
+                <span class="hero-metric-icon bg-apple-orange/12 text-apple-orange group-hover:scale-105 transition">
+                  <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                </span>
+              </div>
+              <p id="stat-capital-soles" class="stat-metric-number text-lg sm:text-xl font-extrabold font-mono text-apple-orange mt-1.5 leading-tight whitespace-nowrap tracking-tight" style="font-variant-numeric: tabular-nums;">S/. 0.00</p>
+              <span id="stat-madre-count" class="hero-metric-sub text-[9px] text-apple-gray-400 block mt-0.5">Custodia • Editar</span>
+            </div>
+
+            <div id="hero-profit-tile" class="col-span-2 xs:col-span-1 hero-metric-tile p-3 sm:p-3.5 rounded-2xl" data-accent="profit">
+              <div class="flex items-center justify-between gap-1.5">
+                <div>
+                  <span class="text-[9px] sm:text-[10px] font-extrabold text-apple-gray-600 dark:text-apple-gray-200 block uppercase tracking-wider">Profit Hoy</span>
+                  <span class="text-[8px] text-apple-gray-400 sm:hidden">Variación + gastos</span>
+                </div>
+                <span class="hero-metric-icon bg-apple-green/20 text-apple-green hidden sm:inline-flex">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                </span>
+              </div>
+              <p id="stat-profit-hoy" class="stat-metric-number text-lg sm:text-xl font-black font-mono text-apple-green mt-1.5 leading-tight whitespace-nowrap tracking-tight" style="font-variant-numeric: tabular-nums;">+€0.00</p>
+              <span class="hero-metric-sub text-[9px] text-apple-gray-500 dark:text-apple-gray-400 block mt-0.5">Rendimiento neto</span>
             </div>
           </div>
         </div>
@@ -1900,7 +1962,10 @@ body.liquidity-modal-open { overflow: hidden; }
               <span class="sm:hidden">Bóvedas &amp; Cuentas</span>
               <span class="hidden sm:inline">Bóvedas &amp; Cuentas de Operación</span>
             </h2>
-            <span class="text-[10px] text-apple-gray-400 font-medium whitespace-nowrap">Toca para editar</span>
+            <span class="text-[10px] font-medium text-apple-gray-400 whitespace-nowrap flex items-center gap-1">
+              <i data-lucide="touchpad" class="w-3 h-3 opacity-60"></i>
+              <span>Toca cualquier cuenta para editar su saldo</span>
+            </span>
           </div>
 
           <div id="bank-cards-grid" class="grid grid-cols-2 xs:grid-cols-3 ipad:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3">
@@ -2099,7 +2164,7 @@ body.liquidity-modal-open { overflow: hidden; }
               <div class="flex items-center justify-between mb-3 sm:mb-4">
                 <div class="flex items-center gap-2.5">
                   <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl overflow-hidden shadow-ios-sm shrink-0 flex items-center justify-center bg-white">
-                    <img src="https://cdn.brandfetch.io/viabcp.com/w/128/h/128" alt="BCP" class="bank-mini-logo-img" referrerpolicy="no-referrer">
+                    <img src="https://joseolaya.com/wp-content/uploads/2022/01/bcp-logo.png" alt="BCP" width="36" height="36" loading="lazy" decoding="async" fetchpriority="low" class="bank-mini-logo-img" referrerpolicy="no-referrer">
                   </div>
                   <div>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-apple-gray-900 dark:text-white">Tarjeta de Crédito</h3>
@@ -2555,89 +2620,72 @@ body.liquidity-modal-open { overflow: hidden; }
     </div>
   </div>
 
-  <!-- MODAL: ACTUALIZAR SALDOS EN BANCOS -->
-  <div id="modal-quick-balance" class="bank-editor-modal fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/45 backdrop-blur-xl hidden transition-opacity">
-    <div class="bank-editor-sheet apple-card w-full sm:max-w-xl rounded-t-[30px] sm:rounded-[30px] shadow-ios-sheet max-h-[94vh] sm:max-h-[90vh] overflow-hidden">
+  <!-- MODAL: ACTUALIZAR SALDOS EN BANCOS (HERO INTERACTIVO CUPERTINO) -->
+  <div id="modal-quick-balance" onclick="if(event.target === this) closeModal('modal-quick-balance')" class="bank-editor-modal fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/45 backdrop-blur-xl hidden transition-opacity">
+    <div class="bank-editor-sheet apple-card w-full sm:max-w-md rounded-t-[30px] sm:rounded-[30px] shadow-ios-sheet">
       <div class="bank-editor-grabber sm:hidden"></div>
 
-      <div class="px-5 pt-3 pb-4 sm:px-6 sm:pt-5">
+      <div class="px-5 pt-3.5 pb-2 sm:px-6 sm:pt-5">
         <div class="flex items-center justify-between gap-3">
-          <div class="min-w-0">
-            <p id="quick-balance-kicker" class="bank-editor-kicker">BÓVEDA</p>
-            <h3 id="quick-balance-title" class="text-xl sm:text-2xl font-bold tracking-tight text-apple-gray-900 dark:text-white truncate">
-              Actualizar Saldos en Bancos
-            </h3>
-            <p id="quick-balance-subtitle" class="text-xs sm:text-sm text-apple-gray-400 mt-0.5 truncate">
-              Actualiza tus cuentas desde un solo lugar
-            </p>
-          </div>
-          <button type="button" onclick="closeModal('modal-quick-balance')" aria-label="Cerrar"
-                  class="bank-editor-close ios-tap shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-apple-gray-500 bg-apple-gray-100/80 dark:bg-apple-gray-800/80">
-            <i data-lucide="x" class="w-4.5 h-4.5"></i>
-          </button>
-        </div>
-
-        <div id="bank-editor-hero" class="bank-editor-hero mt-4">
-          <div id="bank-editor-identity" class="flex items-center gap-3 min-w-0">
-            <div id="bank-editor-logo" class="bank-editor-logo-shell"></div>
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div id="bank-editor-logo" class="bank-editor-logo-shell shrink-0"></div>
             <div class="min-w-0">
-              <div id="bank-editor-name" class="text-sm font-bold text-apple-gray-900 dark:text-white truncate">Cuenta</div>
-              <div id="bank-editor-currency" class="text-[10px] uppercase tracking-[.12em] font-semibold text-apple-gray-400 mt-0.5">EUR</div>
+              <p id="quick-balance-kicker" class="bank-editor-kicker">BÓVEDA</p>
+              <h3 id="quick-balance-title" class="text-lg sm:text-xl font-bold tracking-tight text-apple-gray-900 dark:text-white truncate">
+                Airtm
+              </h3>
             </div>
           </div>
-
-          <div id="bank-editor-balance-wrap" class="mt-4">
-            <div id="bank-editor-balance" class="bank-editor-balance">€0,00</div>
-            <div id="bank-editor-balance-label" class="text-[10px] uppercase tracking-[.12em] text-apple-gray-400 mt-1">Saldo actual</div>
-          </div>
-
-          <div id="bank-editor-delta-pill" class="bank-editor-delta neutral mt-3">
-            <span id="bank-editor-delta-icon"><i data-lucide="minus" class="w-3.5 h-3.5"></i></span>
-            <span id="bank-editor-delta-text">Sin cambio</span>
-            <span class="opacity-55">vs. último snapshot</span>
-          </div>
+          <button type="button" onclick="closeModal('modal-quick-balance')" aria-label="Cerrar"
+                  class="bank-editor-close ios-tap shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-apple-gray-500 bg-apple-gray-100/80 dark:bg-apple-gray-800/80">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
         </div>
       </div>
 
       <form id="form-banks" onsubmit="handleSaveBanks(event)" class="bank-editor-form px-5 pb-5 sm:px-6 sm:pb-6">
-        <div id="bank-editor-summary" class="bank-editor-summary">
-          <div class="bank-editor-summary-head">
-            <div>
-              <span class="bank-editor-section-label">RESUMEN</span>
-              <p class="text-[11px] text-apple-gray-400 mt-0.5">Referencia del último arqueo guardado</p>
-            </div>
-          </div>
-          <div class="bank-editor-summary-grid">
-            <div>
-              <span>Saldo actual</span>
-              <strong id="quick-balance-current">—</strong>
-            </div>
-            <div>
-              <span>Último snapshot</span>
-              <strong id="quick-balance-previous">—</strong>
-            </div>
-            <div>
-              <span>Variación</span>
-              <strong id="quick-balance-delta">Sin cambio</strong>
-            </div>
-            <div>
-              <span>Referencia</span>
-              <strong id="quick-balance-snapshot-date">—</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="bank-editor-edit-block">
-          <div class="flex items-end justify-between gap-3 mb-2.5">
-            <div>
-              <span class="bank-editor-section-label">EDITAR SALDO</span>
-              <p id="bank-editor-edit-hint" class="text-[11px] text-apple-gray-400 mt-0.5">El cambio se refleja en tiempo real.</p>
-            </div>
+        <!-- Interactive Hero Input Container (Option B) -->
+        <div id="bank-editor-hero" class="bank-editor-hero mt-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-apple-gray-400">Nuevo Saldo</span>
             <span id="bank-editor-currency-chip" class="bank-editor-currency-chip">EUR</span>
           </div>
 
-          <div id="bank-inputs-container" class="bank-editor-inputs-grid">
-            <!-- Dynamically populated inputs -->
+          <!-- Big Direct Interactive Input with Fluid Coma/Punto Support (Points 1 & 2) -->
+          <div class="bank-hero-input-shell mt-2">
+            <span id="bank-hero-currency-prefix" class="bank-hero-currency-prefix">€</span>
+            <input id="bank-interactive-input"
+                   type="text"
+                   inputmode="decimal"
+                   autocomplete="off"
+                   class="bank-hero-interactive-field"
+                   placeholder="0.00">
+          </div>
+
+          <!-- Live Delta Pill right under the number -->
+          <div class="mt-2.5 flex items-center justify-between gap-2">
+            <div id="bank-editor-delta-pill" class="bank-editor-delta neutral">
+              <span id="bank-editor-delta-icon"><i data-lucide="minus" class="w-3.5 h-3.5"></i></span>
+              <span id="bank-editor-delta-text">Sin cambio</span>
+              <span class="opacity-55">vs. snapshot</span>
+            </div>
+            <button type="button" id="btn-revert-bank-snapshot" onclick="revertBankToSnapshot()" class="text-[10px] font-bold text-apple-blue hover:underline hidden" title="Restaurar saldo del último arqueo">
+              Restaurar anterior
+            </button>
+          </div>
+        </div>
+
+        <!-- Condensed 2-Data Audit Bar (Point 5) -->
+        <div class="bank-editor-compact-audit">
+          <div class="bank-editor-audit-cell">
+            <span>Último Snapshot</span>
+            <strong id="quick-balance-previous">—</strong>
+            <small id="quick-balance-snapshot-date">—</small>
+          </div>
+          <div class="bank-editor-audit-cell">
+            <span>Capital Proyectado</span>
+            <strong id="quick-balance-projected-capital">—</strong>
+            <small id="quick-balance-capital-diff">Con este cambio</small>
           </div>
         </div>
 
@@ -3278,6 +3326,69 @@ body.liquidity-modal-open { overflow: hidden; }
     let activeDebtorsDirectoryView = 'active';
     let selectedCycleKey = null;
     let cycleSelectionIsManual = false;
+    let activeTabId = 'airtm';
+
+    // Renderizador de iconos con debounce y acotado por contenedor para evitar bloqueos del hilo principal
+    let lucideRafId = 0;
+    function refreshIcons(rootEl = null) {
+      if (!window.lucide || typeof window.lucide.createIcons !== 'function') return;
+      if (rootEl && rootEl instanceof Element) {
+        try {
+          window.lucide.createIcons({ root: rootEl });
+          return;
+        } catch (e) {}
+      }
+      if (lucideRafId) cancelAnimationFrame(lucideRafId);
+      lucideRafId = requestAnimationFrame(() => {
+        lucideRafId = 0;
+        try { window.lucide.createIcons(); } catch (e) {}
+      });
+    }
+
+    // Caché en memoria de estado de logos para no reintentar URLs caídas ni repintar innecesariamente
+    const BANK_LOGO_CACHE = new Map();
+    const BANK_CUSTOM_LOGOS = {
+      BCP: 'https://joseolaya.com/wp-content/uploads/2022/01/bcp-logo.png'
+    };
+    const BANK_DOMAINS = {
+      Airtm: 'airtm.com',
+      N26: 'n26.com',
+      Openbank: 'openbank.es',
+      BBVA: 'bbva.com',
+      Imagin: 'imagin.com',
+      Santander: 'santander.com',
+      Bunq: 'bunq.com',
+      Trade: 'traderepublic.com',
+      Wise: 'wise.com',
+      ING: 'ing.es',
+      Vivid: 'vivid.money',
+      Sabadell: 'bancsabadell.com',
+      Interbank: 'interbank.pe',
+      BCP: 'bcp.com.pe'
+    };
+
+    function preloadBankLogosIdle() {
+      const preload = () => {
+        Object.keys(BANK_DOMAINS).forEach((bank) => {
+          const url = BANK_CUSTOM_LOGOS[bank] || `https://cdn.brandfetch.io/${BANK_DOMAINS[bank]}/w/128/h/128`;
+          if (BANK_LOGO_CACHE.has(bank)) return;
+          const img = new Image();
+          img.decoding = 'async';
+          img.referrerPolicy = 'no-referrer';
+          img.onload = () => BANK_LOGO_CACHE.set(bank, url);
+          img.onerror = () => {
+            const fallbackUrl = `https://www.google.com/s2/favicons?domain=${BANK_DOMAINS[bank]}&sz=128`;
+            BANK_LOGO_CACHE.set(bank, fallbackUrl);
+          };
+          img.src = url;
+        });
+      };
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(preload, { timeout: 2500 });
+      } else {
+        setTimeout(preload, 900);
+      }
+    }
 
     function showToast(title, message, isSuccess = true) {
       const toast = document.getElementById('toast-notify');
@@ -3295,7 +3406,7 @@ body.liquidity-modal-open { overflow: hidden; }
         tIcon.className = 'w-7 h-7 rounded-xl bg-apple-orange/15 text-apple-orange flex items-center justify-center';
         tIcon.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i>';
       }
-      lucide.createIcons();
+      refreshIcons(tIcon);
 
       toast.classList.remove('translate-y-[-100px]', 'opacity-0');
       toast.classList.add('translate-y-0', 'opacity-100');
@@ -3576,9 +3687,17 @@ body.liquidity-modal-open { overflow: hidden; }
         localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
         setCloudStatus(true, "En línea");
 
-        renderAirtmModule();
-        renderPersonalModule();
-        renderLoansModule();
+        // Renderizamos primero la pestaña activa para respuesta inmediata en iPhone
+        if (activeTabId === 'airtm') {
+          renderAirtmModule();
+          requestAnimationFrame(() => { renderPersonalModule(); renderLoansModule(); });
+        } else if (activeTabId === 'personal') {
+          renderPersonalModule();
+          requestAnimationFrame(() => { renderAirtmModule(); renderLoansModule(); });
+        } else {
+          renderLoansModule();
+          requestAnimationFrame(() => { renderAirtmModule(); renderPersonalModule(); });
+        }
 
         // Las métricas se recalculan en memoria para mostrar el valor correcto.
         // No escribimos de vuelta aquí: hacerlo en cada sincronización provoca
@@ -3636,17 +3755,43 @@ body.liquidity-modal-open { overflow: hidden; }
     function setupSupabaseRealtime() {
       if (!supabaseClient) return;
 
-      supabaseClient
-        .channel('schema-db-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'gastos' }, scheduleRealtimeCloudSync)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'prestamos' }, scheduleRealtimeCloudSync)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'arqueos' }, scheduleRealtimeCloudSync)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'app_config' }, scheduleRealtimeCloudSync)
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            setCloudStatus(true, "En línea");
-          }
-        });
+      // Si el entorno bloquea WebSockets (ej. vista previa en Canvas), usamos sincronización HTTP periódica silenciosa
+      const isSandboxedPreview = window.__WEBSOCKET_BLOCKED__ || (function() {
+        try {
+          return window.self !== window.top && /scf\.usercontent\.goog|googleusercontent\.com/i.test(window.location.hostname);
+        } catch (e) {
+          return true;
+        }
+      })();
+
+      if (isSandboxedPreview) {
+        setCloudStatus(true, "En línea (REST)");
+        if (!window.__supabasePollingInterval) {
+          window.__supabasePollingInterval = setInterval(() => {
+            if (!document.hidden && navigator.onLine && !isPersistingArqueoMetrics) {
+              syncAllFromCloud(false).catch(() => {});
+            }
+          }, 25000);
+        }
+        return;
+      }
+
+      try {
+        supabaseClient
+          .channel('schema-db-changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'gastos' }, scheduleRealtimeCloudSync)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'prestamos' }, scheduleRealtimeCloudSync)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'arqueos' }, scheduleRealtimeCloudSync)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'app_config' }, scheduleRealtimeCloudSync)
+          .subscribe((status) => {
+            if (status === 'SUBSCRUBED' || status === 'SUBSCRIBED') {
+              setCloudStatus(true, "En línea");
+            }
+          });
+      } catch (err) {
+        console.warn("Realtime WebSocket no disponible, usando REST:", err);
+        setCloudStatus(true, "En línea (REST)");
+      }
     }
 
     function calculateConsolidatedLoansNetEUR() {
@@ -3811,6 +3956,29 @@ body.liquidity-modal-open { overflow: hidden; }
       const statMadreCount = document.getElementById('stat-madre-count');
       if (statMadreCount) statMadreCount.innerText = `${(state.capitalMadreLog || []).length} movs registrados`;
 
+      // Actualizar barra de distribución patrimonial estilo Apple Wallet
+      const positiveTotal = Math.max(1, Math.max(0, airtm) + Math.max(0, totalBancos) + Math.max(0, loansEur) + Math.max(0, state.acciones || 0));
+      const pAirtm = Math.max(3, Math.round((Math.max(0, airtm) / positiveTotal) * 100));
+      const pEur = Math.max(3, Math.round((Math.max(0, totalBancos) / positiveTotal) * 100));
+      const pLoans = Math.max(3, Math.round((Math.max(0, loansEur) / positiveTotal) * 100));
+      const pAcc = Math.max(3, Math.round((Math.max(0, state.acciones || 0) / positiveTotal) * 100));
+
+      const segAirtm = document.getElementById('alloc-seg-airtm');
+      const segEur = document.getElementById('alloc-seg-eur');
+      const segLoans = document.getElementById('alloc-seg-loans');
+      const segAcc = document.getElementById('alloc-seg-acc');
+      if (segAirtm) segAirtm.style.width = `${pAirtm}%`;
+      if (segEur) segEur.style.width = `${pEur}%`;
+      if (segLoans) segLoans.style.width = `${pLoans}%`;
+      if (segAcc) segAcc.style.width = `${pAcc}%`;
+
+      const shareAirtm = document.getElementById('stat-airtm-share');
+      if (shareAirtm) shareAirtm.innerText = `${Math.round((Math.max(0, airtm) / positiveTotal) * 100)}% del activo`;
+      const shareEur = document.getElementById('stat-bancos-eur-share');
+      if (shareEur) shareEur.innerText = `${Math.round((Math.max(0, totalBancos) / positiveTotal) * 100)}% en 11 cuentas`;
+      const allocSummary = document.getElementById('wealth-allocation-summary');
+      if (allocSummary) allocSummary.innerText = `Liquidez inmediata: ${formatEUR(airtm + totalBancos)}`;
+
       // Alerta de fijos pendientes en el balance general
       const alertBadge = document.getElementById('airtm-fijos-alert-badge');
       const alertText = document.getElementById('airtm-fijos-alert-text');
@@ -3856,10 +4024,10 @@ body.liquidity-modal-open { overflow: hidden; }
       if (profitElem) {
         if (profitHoy >= 0) {
           profitElem.innerText = `+${formatEUR(profitHoy)}`;
-          profitElem.className = 'text-sm sm:text-base md:text-lg font-bold text-apple-green mt-0.5';
+          profitElem.className = 'stat-metric-number text-lg sm:text-xl font-black font-mono text-apple-green mt-1.5 leading-tight whitespace-nowrap tracking-tight';
         } else {
           profitElem.innerText = formatEUR(profitHoy);
-          profitElem.className = 'text-sm sm:text-base md:text-lg font-bold text-apple-red mt-0.5';
+          profitElem.className = 'stat-metric-number text-lg sm:text-xl font-black font-mono text-apple-red mt-1.5 leading-tight whitespace-nowrap tracking-tight';
         }
       }
 
@@ -4103,9 +4271,6 @@ body.liquidity-modal-open { overflow: hidden; }
         tr.className = 'longpress-row hover:bg-apple-gray-50/70 dark:hover:bg-apple-gray-800/40 transition group';
         tr.id = `row-${item.id}`;
 
-        // Edición deliberada: mantener pulsada la fila ~650 ms.
-        // Cualquier desplazamiento horizontal/vertical cancela el gesto,
-        // evitando que un scroll normal abra accidentalmente el editor.
         const longPressIndicator = document.createElement('span');
         longPressIndicator.className = 'longpress-indicator';
         longPressIndicator.setAttribute('aria-hidden', 'true');
@@ -4154,9 +4319,6 @@ body.liquidity-modal-open { overflow: hidden; }
           if (e.pointerType === 'mouse') cancelLongPress();
         });
 
-        // Solo el último snapshot del día es el cierre diario.
-        // Ahí se muestran: variación frente al cierre anterior, suma de todos
-        // los gastos del día y profit. Los snapshots anteriores quedan en —.
         const itemDate = getArqueoDateOnly(item.timestamp);
         const isLastOfDay = (state.arqueoHistory || [])
           .filter(x => getArqueoDateOnly(x.timestamp) === itemDate)
@@ -4213,20 +4375,14 @@ body.liquidity-modal-open { overflow: hidden; }
         `;
         tbody.appendChild(tr);
       });
-      lucide.createIcons();
+      refreshIcons(tbody);
     }
-
-    // ==========================================================
-    // SNAPSHOT ACTIONS (CREATE, EDIT, SAFE DELETE)
-    // ==========================================================
 
     function getArqueoDateOnly(timestamp) {
       if (!timestamp) return '';
       return String(timestamp).slice(0, 10);
     }
 
-    // Busca el último cierre registrado de un día anterior.
-    // Los snapshots del mismo día NO se usan como referencia entre sí.
     function getPreviousArqueoReference(timestamp, excludeId = null) {
       const currentDate = getArqueoDateOnly(timestamp);
       return (state.arqueoHistory || [])
@@ -4234,16 +4390,7 @@ body.liquidity-modal-open { overflow: hidden; }
         .sort((a, b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))[0] || null;
     }
 
-    // Recalcula toda la cadena de Variación/Profit después de editar o eliminar.
-    // Así nunca queda un arqueo dependiendo de una cifra antigua.
     function recalculateArqueoMetrics() {
-      // LÓGICA DEL EXCEL:
-      // 1) Cada arqueo calcula su DIF contra el arqueo inmediatamente anterior.
-      // 2) El resultado diario es la SUMA de TODOS los DIF realizados ese día.
-      // 3) Los gastos personales se asignan al cierre del día (incluyendo los
-      //    gastos de días sin arqueo desde el cierre anterior).
-      // 4) Profit = suma de DIF del día + gastos personales del cierre.
-      // 5) Solo el último arqueo de cada día muestra las métricas diarias.
       const sorted = [...(state.arqueoHistory || [])]
         .sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')));
 
@@ -4275,13 +4422,9 @@ body.liquidity-modal-open { overflow: hidden; }
         const difDia = Number((difByDate.get(date) || 0).toFixed(2));
 
         item.gastosDia = gastos;
-        // Conservamos en item.dif el DIF REAL de ese arqueo (igual que AJ en Excel).
-        // El acumulado del día vive únicamente en profitHoy.
         item.profitHoy = Number((difDia + gastos).toFixed(2));
       });
 
-      // Los arqueos intermedios conservan su DIF individual, pero las métricas
-      // de cierre (gastos y profit diario) solo aparecen en el último arqueo.
       sorted.forEach(item => {
         const date = getArqueoDateOnly(item.timestamp);
         const cierre = lastByDate.get(date);
@@ -4340,7 +4483,6 @@ body.liquidity-modal-open { overflow: hidden; }
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      const todayDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
       const sortedSnapshots = [...(state.arqueoHistory || [])]
         .sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')));
@@ -4349,8 +4491,6 @@ body.liquidity-modal-open { overflow: hidden; }
         ? Number((liveCap - Number(previousSnap.capitalTotal || 0)).toFixed(2))
         : 0;
 
-      // Los gastos y el profit diario se recalculan después de añadir el nuevo
-      // arqueo, exactamente con la lógica de la tabla del Excel.
       const gastosDia = 0;
       const profitHoy = 0;
       const snapId = 'arq_' + Date.now();
@@ -4468,8 +4608,6 @@ body.liquidity-modal-open { overflow: hidden; }
       });
       snap.capitalTotal = Number(newTotal.toFixed(2));
 
-      // Recalcular siempre Variación y Profit con la misma regla patrimonial.
-      // El Profit no es el DIF: recupera los gastos que explican la salida de dinero.
       const referenceSnap = getPreviousArqueoReference(snap.timestamp, snap.id);
       snap.dif = Number(((referenceSnap ? snap.capitalTotal - Number(referenceSnap.capitalTotal || 0) : 0)).toFixed(2));
       const editDate = getArqueoDateOnly(snap.timestamp);
@@ -4511,23 +4649,16 @@ body.liquidity-modal-open { overflow: hidden; }
       const id = document.getElementById('edit-arq-id').value;
       if (!id) return;
 
-      if (!confirm('¿Estás seguro de que deseas eliminar este snapshot? Esta acción no se puede deshacer.')) {
-        return;
-      }
-
       try {
         if (supabaseClient) {
           const { error } = await supabaseClient.from('arqueos').delete().eq('id', id);
           if (error) throw error;
         }
 
-        // También retirar inmediatamente el registro del estado local para que
-        // la fila desaparezca aunque la sincronización tarde unos instantes.
         state.arqueoHistory = (state.arqueoHistory || []).filter(item => String(item.id) !== String(id));
         recalculateArqueoMetrics();
         localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
 
-        // Persistir solo las métricas que cambiaron por la eliminación.
         if (supabaseClient) {
           for (const item of state.arqueoHistory || []) {
             const { error: metricError } = await supabaseClient.from('arqueos').update({
@@ -4549,9 +4680,6 @@ body.liquidity-modal-open { overflow: hidden; }
       }
     }
 
-    // ==========================================================
-    // MODULE 2: PERSONAL BUDGET & CYCLE (15-14)
-    // ==========================================================
     function getCycleKeyForDate(dateObj, startDay = 15) {
       const yr = dateObj.getFullYear();
       const mo = dateObj.getMonth();
@@ -4587,10 +4715,6 @@ body.liquidity-modal-open { overflow: hidden; }
       if (!state.cycleBudgets) state.cycleBudgets = {};
       const budget = Number(state.cycleBudgets[activeKey] || state.personalBudget || 600);
 
-      // Gastos variables hechos en el ciclo.
-      // Los gastos fijos pagados también viven en `personalExpenses` para que
-      // formen parte del balance general, pero NO deben volver a contarse aquí
-      // como variables porque ya se contabilizan mediante totalFixedPaid/totalFixed.
       const fixedExpenseIdsInCycle = new Set(
         Object.values((state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) || {})
           .filter(info => info && info.paid && info.expenseId)
@@ -4606,15 +4730,11 @@ body.liquidity-modal-open { overflow: hidden; }
         }
       });
 
-      // Total de gastos fijos programados
       let totalFixed = 0;
       (state.personalFixedExpenses || []).forEach(f => {
         totalFixed += Number(f.amount || 0);
       });
 
-      // Fijos pagados vs pendientes en este ciclo específico
-      // Cada ciclo tiene su propio estado de pagos. Al comenzar un ciclo
-      // nuevo (nuevo activeKey), no se heredan marcas del ciclo anterior.
       const cycState = (state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) || {};
       let totalFixedPaid = 0;
       let totalFixedPending = 0;
@@ -4632,16 +4752,12 @@ body.liquidity-modal-open { overflow: hidden; }
         }
       });
 
-      // Presupuesto Variable Protegido (Día a Día)
       const variableBudget = Math.max(0, budget - totalFixed);
-      // Disponible libre para gastar día a día
       const availableVariable = Math.max(0, variableBudget - totalSpent);
-      // Disponible total del presupuesto considerando compromisos
       const availableTotal = budget - (totalSpent + totalFixedPaid);
 
       const msPerDay = 1000 * 60 * 60 * 24;
       const daysRemaining = Math.max(1, Math.ceil((cycleEnd - now) / msPerDay));
-      // Límite diario: solo se calcula sobre el dinero VARIABLE para que el alquiler esté 100% blindado
       const dailyAllowance = availableVariable > 0 ? (availableVariable / daysRemaining) : 0;
 
       const daysPassed = Math.max(1, Math.floor((now - cycleStart) / msPerDay));
@@ -4724,7 +4840,6 @@ body.liquidity-modal-open { overflow: hidden; }
       const circle = document.getElementById('personal-ring-circle');
       if (circle) {
         const circumference = 314.16;
-        // El porcentaje de uso se evalúa frente al total comprometido
         const totalComprometido = cyc.totalFixedPaid + cyc.totalSpent;
         const pct = Math.min(100, Math.max(0, (totalComprometido / cyc.budget) * 100));
         const offset = circumference - (pct / 100) * circumference;
@@ -4828,9 +4943,6 @@ body.liquidity-modal-open { overflow: hidden; }
       renderPersonalExpensesList();
     }
 
-    // ==========================================================
-    // GASTOS FIJOS: APPLE CHECKLIST & INTERACTION ENGINE
-    // ==========================================================
     function renderFixedExpensesList() {
       const list = document.getElementById('personal-fixed-expenses-list');
       const badge = document.getElementById('badge-fixed-count');
@@ -4895,7 +5007,7 @@ body.liquidity-modal-open { overflow: hidden; }
         `;
         list.appendChild(card);
       });
-      lucide.createIcons();
+      refreshIcons(list);
     }
 
     function openPayFixedModal(fixedId) {
@@ -4946,7 +5058,6 @@ body.liquidity-modal-open { overflow: hidden; }
       if (!state.fixedExpensesCycleState) state.fixedExpensesCycleState = {};
       if (!state.fixedExpensesCycleState[activeKey]) state.fixedExpensesCycleState[activeKey] = {};
 
-      // Si ya estaba pagado, no duplicar el gasto personal.
       const previousPayment = state.fixedExpensesCycleState[activeKey][fixedId];
       if (previousPayment?.paid) {
         closeModal('modal-pay-fixed');
@@ -4955,8 +5066,6 @@ body.liquidity-modal-open { overflow: hidden; }
       }
 
       try {
-        // Un gasto fijo pagado ES también un gasto personal real: sale de una cuenta
-        // y por eso debe entrar en gastos, Profit y el balance consolidado.
         const expenseObj = {
           id: fixedExpenseId,
           fecha: date,
@@ -4984,7 +5093,6 @@ body.liquidity-modal-open { overflow: hidden; }
           expenseId: fixedExpenseId
         };
 
-        // El débito bancario mantiene el balance patrimonial sincronizado con el gasto.
         if (autodebit) {
           const curBal = Number(state.bancos[bank] || 0);
           state.bancos[bank] = Math.max(0, curBal - amount);
@@ -5022,7 +5130,6 @@ body.liquidity-modal-open { overflow: hidden; }
       const paymentInfo = (state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) ? state.fixedExpensesCycleState[activeKey][fixedId] : null;
 
       try {
-        // Deshacer también el gasto personal asociado para que no quede un gasto fantasma.
         const expenseId = paymentInfo?.expenseId || `g_fixed_${activeKey}_${fixedId}`;
         if (supabaseClient) {
           const { error } = await supabaseClient.from('gastos').delete().eq('id', expenseId);
@@ -5030,7 +5137,6 @@ body.liquidity-modal-open { overflow: hidden; }
         }
         state.personalExpenses = (state.personalExpenses || []).filter(x => String(x.id) !== String(expenseId));
 
-        // Restituir el dinero al banco si corresponde.
         if (refund && paymentInfo && paymentInfo.amountDebited > 0) {
           const bank = paymentInfo.bank || f.bank;
           const curBal = Number(state.bancos[bank] || 0);
@@ -5114,7 +5220,7 @@ body.liquidity-modal-open { overflow: hidden; }
         `;
         list.appendChild(item);
       });
-      lucide.createIcons();
+      refreshIcons(list);
     }
 
     function animateNumericValue(el, targetValue, formatter = formatEUR, duration = 620) {
@@ -5155,16 +5261,11 @@ body.liquidity-modal-open { overflow: hidden; }
       requestAnimationFrame(tick);
     }
 
-
-    // Fecha ISO en hora local: evita que toISOString() desplace el día en UTC.
     function getLocalDateISO(date = new Date()) {
       const d = date instanceof Date ? date : new Date(date);
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
-    // ROTACIÓN DE LIQUIDEZ — FUENTE ÚNICA
-    // La fecha determina el banco; el orden nunca se reinicia.
-    // 08/10/2026 = Santander (índice 0), según la rotación fijada para esta versión.
     const DAILY_FUNDING_ROTATION = [
       'Santander', 'BBVA', 'Imagin', 'Sabadell',
       'ING', 'N26', 'Trade', 'Openbank'
@@ -5179,8 +5280,6 @@ body.liquidity-modal-open { overflow: hidden; }
       return { bank: rotation[index], index, elapsed, rotation };
     }
 
-    // La calculadora se abre como ventana flotante, igual que el editor de saldos.
-    // Solo propone operaciones: nunca ejecuta ni registra transferencias.
     function openLiquidityCalculator() {
       window.__liquidityModalOpen = true;
       renderLiquidityAdvisor();
@@ -5197,13 +5296,9 @@ body.liquidity-modal-open { overflow: hidden; }
     function renderLiquidityAdvisor() {
       const host = document.getElementById('liquidity-advisor-content');
       if (!host) return;
-      // Capturar los valores ANTES de retirar el modal del DOM. Si se elimina
-      // primero, los campos desaparecen y el objetivo vuelve erróneamente a 350.
       const previousTarget = document.getElementById('liquidity-target-bank')?.value;
       const previousAmount = document.getElementById('liquidity-amount')?.value;
       const previousReserve = document.getElementById('liquidity-reserve')?.value;
-      // La ventana se monta directamente en body para que ningún apple-card,
-      // contenedor con overflow o transform la recorte dentro del módulo.
       document.getElementById('liquidity-calculator-modal')?.remove();
       const banks = state.bancos || {};
       const today = new Date();
@@ -5219,8 +5314,6 @@ body.liquidity-modal-open { overflow: hidden; }
       const currentBalance = Math.max(0, Number(banks[targetBank] || 0));
       const needed = Math.max(0, amount - currentBalance);
 
-      // Se conserva el cálculo original: solo cuentas de la rotación, reserva por banco
-      // y prioridad para las cuentas con mayor excedente disponible.
       const sources = bankNames
         .filter(name => name !== targetBank)
         .map(name => ({ name, balance: Math.max(0, Number(banks[name] || 0)), surplus: Math.max(0, Number(banks[name] || 0) - reserve) }))
@@ -5244,8 +5337,6 @@ body.liquidity-modal-open { overflow: hidden; }
       const dateText = tomorrow.toLocaleDateString('es-ES', { day: '2-digit', month: 'long' });
       const targetBalance = Math.max(0, Number(banks[dailyBank] || 0));
       const targetMissing = Math.max(0, 350 - targetBalance);
-      // Movimientos sugeridos para la tarjeta principal: siempre calculados
-      // para el banco que toca mañana y el objetivo orientativo de 350 €.
       const quickSources = bankNames
         .filter(name => name !== dailyBank)
         .map(name => ({ name, balance: Math.max(0, Number(banks[name] || 0)), surplus: Math.max(0, Number(banks[name] || 0) - 50) }))
@@ -5357,8 +5448,6 @@ body.liquidity-modal-open { overflow: hidden; }
             <button type="button" onclick="closeLiquidityCalculator()" class="ios-tap mt-3 w-full rounded-xl px-4 py-2.5 text-xs font-bold bg-apple-gray-100 dark:bg-apple-gray-800">Cerrar</button>
           </div>
         </div>`;
-      // Sacar el modal del bloque de liquidez: position:fixed queda anclado
-      // al viewport y el fondo cubre toda la pantalla, no solo la tarjeta.
       const liquidityModal = host.querySelector('#liquidity-calculator-modal');
       if (liquidityModal) document.body.appendChild(liquidityModal);
       if (window.lucide?.createIcons) window.lucide.createIcons();
@@ -5371,18 +5460,27 @@ body.liquidity-modal-open { overflow: hidden; }
     });
 
     function installOfflineSupport() {
-      window.addEventListener('offline', () => { setCloudStatus(false, 'Sin conexión'); showToast('Modo sin conexión', 'Puedes consultar la copia local; los cambios en la nube no se sincronizarán hasta recuperar internet.', false); });
-      window.addEventListener('online', () => { setCloudStatus(true, 'Conexión recuperada'); syncAllFromCloud(false); });
+      window.addEventListener('offline', () => {
+        setCloudStatus(false, 'Sin conexión');
+        showToast('Modo sin conexión', 'Puedes consultar la copia local; los cambios en la nube no se sincronizarán hasta recuperar internet.', false);
+      });
+      window.addEventListener('online', () => {
+        setCloudStatus(true, 'Conexión recuperada');
+        syncAllFromCloud(false);
+      });
+      // Reconexión silenciosa al desbloquear el iPhone o volver a la PWA desde segundo plano
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && navigator.onLine && !isPersistingArqueoMetrics) {
+          syncAllFromCloud(false).catch(() => {});
+        }
+      });
     }
 
-    // ==========================================================
-    // MODULE 3: LOANS & DEBTORS (CONTABILIDAD NATIVA POR MONEDA)
-    // ==========================================================
     function renderLoansModule() {
       renderDebtorsDirectory();
       renderLoansTable();
       renderLiquidityAdvisor();
-      if (window.lucide) lucide.createIcons();
+      refreshIcons(document.getElementById('view-prestamos'));
     }
 
     function setDebtorsDirectoryView(view) {
@@ -5399,9 +5497,6 @@ body.liquidity-modal-open { overflow: hidden; }
       return amount;
     }
 
-    // Construye DOS relaciones independientes por persona (ME DEBEN vs YO DEBO),
-    // llevando la contabilidad estricta en su propia moneda (EUR, PEN, USD).
-    // Una deuda solo se considera saldada cuando el saldo de CADA moneda es 0.
     function buildLoanRelations() {
       const map = {};
       const curPenRate = state.fxRates?.PEN || 3.88;
@@ -5603,7 +5698,7 @@ body.liquidity-modal-open { overflow: hidden; }
         currentView.list.forEach(c => container.appendChild(renderPerson(c, activeDebtorsDirectoryView === 'active' ? 'receivable' : activeDebtorsDirectoryView)));
       }
 
-      if (window.lucide) lucide.createIcons();
+      refreshIcons(container);
     }
 
     function filterLoanByPerson(personName, side = 'ALL') {
@@ -5761,7 +5856,6 @@ body.liquidity-modal-open { overflow: hidden; }
           : 'En euros';
       }
 
-      // Saldo nativo: se calcula por divisa sin compensar monedas distintas.
       const nativeNet = { EUR: 0, PEN: 0, USD: 0 };
       filtered.forEach(l => {
         const sign = activeContactLoanFilter === 'ALL'
@@ -5791,7 +5885,6 @@ body.liquidity-modal-open { overflow: hidden; }
         dosRestaBreak.innerText = hasForeignNet ? `≈ ${formatEUR(restaEquiv)} · ${contextLabel}` : contextLabel;
       }
 
-      // Mostrar u ocultar el botón "Liquidar deuda" cuando hay una persona seleccionada con saldo pendiente
       const settleBtn = document.getElementById('btn-settle-full-debt');
       const settleBtnLabel = document.getElementById('btn-settle-full-debt-label');
       const positiveCurrencies = ['EUR', 'PEN', 'USD'].filter(c => (nativeNet[c] || 0) > 0.005);
@@ -5855,13 +5948,10 @@ body.liquidity-modal-open { overflow: hidden; }
         `;
         tbody.appendChild(tr);
       });
-      lucide.createIcons();
+      refreshIcons(tbody);
       initArqueoTableScrollHint();
     }
 
-    // ==========================================================
-    // UI NAVIGATION & MODAL HANDLERS
-    // ==========================================================
     function initArqueoTableScrollHint() {
       const scroll = document.getElementById('arqueo-table-scroll');
       const shell = document.getElementById('arqueo-table-shell');
@@ -5903,6 +5993,11 @@ body.liquidity-modal-open { overflow: hidden; }
     }, { passive: true });
 
     function switchTab(tabId) {
+      if (activeTabId === tabId && !document.getElementById(`view-${tabId}`)?.classList.contains('hidden')) {
+        return;
+      }
+      activeTabId = tabId;
+
       document.getElementById('view-airtm').classList.add('hidden');
       document.getElementById('view-personal').classList.add('hidden');
       document.getElementById('view-prestamos').classList.add('hidden');
@@ -5937,15 +6032,21 @@ body.liquidity-modal-open { overflow: hidden; }
       }
       updateMobileNavIndicator(tabId);
 
-      // Primero cambia la pantalla; el render pesado ocurre después del primer frame.
+      // Renderizar en el siguiente frame para que el cambio de pestaña se pinte primero.
+      // Evitamos una segunda pasada global de iconos: cada módulo actualiza los suyos.
       requestAnimationFrame(() => {
-        if (tabId === 'airtm') {
-          renderAirtmModule();
-          requestAnimationFrame(initArqueoTableScrollHint);
+        try {
+          if (tabId === 'airtm') {
+            renderAirtmModule();
+            requestAnimationFrame(initArqueoTableScrollHint);
+          } else if (tabId === 'personal') {
+            renderPersonalModule();
+          } else if (tabId === 'prestamos') {
+            renderLoansModule();
+          }
+        } catch (error) {
+          console.error('No se pudo actualizar la pestaña:', tabId, error);
         }
-        if (tabId === 'personal') renderPersonalModule();
-        if (tabId === 'prestamos') renderLoansModule();
-        if (window.lucide) lucide.createIcons();
       });
     }
 
@@ -5965,35 +6066,15 @@ body.liquidity-modal-open { overflow: hidden; }
     }
 
     function getBankMiniLogo(name, grad = 'from-gray-500 to-gray-700') {
-      // Los logos normales usan Brandfetch. BCP usa SVG inline para que nunca
-      // dependa de CDN, favicons o bloqueos de red.
-      const domains = {
-        Airtm: 'airtm.com',
-        N26: 'n26.com',
-        Openbank: 'openbank.es',
-        BBVA: 'bbva.com',
-        Imagin: 'imagin.com',
-        Santander: 'santander.com',
-        Bunq: 'bunq.com',
-        Trade: 'traderepublic.com',
-        Wise: 'wise.com',
-        ING: 'ing.es',
-        Vivid: 'vivid.money',
-        Sabadell: 'bancsabadell.com',
-        Interbank: 'interbank.pe',
-        BCP: 'bcp.com.pe'
-      };
       const cleanName = String(name || '').trim();
       const fallback = cleanName.slice(0, 2).toUpperCase();
-
-
-
-      const domain = domains[cleanName];
-      const src = domain ? `https://cdn.brandfetch.io/${domain}/w/128/h/128` : '';
+      const domain = BANK_DOMAINS[cleanName];
+      const cachedSrc = BANK_LOGO_CACHE.get(cleanName);
+      const src = cachedSrc || BANK_CUSTOM_LOGOS[cleanName] || (domain ? `https://cdn.brandfetch.io/${domain}/w/128/h/128` : '');
       const fallbackSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : '';
       return `<span class="bank-mini-logo bank-mini-logo-real w-8 h-8 shrink-0 rounded-[10px] bg-white dark:bg-white flex items-center justify-center shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden" title="${cleanName || ''}">` +
-        (src ? `<img src="${src}" data-fallback-src="${fallbackSrc}" alt="" class="bank-mini-logo-img" loading="lazy" referrerpolicy="no-referrer" onload="this.nextElementSibling.style.display='none'" onerror="if(this.dataset.fallbackTried!=='1'&&this.dataset.fallbackSrc){this.dataset.fallbackTried='1';this.src=this.dataset.fallbackSrc;}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">` : '') +
-        `<span class="bank-mini-logo-fallback bank-logo-fallback" style="${src ? 'display:none;' : 'display:flex;'}">${fallback}</span></span>`;
+        (src ? `<img src="${src}" data-bank="${cleanName}" data-fallback-src="${fallbackSrc}" alt="${cleanName}" width="32" height="32" class="bank-mini-logo-img" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" onload="BANK_LOGO_CACHE.set(this.dataset.bank,this.src);this.nextElementSibling.style.display='none'" onerror="if(this.dataset.fallbackTried!=='1'&&this.dataset.fallbackSrc){this.dataset.fallbackTried='1';BANK_LOGO_CACHE.set(this.dataset.bank,this.dataset.fallbackSrc);this.src=this.dataset.fallbackSrc;}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">` : '') +
+        `<span class="bank-mini-logo-fallback bank-logo-fallback text-[10px] font-bold text-apple-gray-700" style="${src ? 'display:none;' : 'display:flex;'}">${fallback}</span></span>`;
     }
 
     function openAllBankEditor() {
@@ -6004,6 +6085,14 @@ body.liquidity-modal-open { overflow: hidden; }
     function openBankQuickEditor(name) {
       state.quickBalanceBank = name;
       openModal('modal-quick-balance');
+    }
+
+    // Helper: fluid parser for both comma (,) and dot (.)
+    function parseLocaleNumber(str) {
+      if (!str) return 0;
+      const clean = String(str).replace(/\s/g, '').replace(',', '.');
+      const val = parseFloat(clean);
+      return Number.isFinite(val) ? val : 0;
     }
 
     function openModal(id) {
@@ -6018,30 +6107,26 @@ body.liquidity-modal-open { overflow: hidden; }
       if (dLoan && !dLoan.value) dLoan.value = todayStr;
 
       if (id === 'modal-quick-balance') {
-        const grid = document.getElementById('bank-inputs-container');
         const title = document.getElementById('quick-balance-title');
-        const subtitle = document.getElementById('quick-balance-subtitle');
         const kicker = document.getElementById('quick-balance-kicker');
-        const hero = document.getElementById('bank-editor-hero');
         const logoWrap = document.getElementById('bank-editor-logo');
-        const bankName = document.getElementById('bank-editor-name');
-        const currencyLabel = document.getElementById('bank-editor-currency');
-        const balanceEl = document.getElementById('bank-editor-balance');
         const deltaPill = document.getElementById('bank-editor-delta-pill');
         const deltaIcon = document.getElementById('bank-editor-delta-icon');
         const deltaText = document.getElementById('bank-editor-delta-text');
-        const current = document.getElementById('quick-balance-current');
         const previousEl = document.getElementById('quick-balance-previous');
-        const delta = document.getElementById('quick-balance-delta');
         const snapshotDate = document.getElementById('quick-balance-snapshot-date');
+        const projectedCapitalEl = document.getElementById('quick-balance-projected-capital');
+        const capitalDiffEl = document.getElementById('quick-balance-capital-diff');
         const currencyChip = document.getElementById('bank-editor-currency-chip');
-        const hint = document.getElementById('bank-editor-edit-hint');
+        const currencyPrefix = document.getElementById('bank-hero-currency-prefix');
         const saveLabel = document.getElementById('bank-editor-save-label');
         const saveButton = document.getElementById('bank-editor-save-button');
+        const mainInput = document.getElementById('bank-interactive-input');
+        const revertBtn = document.getElementById('btn-revert-bank-snapshot');
 
-        const selected = state.quickBalanceBank || null;
-        const editorModal = document.getElementById('modal-quick-balance');
-        if (editorModal) editorModal.classList.toggle('bank-editor-single', Boolean(selected));
+        const selected = state.quickBalanceBank || 'Airtm';
+        state.quickBalanceBank = selected;
+
         const latest = [...(state.arqueoHistory || [])]
           .sort((a,b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))[0] || null;
 
@@ -6056,134 +6141,113 @@ body.liquidity-modal-open { overflow: hidden; }
         };
 
         const formatSnapshotDate = (value) => {
-          if (!value) return '—';
+          if (!value) return 'Sin fecha previa';
           const raw = String(value).replace('T',' ');
           return raw.length >= 16 ? raw.slice(0,16) : raw;
         };
 
-        if (selected) {
-          const val = Number(state.bancos[selected] || 0);
-          const isSoles = selected === 'BCP' || selected === 'Interbank';
-          const previous = latest?.bancos?.[selected] === undefined ? null : Number(latest.bancos[selected] || 0);
-          const d = previous === null ? null : Number((val - previous).toFixed(2));
-          const formatted = isSoles ? formatPEN(val) : formatEUR(val);
-          const previousFormatted = previous === null ? 'Sin snapshot' : (isSoles ? formatPEN(previous) : formatEUR(previous));
-          const deltaFormatted = d === null ? 'Sin snapshot' : d > 0 ? `+${isSoles ? formatPEN(d) : formatEUR(d)}` : d < 0 ? `${isSoles ? formatPEN(d) : formatEUR(d)}` : 'Sin cambio';
+        const val = Number(state.bancos[selected] || 0);
+        const isSoles = selected === 'BCP' || selected === 'Interbank';
+        const previous = latest?.bancos?.[selected] === undefined ? null : Number(latest.bancos[selected] || 0);
+        const previousFormatted = previous === null ? 'Sin snapshot' : (isSoles ? formatPEN(previous) : formatEUR(previous));
 
-          if (title) title.innerText = selected;
-          if (subtitle) subtitle.innerText = 'Edita esta cuenta y revisa el cambio antes de guardar.';
-          if (kicker) kicker.innerText = 'BÓVEDA · EDITAR';
-          if (hero) hero.classList.remove('hidden');
-          if (logoWrap) logoWrap.innerHTML = getBankMiniLogo(selected, gradMap[selected] || 'from-gray-500 to-gray-700');
-          if (bankName) bankName.innerText = selected;
-          if (currencyLabel) currencyLabel.innerText = isSoles ? 'PEN' : 'EUR';
-          if (currencyChip) currencyChip.innerText = isSoles ? 'PEN' : 'EUR';
-          if (balanceEl) balanceEl.innerText = formatted;
-          if (current) current.innerText = formatted;
-          if (previousEl) previousEl.innerText = previousFormatted;
-          if (delta) delta.innerText = deltaFormatted;
-          if (snapshotDate) snapshotDate.innerText = formatSnapshotDate(latest?.timestamp);
-          if (hint) hint.innerText = 'El indicador se actualiza mientras escribes.';
-          if (saveLabel) saveLabel.innerText = 'Guardar cambios';
+        if (title) title.innerText = selected;
+        if (kicker) kicker.innerText = `BÓVEDA · ${isSoles ? 'SOLES' : 'EUROS'}`;
+        if (logoWrap) logoWrap.innerHTML = getBankMiniLogo(selected, gradMap[selected] || 'from-gray-500 to-gray-700');
+        if (currencyChip) currencyChip.innerText = isSoles ? 'PEN' : 'EUR';
+        if (currencyPrefix) currencyPrefix.innerText = isSoles ? 'S/.' : '€';
+        if (previousEl) previousEl.innerText = previousFormatted;
+        if (snapshotDate) snapshotDate.innerText = formatSnapshotDate(latest?.timestamp);
+        if (saveLabel) saveLabel.innerText = 'Guardar cambios';
+
+        // Pre-fill input value
+        if (mainInput) {
+          mainInput.value = val.toFixed(2);
+          mainInput.dataset.originalValue = String(val);
+          mainInput.dataset.previousSnapshot = previous !== null ? String(previous) : String(val);
+          mainInput.dataset.isSoles = isSoles ? '1' : '0';
+          mainInput.dataset.bankName = selected;
+        }
+
+        // Live calculation callback
+        const updateInteractiveState = () => {
+          const currentTyped = parseLocaleNumber(mainInput.value);
+          const basePrev = previous !== null ? previous : val;
+          const delta = Number((currentTyped - basePrev).toFixed(2));
+          const deltaFormatted = delta > 0
+            ? `+${isSoles ? formatPEN(delta) : formatEUR(delta)}`
+            : delta < 0
+              ? `${isSoles ? formatPEN(delta) : formatEUR(delta)}`
+              : 'Sin cambio';
 
           if (deltaPill) {
-            deltaPill.className = `bank-editor-delta mt-3 ${d > 0 ? 'positive' : d < 0 ? 'negative' : 'neutral'}`;
+            deltaPill.className = `bank-editor-delta ${delta > 0 ? 'positive' : delta < 0 ? 'negative' : 'neutral'}`;
           }
           if (deltaIcon) {
-            deltaIcon.innerHTML = d > 0
+            deltaIcon.innerHTML = delta > 0
               ? '<i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>'
-              : d < 0
+              : delta < 0
                 ? '<i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>'
                 : '<i data-lucide="minus" class="w-3.5 h-3.5"></i>';
           }
           if (deltaText) deltaText.innerText = deltaFormatted;
 
-          if (grid) {
-            grid.className = 'bank-editor-inputs-grid';
-            grid.innerHTML = `
-              <div class="bank-editor-input-card">
-                <div class="flex items-center justify-between gap-3 mb-2.5">
-                  <div>
-                    <div class="text-[10px] font-semibold text-apple-gray-400 uppercase tracking-wide">Saldo actual</div>
-                    <div class="text-[9px] text-apple-gray-400 mt-0.5">${isSoles ? 'Importe expresado en soles' : 'Importe expresado en euros'}</div>
-                  </div>
-                  <span class="text-[10px] font-bold text-apple-gray-400">${isSoles ? 'S/' : '€'}</span>
-                </div>
-                <input id="quick-balance-input-${selected}" type="number" step="0.01"
-                       name="b_${selected}" value="${val}" inputmode="decimal"
-                       class="bank-editor-field" autocomplete="off"
-                       oninput="updateQuickBalanceDelta('${selected}', ${val}, ${isSoles})">
-                <div class="flex items-center justify-between gap-3 mt-2.5">
-                  <span class="text-[9px] text-apple-gray-400">Snapshot: ${previousFormatted}</span>
-                  <span id="quick-balance-delta-${selected}" class="text-[10px] font-bold ${d > 0 ? 'text-apple-green' : d < 0 ? 'text-apple-red' : 'text-apple-gray-400'}">${deltaFormatted}</span>
-                </div>
-              </div>
-            `;
+          // Projected Capital Impact (Point 5)
+          const fx = (state.fxRates?.PEN && state.fxRates.PEN > 0) ? state.fxRates.PEN : 3.88;
+          const simBancos = { ...state.bancos, [selected]: currentTyped };
+          const projectedCap = calculateCapitalFromComponents({
+            bancos: simBancos,
+            acciones: state.acciones || 0,
+            loansEur: calculateConsolidatedLoansNetEUR(),
+            capitalMadre: Number(state.capitalSolesMadre || 1365),
+            fx
+          });
+
+          const currentCap = calculateLiveCapitalTotal();
+          const capDiff = projectedCap - currentCap;
+
+          if (projectedCapitalEl) projectedCapitalEl.innerText = formatEUR(projectedCap);
+          if (capitalDiffEl) {
+            if (Math.abs(capDiff) < 0.005) {
+              capitalDiffEl.innerText = 'Sin variación total';
+              capitalDiffEl.className = 'text-apple-gray-400';
+            } else if (capDiff > 0) {
+              capitalDiffEl.innerText = `+${formatEUR(capDiff)} en capital total`;
+              capitalDiffEl.className = 'text-apple-green font-bold';
+            } else {
+              capitalDiffEl.innerText = `${formatEUR(capDiff)} en capital total`;
+              capitalDiffEl.className = 'text-apple-red font-bold';
+            }
           }
-        } else {
-          // Modo "Actualizar todos": conserva la función existente, pero con el nuevo lenguaje visual.
-          if (title) title.innerText = 'Actualizar saldos';
-          if (subtitle) subtitle.innerText = 'Revisa tus cuentas y guarda los cambios juntos.';
-          if (kicker) kicker.innerText = 'BÓVEDAS · TODAS';
-          if (hero) hero.classList.add('hidden');
-          if (hint) hint.innerText = 'Puedes actualizar varias cuentas antes de guardar.';
-          if (saveLabel) saveLabel.innerText = 'Guardar cambios';
-          if (grid) {
-            grid.className = 'bank-editor-inputs-grid bank-editor-multi';
-            grid.innerHTML = '';
-            const names = getOrderedBankNames(state.bancos);
-            names.forEach((name, index) => {
-              const val = Number(state.bancos[name] || 0);
-              const isSoles = name === 'BCP' || name === 'Interbank';
-              const previous = latest?.bancos?.[name] === undefined ? null : Number(latest.bancos[name] || 0);
-              const d = previous === null ? null : Number((val - previous).toFixed(2));
-              const previousFormatted = previous === null ? 'Sin snapshot' : (isSoles ? formatPEN(previous) : formatEUR(previous));
-              const deltaFormatted = d === null ? 'Sin snapshot' : d > 0 ? `+${isSoles ? formatPEN(d) : formatEUR(d)}` : d < 0 ? `${isSoles ? formatPEN(d) : formatEUR(d)}` : 'Sin cambio';
-              const div = document.createElement('div');
-              div.className = 'bank-editor-input-card';
-              div.style.animationDelay = `${Math.min(index, 7) * 30}ms`;
-              div.innerHTML = `
-                <div class="flex items-center gap-2.5 mb-2.5">
-                  ${getBankMiniLogo(name, gradMap[name] || 'from-gray-500 to-gray-700')}
-                  <div class="min-w-0">
-                    <div class="text-xs font-bold text-apple-gray-900 dark:text-white truncate">${name}</div>
-                    <div class="text-[9px] text-apple-gray-400">${isSoles ? 'PEN' : 'EUR'}</div>
-                  </div>
-                </div>
-                <input id="quick-balance-input-${name}" type="number" step="0.01"
-                       name="b_${name}" value="${val}" inputmode="decimal"
-                       class="bank-editor-field"
-                       oninput="updateQuickBalanceDelta('${name}', ${val}, ${isSoles})">
-                <div class="flex items-center justify-between gap-2 mt-2">
-                  <span class="text-[9px] text-apple-gray-400 truncate">Snapshot: ${previousFormatted}</span>
-                  <span id="quick-balance-delta-${name}" class="text-[10px] font-bold ${d > 0 ? 'text-apple-green' : d < 0 ? 'text-apple-red' : 'text-apple-gray-400'} truncate">${deltaFormatted}</span>
-                </div>
-              `;
-              grid.appendChild(div);
-            });
+
+          if (revertBtn) {
+            revertBtn.classList.toggle('hidden', previous === null || Math.abs(currentTyped - previous) < 0.005);
           }
-          if (current) current.innerText = '';
-          if (previousEl) previousEl.innerText = '—';
-          if (delta) delta.innerText = '—';
-          if (snapshotDate) snapshotDate.innerText = latest?.timestamp ? formatSnapshotDate(latest.timestamp) : '—';
-        }
+          if (window.lucide) lucide.createIcons();
+        };
+
+        // Attach listener for fluid typing (Point 2)
+        mainInput.oninput = updateInteractiveState;
+        updateInteractiveState();
 
         if (saveButton) {
-          saveButton.classList.remove('is-saving','is-saved');
+          saveButton.classList.remove('is-saving', 'is-saved');
           saveButton.disabled = false;
         }
 
+        // Smart Autofocus & Select All without forcing viewport jump (Point 1)
         requestAnimationFrame(() => {
-          if (window.lucide) lucide.createIcons();
-          const focusInput = selected
-            ? document.getElementById(`quick-balance-input-${selected}`)
-            : null;
-          if (focusInput && !window.matchMedia('(max-width: 639px)').matches) {
-            setTimeout(() => {
-              focusInput.focus({ preventScroll: true });
-              try { focusInput.select(); } catch (_) {}
-            }, 180);
-          }
+          refreshIcons(m);
+          setTimeout(() => {
+            if (mainInput) {
+              try {
+                mainInput.focus({ preventScroll: true });
+                mainInput.select();
+              } catch (e) {
+                mainInput.focus();
+              }
+            }
+          }, 50);
         });
       }
 
@@ -6227,24 +6291,7 @@ body.liquidity-modal-open { overflow: hidden; }
       m.classList.remove('hidden');
 
       if (id === 'modal-quick-balance') {
-        document.documentElement.classList.add('bank-editor-open');
-        if (window.matchMedia('(max-width: 639px)').matches && !window.__bankEditorBodyLock) {
-          const body = document.body;
-          const scrollY = window.scrollY || window.pageYOffset || 0;
-          window.__bankEditorBodyLock = {
-            scrollY,
-            position: body.style.position,
-            top: body.style.top,
-            left: body.style.left,
-            right: body.style.right,
-            width: body.style.width
-          };
-          body.style.position = 'fixed';
-          body.style.top = `-${scrollY}px`;
-          body.style.left = '0';
-          body.style.right = '0';
-          body.style.width = '100%';
-        }
+        document.body.classList.add('bank-editor-open');
         requestAnimationFrame(syncBankEditorVisualViewport);
       }
     }
@@ -6255,9 +6302,9 @@ body.liquidity-modal-open { overflow: hidden; }
 
       const vv = window.visualViewport;
       const height = vv && Number.isFinite(vv.height) ? vv.height : window.innerHeight;
-      const visualHeight = Math.max(260, Math.round(height));
+      const visualHeight = Math.max(240, Math.round(height));
       const visualTop = vv && Number.isFinite(vv.offsetTop) ? Math.max(0, Math.round(vv.offsetTop)) : 0;
-      const keyboardOpen = vv ? (window.innerHeight - vv.height > 120) : false;
+      const keyboardOpen = vv ? (window.innerHeight - vv.height > 110) : false;
 
       modal.style.setProperty('--bank-editor-visual-height', `${visualHeight}px`);
       modal.style.setProperty('--bank-editor-visual-top', `${visualTop}px`);
@@ -6274,8 +6321,6 @@ body.liquidity-modal-open { overflow: hidden; }
         window.visualViewport.addEventListener('scroll', sync, { passive: true });
       }
 
-      // iOS puede animar el teclado durante varios frames. Recalculamos
-      // mientras termina la transición para evitar saltos intermitentes.
       let viewportRaf = 0;
       const stableSync = () => {
         cancelAnimationFrame(viewportRaf);
@@ -6292,7 +6337,6 @@ body.liquidity-modal-open { overflow: hidden; }
         if (!event.target || !event.target.closest('#modal-quick-balance')) return;
         requestAnimationFrame(syncBankEditorVisualViewport);
         setTimeout(syncBankEditorVisualViewport, 90);
-        setTimeout(syncBankEditorVisualViewport, 220);
       });
     }
 
@@ -6309,84 +6353,37 @@ body.liquidity-modal-open { overflow: hidden; }
           saveButton.classList.remove('is-saving','is-saved');
           saveButton.disabled = false;
         }
-        document.documentElement.classList.remove('bank-editor-open');
-        m.style.removeProperty('--bank-editor-visual-height');
-        m.style.removeProperty('--bank-editor-visual-top');
-        m.removeAttribute('data-keyboard-open');
-        m.classList.remove('bank-editor-single');
-        const lock = window.__bankEditorBodyLock;
-        if (lock) {
-          const body = document.body;
-          body.style.position = lock.position;
-          body.style.top = lock.top;
-          body.style.left = lock.left;
-          body.style.right = lock.right;
-          body.style.width = lock.width;
-          window.__bankEditorBodyLock = null;
-          window.scrollTo(0, lock.scrollY);
+        document.body.classList.remove('bank-editor-open');
+        if (m) {
+          m.style.removeProperty('--bank-editor-visual-height');
+          m.style.removeProperty('--bank-editor-visual-top');
+          m.removeAttribute('data-keyboard-open');
         }
         state.quickBalanceBank = null;
       }
     }
 
-    function updateQuickBalanceDelta(name, original, isSoles) {
-      const input = document.getElementById(`quick-balance-input-${name}`);
-      const out = document.getElementById(`quick-balance-delta-${name}`);
-      if (!input) return;
-
-      const next = Number.parseFloat(input.value);
-      const safeNext = Number.isFinite(next) ? next : 0;
-      const d = Number((safeNext - Number(original || 0)).toFixed(2));
-      const formatted = d > 0
-        ? `+${isSoles ? formatPEN(d) : formatEUR(d)}`
-        : d < 0
-          ? `${isSoles ? formatPEN(d) : formatEUR(d)}`
-          : 'Sin cambio';
-
-      if (out) {
-        out.className = `text-[10px] font-bold ${d > 0 ? 'text-apple-green' : d < 0 ? 'text-apple-red' : 'text-apple-gray-400'} truncate`;
-        out.innerText = formatted;
-      }
-
-      const selected = state.quickBalanceBank || null;
-      if (selected === name) {
-        const balanceEl = document.getElementById('bank-editor-balance');
-        const current = document.getElementById('quick-balance-current');
-        const delta = document.getElementById('quick-balance-delta');
-        const deltaText = document.getElementById('bank-editor-delta-text');
-        const deltaIcon = document.getElementById('bank-editor-delta-icon');
-        const deltaPill = document.getElementById('bank-editor-delta-pill');
-
-        const nextFormatted = isSoles ? formatPEN(safeNext) : formatEUR(safeNext);
-        if (balanceEl) balanceEl.innerText = nextFormatted;
-        if (current) current.innerText = nextFormatted;
-        if (delta) delta.innerText = formatted;
-        if (deltaText) deltaText.innerText = formatted;
-
-        if (deltaPill) {
-          deltaPill.className = `bank-editor-delta mt-3 ${d > 0 ? 'positive' : d < 0 ? 'negative' : 'neutral'} pulse`;
-          setTimeout(() => deltaPill.classList.remove('pulse'), 300);
-        }
-        if (deltaIcon) {
-          deltaIcon.innerHTML = d > 0
-            ? '<i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>'
-            : d < 0
-              ? '<i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>'
-              : '<i data-lucide="minus" class="w-3.5 h-3.5"></i>';
-          if (window.lucide) lucide.createIcons();
-        }
-      }
+    function revertBankToSnapshot() {
+      const mainInput = document.getElementById('bank-interactive-input');
+      if (!mainInput) return;
+      const prev = parseFloat(mainInput.dataset.previousSnapshot || '0');
+      mainInput.value = prev.toFixed(2);
+      mainInput.dispatchEvent(new Event('input'));
+      mainInput.focus();
+      mainInput.select();
     }
 
     async function handleSaveBanks(e) {
       e.preventDefault();
 
       const form = e.target;
-      const selected = state.quickBalanceBank || null;
+      const selected = state.quickBalanceBank;
+      const mainInput = document.getElementById('bank-interactive-input');
       const saveButton = document.getElementById('bank-editor-save-button');
       const saveLabel = document.getElementById('bank-editor-save-label');
       const saveIcon = document.getElementById('bank-editor-save-icon');
 
+      if (!selected || !mainInput) return;
       if (form.dataset.saving === '1') return;
       form.dataset.saving = '1';
 
@@ -6401,17 +6398,8 @@ body.liquidity-modal-open { overflow: hidden; }
       }
 
       try {
-        const formData = new FormData(form);
-
-        if (selected) {
-          const val = formData.get(`b_${selected}`);
-          if (val !== null) state.bancos[selected] = Number.parseFloat(val) || 0;
-        } else {
-          for (const name of getOrderedBankNames(state.bancos)) {
-            const val = formData.get(`b_${name}`);
-            if (val !== null) state.bancos[name] = Number.parseFloat(val) || 0;
-          }
-        }
+        const nextValue = parseLocaleNumber(mainInput.value);
+        state.bancos[selected] = nextValue;
 
         await saveGlobalConfigToCloud();
         renderAirtmModule();
@@ -6427,23 +6415,22 @@ body.liquidity-modal-open { overflow: hidden; }
         }
 
         showToast(
-          selected ? `${selected} actualizado` : 'Saldos guardados',
-          selected ? 'El cambio se sincronizó con Supabase Cloud.' : 'Todos los saldos se sincronizaron con Supabase Cloud.',
+          `${selected} actualizado`,
+          `Saldo guardado: ${selected === 'BCP' || selected === 'Interbank' ? formatPEN(nextValue) : formatEUR(nextValue)}`,
           true
         );
 
         setTimeout(() => {
           closeModal('modal-quick-balance');
-          state.quickBalanceBank = null;
           form.dataset.saving = '0';
           if (saveButton) {
             saveButton.classList.remove('is-saving','is-saved');
             saveButton.disabled = false;
           }
-        }, 420);
+        }, 360);
 
       } catch (error) {
-        console.error('Error guardando saldos:', error);
+        console.error('Error guardando saldo:', error);
         form.dataset.saving = '0';
         if (saveButton) {
           saveButton.classList.remove('is-saving','is-saved');
@@ -6454,14 +6441,11 @@ body.liquidity-modal-open { overflow: hidden; }
           saveIcon.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
           if (window.lucide) lucide.createIcons();
         }
-        showToast('No se guardaron los saldos', error?.message || 'Supabase rechazó la operación.', false);
+        showToast('No se guardó el saldo', error?.message || 'Supabase rechazó la operación.', false);
       }
     }
 
     async function refreshProfitAfterExpenseChange() {
-      // El Excel recalcula el beneficio a partir de los gastos del libro PERSONAL.
-      // Hacemos lo mismo aquí: refrescar gastos -> recalcular arqueos -> persistir
-      // las métricas -> volver a pintar el resumen principal y la tabla.
       await syncAllFromCloud();
       recalculateArqueoMetrics();
       await persistArqueoMetrics();
@@ -6494,7 +6478,6 @@ body.liquidity-modal-open { overflow: hidden; }
       const form = e.target;
       const saveButton = form.querySelector('button[type="submit"]');
 
-      // Evitar dobles pulsaciones mientras se confirma la inserción.
       if (form.dataset.saving === '1') return;
       form.dataset.saving = '1';
 
@@ -6529,14 +6512,11 @@ body.liquidity-modal-open { overflow: hidden; }
       }
 
       try {
-        // La inserción es la confirmación real de que Supabase recibió el gasto.
         if (supabaseClient) {
           const { error } = await supabaseClient.from('gastos').insert(expenseObj);
           if (error) throw error;
         }
 
-        // Pintado optimista local: el gasto aparece inmediatamente, sin esperar
-        // a la sincronización/recalculación completa.
         if (!state.personalExpenses) state.personalExpenses = [];
         state.personalExpenses = [
           {
@@ -6551,7 +6531,6 @@ body.liquidity-modal-open { overflow: hidden; }
           ...state.personalExpenses.filter(x => String(x.id) !== String(expenseObj.id))
         ];
 
-        // Si se eligió descuento automático, el gasto también modifica el saldo de la cuenta.
         if (expenseObj.descontar_cuenta && state.bancos[expenseObj.banco] !== undefined) {
           const currentBalance = Number(state.bancos[expenseObj.banco] || 0);
           state.bancos[expenseObj.banco] = Number((currentBalance - expenseObj.monto_debitado).toFixed(2));
@@ -6571,8 +6550,6 @@ body.liquidity-modal-open { overflow: hidden; }
           true
         );
 
-        // La parte pesada ocurre después de cerrar el modal.
-        // Si Supabase ya confirmó el INSERT, el usuario no queda bloqueado.
         setTimeout(async () => {
           try {
             await refreshProfitAfterExpenseChange();
@@ -6616,7 +6593,7 @@ body.liquidity-modal-open { overflow: hidden; }
         const { error } = await supabaseClient.from('gastos').delete().eq('id', id);
         if (error) {
           console.error('Error eliminando gasto:', error);
-          showToast('No se eliminó el gasto', error.message || 'Supabase rechazó la operación.');
+          showToast('No se eliminó el gasto', error.message || 'Supabase rechazó la operación.', false);
           return;
         }
       }
@@ -6712,7 +6689,7 @@ body.liquidity-modal-open { overflow: hidden; }
       const date = form.date.value;
 
       if (deltaAmt <= 0) {
-        alert("El monto de la variación debe ser mayor a 0.");
+        showToast("Monto inválido", "El monto de la variación debe ser mayor a 0.", false);
         return;
       }
 
@@ -6799,7 +6776,7 @@ body.liquidity-modal-open { overflow: hidden; }
       const date = form.date.value;
 
       if (deltaAmt <= 0) {
-        alert("El monto de la variación debe ser mayor a 0.");
+        showToast("Monto inválido", "El monto de la variación debe ser mayor a 0.", false);
         return;
       }
 
@@ -6866,8 +6843,6 @@ body.liquidity-modal-open { overflow: hidden; }
     }
 
     function openNewDebtorFlow() {
-      // El deudor se crea al guardar su primer movimiento; no duplicamos contactos
-      // en una tabla separada. Abrimos directamente el flujo de alta y enfocamos el nombre.
       activeContactLoanFilter = 'ALL';
       activeContactLoanSide = 'ALL';
       openLoanModal();
@@ -6949,7 +6924,6 @@ body.liquidity-modal-open { overflow: hidden; }
       if (!form) return;
       form.person.value = activeContactLoanFilter;
 
-      // Detectar qué moneda tiene saldo pendiente con esta persona para preseleccionarla
       const penDebt = getRelationNativeBalance(activeContactLoanFilter, activeContactLoanSide, 'PEN');
       const eurDebt = getRelationNativeBalance(activeContactLoanFilter, activeContactLoanSide, 'EUR');
       const usdDebt = getRelationNativeBalance(activeContactLoanFilter, activeContactLoanSide, 'USD');
@@ -7053,18 +7027,9 @@ body.liquidity-modal-open { overflow: hidden; }
       }
 
       const isReceivable = side === 'receivable';
-      const actionVerb = isReceivable ? 'te devolvió' : 'le pagaste';
       const categoryLabel = isReceivable ? 'Me devolvió' : 'Le pagué';
       const flowType = isReceivable ? 'ME_PAGARON' : 'YO_PAGUE';
       const summaryText = pendingItems.map(x => x.label).join(' + ');
-
-      if (!confirm(`¿Liquidar por completo la deuda con ${person}?
-
-Se registrará que ${actionVerb}: ${summaryText}
-
-La relación pasará automáticamente a "Saldadas".`)) {
-        return;
-      }
 
       const todayStr = getLocalDateISO(new Date());
       const settleBtn = document.getElementById('btn-settle-full-debt');
@@ -7146,23 +7111,6 @@ La relación pasará automáticamente a "Saldadas".`)) {
           throw new Error('Completa la persona y un monto válido.');
         }
 
-        // Validación en la MISMA moneda nativa (EUR con EUR, PEN con PEN, USD con USD)
-        const paymentSide = form.type.value === 'ME_PAGARON' ? 'receivable' : (form.type.value === 'YO_PAGUE' ? 'payable' : null);
-        if (paymentSide) {
-          const currentNativeDebt = getRelationNativeBalance(loanObj.persona, paymentSide, currency, editId);
-          if (loanObj.monto > currentNativeDebt + 0.005) {
-            const excess = loanObj.monto - currentNativeDebt;
-            const ok = confirm(`Este pago en ${currency} supera el saldo pendiente en ${currency} con ${loanObj.persona}.
-
-Saldo pendiente (${currency}): ${fmtCurr(currentNativeDebt)}
-Pago registrado: ${fmtCurr(loanObj.monto)}
-Exceso: ${fmtCurr(excess)}
-
-¿Quieres registrarlo igualmente?`);
-            if (!ok) throw new Error('Registro cancelado. El pago supera el saldo actual en esa moneda.');
-          }
-        }
-
         if (supabaseClient) {
           if (editId) {
             const { error } = await supabaseClient
@@ -7239,12 +7187,6 @@ Exceso: ${fmtCurr(excess)}
     async function deleteLoan(id) {
       const loan = (state.loans || []).find(item => String(item.id) === String(id));
       if (!loan) return;
-
-      if (!confirm(`¿Eliminar el movimiento de ${loan.person || 'esta persona'} por ${loan.amount} ${loan.currency}?
-
-Esta acción no se puede deshacer.`)) {
-        return;
-      }
 
       try {
         if (supabaseClient) {
@@ -7423,12 +7365,8 @@ Esta acción no se puede deshacer.`)) {
               }
             }
 
-            // El Excel no solo migra el historial: deja también guardado en
-            // app_config el estado actual que verá un dispositivo nuevo.
             if (supabaseClient && latestImported) {
               const mainStateFromExcel = {
-                // El Excel antiguo no tiene columna Openbank: conservamos el saldo
-                // actual para que una importación histórica nunca lo borre.
                 bancos: {
                   ...latestImported.bancos,
                   Openbank: Number(state.bancos?.Openbank || 0)
@@ -7486,15 +7424,25 @@ Esta acción no se puede deshacer.`)) {
         }
       } catch (e) {}
 
-      // Primer frame: la navegación queda funcional antes de cualquier red o render pesado.
       const themeIcon = document.getElementById('theme-icon');
       if (themeIcon) {
         themeIcon.setAttribute('data-lucide', document.documentElement.classList.contains('dark') ? 'sun' : 'moon');
       }
+      // Primer render exclusivo de la pestaña activa para que el arranque sea instantáneo en móvil
       renderAirtmModule();
-      renderPersonalModule();
-      renderLoansModule();
-      if (window.lucide) lucide.createIcons();
+      refreshIcons();
+
+      // Pre-renderizado de las pestañas secundarias y precarga de logos en tiempo inactivo
+      const hydrateSecondaryTabs = () => {
+        try { renderPersonalModule(); } catch (e) {}
+        try { renderLoansModule(); } catch (e) {}
+        preloadBankLogosIdle();
+      };
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(hydrateSecondaryTabs, { timeout: 800 });
+      } else {
+        setTimeout(hydrateSecondaryTabs, 60);
+      }
 
       const startBackgroundWork = () => {
         try { setupSupabaseRealtime(); } catch (e) { console.warn('Realtime inicial:', e); }
@@ -7504,30 +7452,28 @@ Esta acción no se puede deshacer.`)) {
         }
       };
 
-      // En PWA damos prioridad absoluta a la primera interacción.
       if (document.documentElement.classList.contains('ios-standalone')) {
-        setTimeout(startBackgroundWork, 1200);
+        setTimeout(startBackgroundWork, 600);
       } else if ('requestIdleCallback' in window) {
-        requestIdleCallback(startBackgroundWork, { timeout: 1200 });
+        requestIdleCallback(startBackgroundWork, { timeout: 1000 });
       } else {
         setTimeout(startBackgroundWork, 120);
       }
     });
   </script>
 
-<script>
-  // Mobile UX: all numeric fields should open the device numeric keypad.
-  document.addEventListener('focusin', function (event) {
-    const el = event.target;
-    if (!el || el.tagName !== 'INPUT' || el.type !== 'number') return;
-    if (!el.hasAttribute('inputmode')) {
-      el.setAttribute('inputmode', el.step && el.step !== '1' ? 'decimal' : 'numeric');
-    }
-  });
-</script>
-
-
-
+  <script>
+    // Mobile UX: configure numeric keyboards without forcing scrollIntoView on every focus.
+    // The old smooth-scroll handler repeatedly moved the page when switching between fields,
+    // especially while the iOS keyboard was opening or closing.
+    document.addEventListener('focusin', function (event) {
+      const el = event.target;
+      if (!el || el.tagName !== 'INPUT') return;
+      if (el.type === 'number' && !el.hasAttribute('inputmode')) {
+        el.setAttribute('inputmode', el.step && el.step !== '1' ? 'decimal' : 'numeric');
+      }
+    });
+  </script>
 
 </body>
 </html>
