@@ -404,7 +404,6 @@
     @media (max-width: 679px) {
       /* Los formularios largos siguen siendo desplazables con el teclado móvil abierto. */
       #modal-add-loan,
-      #modal-add-expense,
       #modal-add-fixed-expense,
       #modal-pay-fixed,
       #modal-edit-acciones,
@@ -416,7 +415,6 @@
         padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
       }
       #modal-add-loan > .apple-card,
-      #modal-add-expense > .apple-card,
       #modal-add-fixed-expense > .apple-card,
       #modal-pay-fixed > .apple-card,
       #modal-edit-acciones > .apple-card,
@@ -504,16 +502,7 @@
       font-weight: 650;
     }
 
-    .ios-bottom-tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      width: 4px;
-      height: 4px;
-      border-radius: 9999px;
-      background: currentColor;
-      animation: mobile-nav-dot-in .28s ease-out both;
-    }
+
 
     .ios-bottom-tab:active {
       transform: scale(.94);
@@ -1244,16 +1233,16 @@ body.liquidity-modal-open { overflow: hidden; }
       left: 0;
       right: 0;
       top: 44px;
-      height: 150px;
+      height: 172px;
       pointer-events: none;
       z-index: 1;
       overflow: hidden;
-      opacity: 0.52;
+      opacity: 0.78;
       mask-image: linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.85) 26%, rgba(0,0,0,0.65) 70%, rgba(0,0,0,0) 100%);
       -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.85) 26%, rgba(0,0,0,0.65) 70%, rgba(0,0,0,0) 100%);
     }
     .dark .hero-sparkline-backdrop {
-      opacity: 0.68;
+      opacity: 0.88;
     }
 
     /* Elevated Apple Glass Surface for Hero Card */
@@ -1452,9 +1441,9 @@ body.liquidity-modal-open { overflow: hidden; }
 
     @media (max-width: 639px) {
       .hero-sparkline-backdrop {
-        top: 52px;
-        height: 112px;
-        opacity: 0.44;
+        top: 48px;
+        height: 126px;
+        opacity: 0.68;
       }
       /* Compactación vertical exclusiva para móvil (<640px):
          Permite ver todo el Hero Card + primera fila de Bóvedas sin hacer scroll. */
@@ -1580,7 +1569,20 @@ body.liquidity-modal-open { overflow: hidden; }
       }
     }
 
-    </style>
+    
+    .ios-bottom-tab span {
+      display: none !important;
+    }
+    .ios-bottom-tab {
+      gap: 0 !important;
+      min-height: 52px !important;
+    }
+    .ios-bottom-tab svg {
+      width: 24px !important;
+      height: 24px !important;
+    }
+
+</style>
 
 <style>
   @media (max-width: 679px) {
@@ -1708,6 +1710,552 @@ body.liquidity-modal-open { overflow: hidden; }
       transition-duration: .01ms !important;
     }
   }
+</style>
+
+
+<style id="expense-wireframe-v2-styles">
+  /* Contenedor interior que agrupa MONTO + (CONCEPTO | TARJETA) exactamente como en el boceto */
+  .expense-wireframe-inner-card {
+    border-radius: 22px;
+    padding: 13px;
+    background: rgba(242, 242, 247, 0.72);
+    border: 1.5px solid rgba(60, 60, 67, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+  .dark .expense-wireframe-inner-card {
+    background: rgba(24, 24, 27, 0.88);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* Bloques de los inputs (Monto, Concepto, Tarjeta) */
+  .expense-wireframe-field {
+    border-radius: 15px;
+    background: #ffffff;
+    border: 1.5px solid rgba(60, 60, 67, 0.14);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  }
+  .dark .expense-wireframe-field {
+    background: #121214;
+    border-color: rgba(255, 255, 255, 0.11);
+  }
+  .expense-wireframe-field:focus-within {
+    border-color: #007AFF;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18);
+  }
+  .dark .expense-wireframe-field:focus-within {
+    border-color: #0A84FF;
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25);
+  }
+
+  /* Los 6 bloques de categorías en cuadrícula 2x3 */
+  .expense-cat-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 44px;
+    padding: 8px 6px;
+    border-radius: 13px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+    background: rgba(242, 242, 247, 0.9);
+    border: 1.5px solid rgba(60, 60, 67, 0.13);
+    color: #1d1d1f;
+    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dark .expense-cat-block {
+    background: rgba(24, 24, 27, 0.92);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f5f5f7;
+  }
+  .expense-cat-block:active {
+    transform: scale(0.95);
+  }
+  .expense-cat-block.is-selected {
+    background: rgba(0, 122, 255, 0.15);
+    border-color: #007AFF;
+    color: #007AFF;
+    box-shadow: 0 4px 14px rgba(0, 122, 255, 0.18);
+  }
+  .dark .expense-cat-block.is-selected {
+    background: rgba(10, 132, 255, 0.24);
+    border-color: #0A84FF;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(10, 132, 255, 0.28);
+  }
+
+  /* Control de viewport y teclado móvil para modal-add-expense */
+  body.expense-editor-open {
+    overflow: hidden !important;
+  }
+  @media (max-width: 679px) {
+    #modal-add-expense {
+      position: fixed !important;
+      top: var(--expense-visual-top, 0px) !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: auto !important;
+      height: var(--expense-visual-height, 100dvh) !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 8px 12px !important;
+      overflow: hidden !important;
+    }
+    #modal-add-expense > .expense-editor-sheet {
+      width: 100% !important;
+      max-height: calc(var(--expense-visual-height, 100dvh) - 16px) !important;
+      overflow-y: auto !important;
+      overscroll-behavior: contain !important;
+      -webkit-overflow-scrolling: touch;
+      margin: auto !important;
+    }
+    /* Compactación automática cuando se despliega el teclado del móvil */
+    #modal-add-expense[data-keyboard-open="1"] > .expense-editor-sheet {
+      padding: 12px 14px !important;
+    }
+    #modal-add-expense[data-keyboard-open="1"] .expense-wireframe-inner-card {
+      padding: 10px !important;
+    }
+    #modal-add-expense[data-keyboard-open="1"] .expense-cat-block {
+      min-height: 36px !important;
+      padding: 5px 4px !important;
+      font-size: 10px !important;
+    }
+    body.expense-editor-open .ios-bottom-tabbar,
+    body.expense-editor-open #fab-add-personal-expense {
+      display: none !important;
+    }
+  }
+</style>
+
+
+<style id="mobile-keyboard-glitch-fix">
+  @media (max-width: 679px) {
+    .bank-editor-modal, #modal-add-expense {
+      position: fixed !important;
+      inset: 0 !important;
+      height: 100svh !important;
+      max-height: 100svh !important;
+      align-items: flex-end !important;
+      justify-content: center !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      background: rgba(0,0,0,0.48) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+    }
+    .bank-editor-sheet, #modal-add-expense > .expense-editor-sheet {
+      width: 100% !important;
+      max-height: 85dvh !important;
+      overflow-y: auto !important;
+      overscroll-behavior: contain !important;
+      -webkit-overflow-scrolling: touch;
+      border-bottom-left-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      border-top-left-radius: 28px !important;
+      border-top-right-radius: 28px !important;
+      padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+      margin: 0 !important;
+      transform: translateY(0) !important;
+      animation: sheet-slide-up .28s cubic-bezier(.22,1,.36,1) both;
+    }
+  }
+  @keyframes sheet-slide-up {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
+
+
+<style id="focus-ring-and-tabbar-centering-fixes">
+  /* Centrado perfecto de iconos en la barra inferior flotante */
+  .ios-bottom-tab {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  .ios-bottom-tab svg {
+    margin: auto !important;
+    display: block !important;
+  }
+
+  /* Evitar múltiples bordes/rectángulos azules al enfocar inputs numéricos o texto */
+  .bank-hero-interactive-field:focus,
+  .bank-hero-interactive-field:focus-visible,
+  .expense-wireframe-field input:focus,
+  .expense-wireframe-field input:focus-visible,
+  .expense-wireframe-field select:focus,
+  .expense-wireframe-field select:focus-visible,
+  #expense-amount-input:focus,
+  #expense-concept-input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+  
+  .bank-hero-input-shell:focus-within {
+    border-color: #007AFF !important;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.22) !important;
+  }
+  .dark .bank-hero-input-shell:focus-within {
+    border-color: #0A84FF !important;
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3) !important;
+  }
+</style>
+
+
+<style id="capital-mobile-polish-v5">
+  /* Navegación móvil minimalista: iconos sin punto ni cápsula azul móvil. */
+  @media (max-width: 679px) {
+    .ios-bottom-tab-indicator { display: none !important; }
+    .ios-bottom-tabbar { padding: 5px !important; }
+    .ios-bottom-tabbar > .flex { min-height: 52px !important; }
+    .ios-bottom-tab { min-height: 52px !important; }
+    .ios-bottom-tab span { display: none !important; }
+
+    /* Toast siempre arriba, respetando la zona segura de iOS. */
+    #toast-notify {
+      top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+      bottom: auto !important;
+      left: 12px !important;
+      right: 12px !important;
+      width: auto !important;
+      transform: translate3d(0, -125%, 0) !important;
+      transition: transform .22s cubic-bezier(.2,.8,.2,1), opacity .22s ease !important;
+      z-index: 10000 !important;
+    }
+    #toast-notify.translate-y-0 { transform: translate3d(0, 0, 0) !important; }
+    #toast-notify > div { width: 100%; box-sizing: border-box; }
+
+    /* Modales centrados, con desplazamiento interno si el formulario es largo. */
+    body > #app-shell ~ .fixed.inset-0.z-50:not(#modal-quick-balance),
+    #modal-pay-fixed, #modal-unpay-fixed, #modal-edit-arqueo,
+    #modal-add-expense, #modal-add-fixed-expense, #modal-edit-budget,
+    #modal-edit-acciones, #modal-edit-madre, #modal-add-loan,
+    #modal-config-cycle, #modal-bcp-edit, #modal-cloud-settings {
+      align-items: center !important;
+      justify-content: center !important;
+      padding: max(12px, env(safe-area-inset-top, 0px)) 12px max(12px, env(safe-area-inset-bottom, 0px)) !important;
+      overflow-y: auto !important;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    #modal-pay-fixed > .apple-card, #modal-unpay-fixed > .apple-card,
+    #modal-edit-arqueo > .apple-card, #modal-add-expense > .apple-card,
+    #modal-add-fixed-expense > .apple-card, #modal-edit-budget > .apple-card,
+    #modal-edit-acciones > .apple-card, #modal-edit-madre > .apple-card,
+    #modal-add-loan > .apple-card, #modal-config-cycle > .apple-card,
+    #modal-bcp-edit > .apple-card, #modal-cloud-settings > .apple-card {
+      max-height: calc(100dvh - 28px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      flex-shrink: 0;
+    }
+
+    /* Evita zoom automático, doble resaltado y saltos al abrir el teclado. */
+    input, select, textarea, button { -webkit-tap-highlight-color: transparent; }
+    input, select, textarea { font-size: max(16px, 1em); }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    input[type="number"] { font-variant-numeric: tabular-nums; }
+    .ios-bottom-tab, .ios-bottom-tab svg { transition-duration: .16s !important; }
+  }
+
+  /* Reduce animación costosa de contenido sin quitar la respuesta visual. */
+  .view-native-enter { animation-duration: .10s !important; }
+  @media (prefers-reduced-motion: reduce) {
+    .view-native-enter, .ios-bottom-tab, #toast-notify { animation: none !important; transition: none !important; }
+  }
+</style>
+
+
+<style id="apple-navigation-modal-restoration-v6">
+  /* Restauración de la navegación flotante tipo Apple Music / iOS. */
+  @media (max-width: 679px) {
+    .ios-bottom-tabbar {
+      padding: 5px !important;
+      border-radius: 32px !important;
+      background: rgba(248,248,250,.78) !important;
+      border: 1px solid rgba(255,255,255,.76) !important;
+      -webkit-backdrop-filter: blur(26px) saturate(165%) !important;
+      backdrop-filter: blur(26px) saturate(165%) !important;
+      box-shadow: 0 14px 34px rgba(0,0,0,.15), 0 3px 10px rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.9) !important;
+      isolation: isolate;
+    }
+    .dark .ios-bottom-tabbar {
+      background: rgba(30,30,32,.80) !important;
+      border-color: rgba(255,255,255,.12) !important;
+      box-shadow: 0 14px 34px rgba(0,0,0,.42), 0 3px 10px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.08) !important;
+    }
+    .ios-bottom-tabbar > .flex { min-height: 54px !important; gap: 2px !important; }
+    .ios-bottom-tab { min-height: 54px !important; border-radius: 26px !important; }
+    .ios-bottom-tab span { display: none !important; }
+    .ios-bottom-tab-indicator {
+      display: block !important;
+      top: 3px !important;
+      bottom: 3px !important;
+      border-radius: 26px !important;
+      background: rgba(0,122,255,.13) !important;
+      border: 1px solid rgba(0,122,255,.13) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 2px 8px rgba(0,122,255,.07) !important;
+      transition: transform .32s cubic-bezier(.22,1,.36,1) !important;
+      z-index: 0 !important;
+    }
+    .dark .ios-bottom-tab-indicator {
+      background: rgba(10,132,255,.22) !important;
+      border-color: rgba(120,180,255,.17) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 2px 8px rgba(0,0,0,.15) !important;
+    }
+    .ios-bottom-tab { color: rgb(142,142,147) !important; }
+    .ios-bottom-tab.active { color: rgb(0,122,255) !important; }
+    .dark .ios-bottom-tab.active { color: rgb(10,132,255) !important; }
+    .ios-bottom-tab svg { position: relative; z-index: 1; width: 22px !important; height: 22px !important; }
+    .ios-bottom-tab:active { transform: scale(.96) !important; }
+  }
+
+  /* Superficie uniforme: todas las ventanas de edición mantienen sus cuatro esquinas. */
+  [id^="modal-"] > .apple-card,
+  [id^="modal-"] > div > .apple-card,
+  #liquidity-calculator-modal > .apple-card,
+  #liquidity-calculator-modal .apple-card,
+  .bank-editor-modal .bank-editor-sheet,
+  .bank-editor-modal .bank-editor-panel {
+    border-radius: 28px !important;
+    clip-path: inset(0 round 28px);
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+  }
+  [id^="modal-"] > .apple-card,
+  [id^="modal-"] > div > .apple-card,
+  #liquidity-calculator-modal > .apple-card,
+  #liquidity-calculator-modal .apple-card {
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    background-clip: padding-box;
+  }
+  [id^="modal-"] > .apple-card > :first-child,
+  [id^="modal-"] > div > .apple-card > :first-child {
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+  }
+  [id^="modal-"] > .apple-card > :last-child,
+  [id^="modal-"] > div > .apple-card > :last-child {
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+  }
+  @media (max-width: 679px) {
+    [id^="modal-"]:not(.hidden) { box-sizing: border-box; }
+    [id^="modal-"] > .apple-card,
+    [id^="modal-"] > div > .apple-card,
+    #liquidity-calculator-modal .apple-card {
+      max-width: 100%;
+      flex-shrink: 0;
+      border-radius: 26px !important;
+      clip-path: inset(0 round 26px);
+    }
+    .bank-editor-modal .bank-editor-sheet,
+    .bank-editor-modal .bank-editor-panel {
+      border-radius: 28px 28px 28px 28px !important;
+      overflow: hidden;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ios-bottom-tab-indicator { transition: none !important; }
+  }
+</style>
+
+
+<style id="v7-capital-chart-and-vault-editor-fix">
+  /* Gráfico del patrimonio más visible, sin competir con el importe principal. */
+  .hero-sparkline-backdrop { opacity: .82 !important; }
+  .dark .hero-sparkline-backdrop { opacity: .92 !important; }
+  .sparkline-glow-line { filter: drop-shadow(0 0 5px currentColor); }
+  .sparkline-path-line { stroke-width: 3.5; }
+  @media (max-width: 639px) {
+    .hero-sparkline-backdrop { opacity: .72 !important; height: 126px !important; }
+    .dark .hero-sparkline-backdrop { opacity: .88 !important; }
+  }
+
+  /* Editor de bóveda: centrado en el viewport visible, con las cuatro esquinas. */
+  @media (max-width: 639px) {
+    #modal-quick-balance.bank-editor-modal {
+      top: var(--bank-editor-visual-top, 0px) !important;
+      height: var(--bank-editor-visual-height, 100dvh) !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 12px !important;
+      overflow: hidden !important;
+    }
+    #modal-quick-balance .bank-editor-sheet {
+      width: min(100%, 430px) !important;
+      height: auto !important;
+      max-height: calc(var(--bank-editor-visual-height, 100dvh) - 24px) !important;
+      min-height: 0 !important;
+      margin: auto !important;
+      border-radius: 28px !important;
+      clip-path: inset(0 round 28px);
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      padding-bottom: max(14px, env(safe-area-inset-bottom, 0px)) !important;
+      scroll-padding-bottom: 20px;
+      transform-origin: center center !important;
+      animation: none !important;
+    }
+    #modal-quick-balance .bank-editor-form { padding-bottom: 8px !important; }
+    #modal-quick-balance[data-keyboard-open="true"] .bank-editor-sheet {
+      max-height: calc(var(--bank-editor-visual-height, 100dvh) - 16px) !important;
+    }
+    #modal-quick-balance .bank-editor-actions {
+      position: sticky;
+      bottom: -1px;
+      z-index: 3;
+      padding-top: 10px;
+      padding-bottom: 2px;
+      background: linear-gradient(to bottom, transparent, var(--bank-editor-surface, #fff) 22%);
+    }
+    .dark #modal-quick-balance .bank-editor-actions {
+      --bank-editor-surface: #1c1c1e;
+    }
+    #modal-quick-balance .bank-editor-sheet > .px-5 { flex-shrink: 0 !important; }
+  }
+  @media (min-width: 640px) {
+    #modal-quick-balance.bank-editor-modal { align-items: center !important; justify-content: center !important; }
+    #modal-quick-balance .bank-editor-sheet { border-radius: 30px !important; }
+  }
+</style>
+
+
+
+
+<style id="v9-refined-hero-and-bank-editor">
+  /* Patrimonio: acción secundaria en la cabecera, sin ocupar una fila entera. */
+  @media (max-width: 639px) {
+    #hero-capital-card > .relative.z-10.flex.flex-col.md\:flex-row {
+      position: relative;
+      display: block !important;
+      padding-top: 0;
+    }
+    #hero-capital-card > .relative.z-10.flex.flex-col.md\:flex-row > div:first-child {
+      padding-right: 0;
+    }
+    #hero-capital-card > .relative.z-10.flex.flex-col.md\:flex-row > div:first-child > div:first-child {
+      padding-right: 112px;
+      min-height: 35px;
+      align-items: center;
+    }
+    #hero-capital-card #snapshot-action-wrap {
+      position: absolute !important;
+      top: 0;
+      right: 0;
+      width: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      z-index: 15;
+      display: flex !important;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    #hero-capital-card #btn-snapshot-trigger {
+      width: auto !important;
+      min-width: 94px;
+      min-height: 34px;
+      padding: 8px 11px !important;
+      gap: 6px;
+      border-radius: 999px !important;
+      font-size: 10px !important;
+      line-height: 1;
+      box-shadow: 0 3px 10px rgba(0, 100, 220, .18);
+    }
+    #hero-capital-card #btn-snapshot-trigger svg,
+    #hero-capital-card #btn-snapshot-trigger [data-lucide="camera"] {
+      width: 14px !important;
+      height: 14px !important;
+    }
+    #hero-capital-card #snapshot-btn-label { font-size: 10px; }
+    #hero-capital-card .hero-sparkline-backdrop {
+      height: 174px !important;
+      opacity: .9 !important;
+      pointer-events: none;
+    }
+    .dark #hero-capital-card .hero-sparkline-backdrop { opacity: .92 !important; }
+    #hero-capital-card .relative.z-10.mt-5.sm\:mt-6 {
+      margin-top: 1.15rem !important;
+    }
+  }
+  @media (max-width: 430px) {
+    #hero-capital-card > .relative.z-10.flex.flex-col.md\:flex-row > div:first-child > div:first-child {
+      padding-right: 44px;
+    }
+    #hero-capital-card #btn-snapshot-trigger {
+      width: 36px !important;
+      min-width: 36px !important;
+      height: 36px;
+      min-height: 36px;
+      padding: 0 !important;
+      justify-content: center;
+      gap: 0;
+      border-radius: 50% !important;
+    }
+    #hero-capital-card #snapshot-btn-label { display: none !important; }
+  }
+  /* Bóvedas: evita el panel blanco duro y alinea visualmente la tarjeta de saldo
+     con las tarjetas de auditoría, en claro y oscuro. */
+  #modal-quick-balance .bank-editor-sheet {
+    background: rgba(250, 250, 252, .97) !important;
+    border: 1px solid rgba(255,255,255,.82) !important;
+    box-shadow: 0 24px 70px rgba(0,0,0,.18) !important;
+    overflow: hidden auto !important;
+  }
+  .dark #modal-quick-balance .bank-editor-sheet {
+    background: rgba(28, 28, 30, .98) !important;
+    border-color: rgba(255,255,255,.1) !important;
+    box-shadow: 0 24px 70px rgba(0,0,0,.48) !important;
+  }
+  #modal-quick-balance .bank-editor-hero {
+    background: linear-gradient(145deg, rgba(0,122,255,.07), rgba(255,255,255,.68) 58%, rgba(52,199,89,.045)) !important;
+    border: 1px solid rgba(60,60,67,.07) !important;
+    box-shadow: none !important;
+  }
+  .dark #modal-quick-balance .bank-editor-hero {
+    background: linear-gradient(145deg, rgba(10,132,255,.13), rgba(44,44,46,.72) 58%, rgba(48,209,88,.05)) !important;
+    border-color: rgba(255,255,255,.07) !important;
+  }
+  #modal-quick-balance .bank-hero-input-shell {
+    background: rgba(242,242,247,.72) !important;
+    border-color: rgba(0,122,255,.2) !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.025) !important;
+  }
+  #modal-quick-balance .bank-hero-input-shell:focus-within {
+    background: rgba(255,255,255,.96) !important;
+    border-color: rgba(0,122,255,.72) !important;
+    box-shadow: 0 0 0 3px rgba(0,122,255,.12) !important;
+  }
+  .dark #modal-quick-balance .bank-hero-input-shell,
+  .dark #modal-quick-balance .bank-hero-input-shell:focus-within {
+    background: rgba(44,44,46,.8) !important;
+    border-color: rgba(10,132,255,.34) !important;
+  }
+  #modal-quick-balance .bank-editor-audit-cell {
+    border-radius: 15px !important;
+    background: rgba(242,242,247,.62) !important;
+    border-color: rgba(60,60,67,.07) !important;
+    box-shadow: none !important;
+  }
+  .dark #modal-quick-balance .bank-editor-audit-cell {
+    background: rgba(44,44,46,.58) !important;
+    border-color: rgba(255,255,255,.07) !important;
+  }
+  #modal-quick-balance .bank-editor-audit-cell small { background: transparent !important; }
 </style>
 
 </head>
@@ -1848,8 +2396,8 @@ body.liquidity-modal-open { overflow: hidden; }
             </div>
 
             <!-- Quick Action Button -->
-            <div class="flex items-center pt-0.5 md:pt-1 shrink-0">
-              <button onclick="takeArqueoSnapshot()" id="btn-snapshot-trigger" class="ios-tap w-full md:w-auto justify-center px-4 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-b from-apple-blue to-[#0062CC] text-white rounded-2xl text-xs font-bold shadow-ios-float flex items-center gap-2 hover:brightness-105 transition whitespace-nowrap ring-1 ring-white/20" title="Registra el estado actual de tus cuentas como snapshot en el histórico">
+            <div id="snapshot-action-wrap" class="flex items-center pt-0.5 md:pt-1 shrink-0">
+              <button onclick="takeArqueoSnapshot()" id="btn-snapshot-trigger" aria-label="Registrar snapshot del patrimonio" class="ios-tap w-full md:w-auto justify-center px-4 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-b from-apple-blue to-[#0062CC] text-white rounded-2xl text-xs font-bold shadow-ios-float flex items-center gap-2 hover:brightness-105 transition whitespace-nowrap ring-1 ring-white/20" title="Registra el estado actual de tus cuentas como snapshot en el histórico">
                 <i data-lucide="camera" class="w-4 h-4 shrink-0"></i>
                 <span id="snapshot-btn-label">Registrar Snapshot</span>
               </button>
@@ -1984,7 +2532,7 @@ body.liquidity-modal-open { overflow: hidden; }
                 </span>
               </div>
               <p class="text-[11px] sm:text-xs text-apple-gray-400">
-                En móvil, <strong>mantén pulsada una fila</strong> para editarla. El gesto muestra una señal visual y, si el dispositivo lo permite, una vibración breve.
+                Mantén una fila pulsada para editar.
               </p>
             </div>
             <div class="flex items-center gap-2">
@@ -2702,76 +3250,114 @@ body.liquidity-modal-open { overflow: hidden; }
     </div>
   </div>
 
-  <!-- MODAL: REGISTRAR GASTO PERSONAL -->
-  <div id="modal-add-expense" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
-    <div class="apple-card rounded-3xl w-full max-w-sm p-5 sm:p-6 shadow-ios-sheet">
-      <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
-        <div>
-          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Registrar Gasto Personal</h3>
-          <p class="text-xs text-apple-gray-400">Se guarda en Supabase (tabla <code>gastos</code>)</p>
+  <!-- MODAL: REGISTRAR GASTO PERSONAL (ESTRUCTURA WIREFRAME + 6 CATEGORÍAS) -->
+  <div id="modal-add-expense" onclick="if(event.target === this) closeModal('modal-add-expense')" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/55 backdrop-blur-md hidden transition-opacity">
+    <div class="expense-editor-sheet apple-card rounded-[28px] w-full max-w-sm p-4 sm:p-5 shadow-ios-sheet">
+      <!-- Cabecera compacta con botón para alternar descuento de saldo y cerrar -->
+      <div class="flex items-center justify-between gap-2 pb-2.5 mb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50">
+        <div class="min-w-0">
+          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white leading-tight truncate">Registrar Gasto Personal</h3>
+          <p id="expense-bank-preview" class="text-[10px] text-apple-gray-400 truncate mt-0.5">Se guarda en Supabase (tabla <code>gastos</code>)</p>
         </div>
-        <button onclick="closeModal('modal-add-expense')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-700">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <!-- Toggle compacto opcional por si deseas descontar del saldo del banco -->
+          <label class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300/60 dark:border-apple-gray-700 cursor-pointer" title="Actívalo si quieres restar este gasto del saldo del banco">
+            <input type="checkbox" name="autodebit" id="expense-autodebit" form="form-expense" class="sr-only peer">
+            <span class="w-2 h-2 rounded-full bg-apple-gray-400 peer-checked:bg-apple-green transition-colors"></span>
+            <span class="text-[9px] font-bold uppercase tracking-wider text-apple-gray-500 dark:text-apple-gray-300 peer-checked:text-apple-green">Descontar</span>
+          </label>
+          <button type="button" onclick="closeModal('modal-add-expense')" class="p-1.5 rounded-full text-apple-gray-400 hover:text-apple-gray-700 dark:hover:text-white transition" aria-label="Cerrar">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
       </div>
 
-      <form id="form-expense" onsubmit="handleSaveExpense(event)" class="space-y-3.5">
-        <div>
-          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Monto (€)</label>
-          <input type="number" step="0.01" required name="amount" placeholder="0.00" class="w-full px-3 py-2 text-xl font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue" inputmode="decimal">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-apple-gray-500 mb-1">Concepto / Motivo</label>
-          <input type="text" required name="concept" placeholder="Ej: Mercadona, Cena, Abono..." class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
-        </div>
-        <div class="rounded-2xl border border-apple-gray-200/70 dark:border-apple-gray-700/70 bg-apple-gray-50/80 dark:bg-apple-gray-800/60 p-3">
-          <div class="flex items-center justify-between gap-3">
-            <div class="min-w-0">
-              <div class="text-xs font-semibold text-apple-gray-800 dark:text-white">Descontar de una cuenta</div>
-              <div class="text-[10px] text-apple-gray-400 mt-0.5">Úsalo solo si todavía no has actualizado el saldo del banco.</div>
+      <form id="form-expense" onsubmit="handleSaveExpense(event)" class="space-y-3">
+        <input type="hidden" name="category" id="expense-category-input" value="">
+        <input type="hidden" name="date" id="input-expense-date" value="">
+
+        <!-- MARCO INTERIOR DEL BOCETO: MONTO ARRIBA + (CONCEPTO | TARJETA) ABAJO -->
+        <div class="expense-wireframe-inner-card space-y-2.5">
+          <!-- MONTO -->
+          <div>
+            <div class="flex items-center justify-between mb-1 px-0.5">
+              <label for="expense-amount-input" class="block text-[10px] font-extrabold uppercase tracking-wider text-apple-gray-400">Monto (€)</label>
+              <span id="expense-selected-cat-badge" class="hidden text-[9px] font-bold px-2 py-0.5 rounded-full bg-apple-blue/15 text-apple-blue"></span>
             </div>
-            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-              <input type="checkbox" name="autodebit" id="expense-autodebit" class="sr-only peer">
-              <div class="w-11 h-6 bg-apple-gray-300 dark:bg-apple-gray-600 rounded-full peer peer-checked:bg-apple-green transition-colors"></div>
-              <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></div>
-            </label>
+            <div class="expense-wireframe-field px-3.5 py-2.5 flex items-baseline gap-1.5">
+              <input type="text" id="expense-amount-input" required name="amount" placeholder="0.00" autocomplete="off" inputmode="decimal"
+                     class="w-full bg-transparent text-2xl font-extrabold font-mono text-apple-gray-900 dark:text-white placeholder-apple-gray-400/60 focus:outline-none">
+            </div>
           </div>
-          <div id="expense-autodebit-panel" class="hidden mt-3 pt-3 border-t border-apple-gray-200/60 dark:border-apple-gray-700/60">
-            <label class="block text-[10px] font-semibold text-apple-gray-500 mb-1">Cuenta que pagó el gasto</label>
-            <select name="bank" id="expense-bank-select" class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-apple-gray-900 border border-apple-gray-300 dark:border-apple-gray-700">
-              <option value="N26">N26</option>
-              <option value="Openbank">Openbank</option>
-              <option value="Bunq">Bunq</option>
-              <option value="Imagin">Imagin</option>
-              <option value="Santander">Santander</option>
-              <option value="BBVA">BBVA</option>
-              <option value="Sabadell">Sabadell</option>
-              <option value="Wise">Wise</option>
-              <option value="ING">ING</option>
-              <option value="Airtm">Airtm</option>
-              <option value="Otro">Otro</option>
-            </select>
-            <div id="expense-bank-preview" class="text-[10px] text-apple-gray-400 mt-1.5"></div>
+
+          <!-- FILA DOBLE: CONCEPTO (IZQUIERDA) + TARJETA (DERECHA) -->
+          <div class="grid grid-cols-12 gap-2">
+            <div class="col-span-7">
+              <label for="expense-concept-input" class="block text-[10px] font-extrabold uppercase tracking-wider text-apple-gray-400 mb-1 px-0.5">Concepto</label>
+              <div class="expense-wireframe-field px-3 py-2">
+                <input type="text" id="expense-concept-input" name="concept" placeholder="Ej: Mercadona, Cena..." autocomplete="off"
+                       class="w-full bg-transparent text-xs font-semibold text-apple-gray-900 dark:text-white placeholder-apple-gray-400/60 focus:outline-none">
+              </div>
+            </div>
+            <div class="col-span-5">
+              <label for="expense-bank-select" class="block text-[10px] font-extrabold uppercase tracking-wider text-apple-gray-400 mb-1 px-0.5">Tarjeta</label>
+              <div class="expense-wireframe-field px-2.5 py-2">
+                <select name="bank" id="expense-bank-select"
+                        class="w-full bg-transparent text-xs font-bold text-apple-gray-900 dark:text-white focus:outline-none cursor-pointer">
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="N26">N26</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Openbank">Openbank</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Bunq">Bunq</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Imagin">Imagin</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Santander">Santander</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="BBVA">BBVA</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Sabadell">Sabadell</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Wise">Wise</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="ING">ING</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Vivid">Vivid</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Trade">Trade</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Airtm">Airtm</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Otro">Otro</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2.5">
-          <div>
-            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Banco / Tarjeta</label>
-<div class="text-[10px] text-apple-gray-400 py-2">Se selecciona arriba al activar el descuento.</div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Fecha y hora</label>
-            <input type="datetime-local" required name="date" id="input-expense-date" step="60" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
-          </div>
+        <!-- 6 BLOQUES DE CATEGORÍAS EN CUADRÍCULA 2x3 (PARTE INFERIOR DEL BOCETO) -->
+        <div id="expense-categories-grid" class="grid grid-cols-3 gap-2">
+          <button type="button" onclick="selectExpenseCategory('Supermercado')" data-cat="Supermercado" class="expense-cat-block">
+            <i data-lucide="shopping-cart" class="w-3.5 h-3.5 text-apple-green shrink-0"></i>
+            <span class="truncate">Super</span>
+          </button>
+          <button type="button" onclick="selectExpenseCategory('Comida y Ocio')" data-cat="Comida y Ocio" class="expense-cat-block">
+            <i data-lucide="utensils" class="w-3.5 h-3.5 text-apple-orange shrink-0"></i>
+            <span class="truncate">Comida</span>
+          </button>
+          <button type="button" onclick="selectExpenseCategory('Transporte')" data-cat="Transporte" class="expense-cat-block">
+            <i data-lucide="bus" class="w-3.5 h-3.5 text-apple-blue shrink-0"></i>
+            <span class="truncate">Transporte</span>
+          </button>
+          <button type="button" onclick="selectExpenseCategory('Hogar')" data-cat="Hogar" class="expense-cat-block">
+            <i data-lucide="home" class="w-3.5 h-3.5 text-apple-indigo shrink-0"></i>
+            <span class="truncate">Hogar</span>
+          </button>
+          <button type="button" onclick="selectExpenseCategory('Salud y Deporte')" data-cat="Salud y Deporte" class="expense-cat-block">
+            <i data-lucide="dumbbell" class="w-3.5 h-3.5 text-apple-pink shrink-0"></i>
+            <span class="truncate">Salud / Gym</span>
+          </button>
+          <button type="button" onclick="selectExpenseCategory('Compras y Otros')" data-cat="Compras y Otros" class="expense-cat-block">
+            <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-apple-purple shrink-0"></i>
+            <span class="truncate">Otros</span>
+          </button>
         </div>
 
-        <div class="pt-3 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5">
-          <button type="button" onclick="closeModal('modal-add-expense')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="pt-2 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex items-center justify-end gap-2.5 sticky bottom-0 bg-inherit">
+          <button type="button" onclick="closeModal('modal-add-expense')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-400 hover:text-apple-gray-700 dark:hover:text-white transition">
             Cancelar
           </button>
-          <button type="submit" class="ios-tap px-5 py-2 rounded-xl text-xs font-semibold bg-apple-blue text-white shadow-ios-sm">
-            Guardar Gasto
+          <button type="submit" class="ios-tap px-5 py-2.5 rounded-2xl text-xs font-bold bg-apple-blue hover:bg-blue-600 text-white shadow-ios-sm flex items-center gap-1.5 transition">
+            <span>Guardar Gasto</span>
           </button>
         </div>
       </form>
@@ -4209,19 +4795,21 @@ body.liquidity-modal-open { overflow: hidden; }
       svg.innerHTML = `
         <defs>
           <linearGradient id="capitalSparkGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.20" />
-            <stop offset="68%" stop-color="${strokeColor}" stop-opacity="0.05" />
+            <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.30" />
+            <stop offset="68%" stop-color="${strokeColor}" stop-opacity="0.10" />
             <stop offset="100%" stop-color="${strokeColor}" stop-opacity="0.0" />
           </linearGradient>
           <linearGradient id="capitalLineFade" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.18" />
-            <stop offset="35%" stop-color="${strokeColor}" stop-opacity="0.55" />
-            <stop offset="100%" stop-color="${strokeColor}" stop-opacity="0.92" />
+            <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.48" />
+            <stop offset="35%" stop-color="${strokeColor}" stop-opacity="0.78" />
+            <stop offset="100%" stop-color="${strokeColor}" stop-opacity="1" />
           </linearGradient>
         </defs>
         <path d="${areaPath}" fill="url(#capitalSparkGrad)" />
-        <path d="${dPath}" fill="none" stroke="url(#capitalLineFade)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="sparkline-path-line" />
-        <circle cx="${lastPt.x}" cy="${lastPt.y}" r="4" fill="${strokeColor}" class="sparkline-dot-pulse" />
+        <path d="${dPath}" fill="none" stroke="${strokeColor}" stroke-opacity="0.20" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" class="sparkline-glow-line" />
+        <path d="${dPath}" fill="none" stroke="url(#capitalLineFade)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" class="sparkline-path-line" />
+        <circle cx="${lastPt.x}" cy="${lastPt.y}" r="7" fill="${strokeColor}" fill-opacity="0.16" />
+        <circle cx="${lastPt.x}" cy="${lastPt.y}" r="4.2" fill="${strokeColor}" stroke="white" stroke-opacity="0.82" stroke-width="1.4" class="sparkline-dot-pulse" />
       `;
 
       if (pill) {
@@ -6288,27 +6876,58 @@ body.liquidity-modal-open { overflow: hidden; }
         if (bcpCut) bcpCut.value = state.bcp?.cutDay || 20;
       }
 
+      if (id === 'modal-add-expense') {
+        if (dExp) dExp.value = getLocalDateTimeInputValue(now);
+        const bankSel = document.getElementById('expense-bank-select');
+        if (bankSel && typeof getDailyFundingBank === 'function') {
+          const todayRot = getDailyFundingBank(now);
+          if (todayRot && todayRot.bank && Array.from(bankSel.options).some(o => o.value === todayRot.bank)) {
+            bankSel.value = todayRot.bank;
+          }
+        }
+        updateExpenseAutoDebitUI();
+        refreshIcons(m);
+      }
+
       m.classList.remove('hidden');
 
       if (id === 'modal-quick-balance') {
         document.body.classList.add('bank-editor-open');
         requestAnimationFrame(syncBankEditorVisualViewport);
       }
+      if (id === 'modal-add-expense') {
+        document.body.classList.add('expense-editor-open');
+        requestAnimationFrame(syncExpenseModalVisualViewport);
+      }
     }
 
     function syncBankEditorVisualViewport() {
       const modal = document.getElementById('modal-quick-balance');
       if (!modal || modal.classList.contains('hidden')) return;
-
       const vv = window.visualViewport;
-      const height = vv && Number.isFinite(vv.height) ? vv.height : window.innerHeight;
-      const visualHeight = Math.max(240, Math.round(height));
-      const visualTop = vv && Number.isFinite(vv.offsetTop) ? Math.max(0, Math.round(vv.offsetTop)) : 0;
-      const keyboardOpen = vv ? (window.innerHeight - vv.height > 110) : false;
+      const top = vv ? Math.max(0, vv.offsetTop || 0) : 0;
+      const height = vv ? Math.max(240, vv.height) : window.innerHeight;
+      const keyboardOpen = !!(vv && (window.innerHeight - vv.height > 120));
+      modal.style.setProperty('--bank-editor-visual-top', `${top}px`);
+      modal.style.setProperty('--bank-editor-visual-height', `${height}px`);
+      if (keyboardOpen) modal.dataset.keyboardOpen = 'true';
+      else modal.removeAttribute('data-keyboard-open');
 
-      modal.style.setProperty('--bank-editor-visual-height', `${visualHeight}px`);
-      modal.style.setProperty('--bank-editor-visual-top', `${visualTop}px`);
-      modal.dataset.keyboardOpen = keyboardOpen ? '1' : '0';
+      // Keep the focused field visible inside the editor without moving the page behind it.
+      if (keyboardOpen) {
+        const active = document.activeElement;
+        if (active && modal.contains(active) && active.matches('input, select, textarea')) {
+          requestAnimationFrame(() => {
+            const sheet = modal.querySelector('.bank-editor-sheet');
+            if (!sheet || !active.isConnected) return;
+            const field = active.getBoundingClientRect();
+            const safeTop = top + 14;
+            const safeBottom = top + height - 86;
+            if (field.bottom > safeBottom) sheet.scrollTop += field.bottom - safeBottom;
+            else if (field.top < safeTop) sheet.scrollTop -= safeTop - field.top;
+          });
+        }
+      }
     }
 
     function initBankEditorViewportSync() {
@@ -6345,6 +6964,14 @@ body.liquidity-modal-open { overflow: hidden; }
     function closeModal(id) {
       const m = document.getElementById(id);
       if (m) m.classList.add('hidden');
+      if (id === 'modal-add-expense') {
+        document.body.classList.remove('expense-editor-open');
+        if (m) {
+          m.style.removeProperty('--expense-visual-height');
+          m.style.removeProperty('--expense-visual-top');
+          m.removeAttribute('data-keyboard-open');
+        }
+      }
       if (id === 'modal-quick-balance') {
         const form = document.getElementById('form-banks');
         if (form) form.dataset.saving = '0';
@@ -6454,17 +7081,102 @@ body.liquidity-modal-open { overflow: hidden; }
       renderArqueoHistoryTable(document.getElementById('arqueo-search')?.value || '');
     }
 
+    const EXPENSE_PRESET_CATEGORIES = [
+      'Supermercado',
+      'Comida y Ocio',
+      'Transporte',
+      'Hogar',
+      'Salud y Deporte',
+      'Compras y Otros'
+    ];
+
+    function selectExpenseCategory(catName) {
+      const catInput = document.getElementById('expense-category-input');
+      const conceptInput = document.getElementById('expense-concept-input');
+      const badge = document.getElementById('expense-selected-cat-badge');
+      const buttons = document.querySelectorAll('#expense-categories-grid .expense-cat-block');
+
+      const currentCat = catInput ? catInput.value : '';
+      const nextCat = currentCat === catName ? '' : catName;
+
+      if (catInput) catInput.value = nextCat;
+
+      buttons.forEach(btn => {
+        const isMatch = btn.getAttribute('data-cat') === nextCat;
+        btn.classList.toggle('is-selected', isMatch);
+      });
+
+      if (badge) {
+        if (nextCat) {
+          badge.textContent = nextCat;
+          badge.classList.remove('hidden');
+        } else {
+          badge.textContent = '';
+          badge.classList.add('hidden');
+        }
+      }
+
+      if (conceptInput) {
+        const currentConcept = conceptInput.value.trim();
+        if (nextCat) {
+          if (!currentConcept || EXPENSE_PRESET_CATEGORIES.includes(currentConcept)) {
+            conceptInput.value = nextCat;
+          }
+        } else if (EXPENSE_PRESET_CATEGORIES.includes(currentConcept)) {
+          conceptInput.value = '';
+        }
+      }
+    }
+
+    function clearExpenseCategorySelection() {
+      const catInput = document.getElementById('expense-category-input');
+      const badge = document.getElementById('expense-selected-cat-badge');
+      if (catInput) catInput.value = '';
+      if (badge) {
+        badge.textContent = '';
+        badge.classList.add('hidden');
+      }
+      document.querySelectorAll('#expense-categories-grid .expense-cat-block').forEach(btn => {
+        btn.classList.remove('is-selected');
+      });
+    }
+
+    function syncExpenseModalVisualViewport() {
+      // Stable keyboard positioning without jitter
+    }
+
+    (function initExpenseModalViewportSync() {
+      const sync = () => syncExpenseModalVisualViewport();
+      window.addEventListener('resize', sync, { passive: true });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', sync, { passive: true });
+        window.visualViewport.addEventListener('scroll', sync, { passive: true });
+      }
+      document.addEventListener('focusin', (event) => {
+        if (!event.target || !event.target.closest('#modal-add-expense')) return;
+        requestAnimationFrame(syncExpenseModalVisualViewport);
+        setTimeout(syncExpenseModalVisualViewport, 90);
+      });
+    })();
+
     function updateExpenseAutoDebitUI() {
       const toggle = document.getElementById('expense-autodebit');
-      const panel = document.getElementById('expense-autodebit-panel');
       const select = document.getElementById('expense-bank-select');
       const preview = document.getElementById('expense-bank-preview');
-      if (!toggle || !panel) return;
-      const enabled = !!toggle.checked;
-      panel.classList.toggle('hidden', !enabled);
-      if (enabled && select && preview) {
-        const bal = Number(state.bancos?.[select.value] || 0);
-        preview.textContent = `Saldo actual: ${formatEUR(bal)} · después del gasto: ${formatEUR(bal - (parseFloat(document.querySelector('#form-expense [name="amount"]')?.value) || 0))}`;
+      if (!preview || !select) return;
+
+      const bankName = select.value || 'N26';
+      const bal = Number(state.bancos?.[bankName] || 0);
+      const rawAmount = document.querySelector('#form-expense [name="amount"]')?.value || '';
+      const typedAmount = parseLocaleNumber(rawAmount);
+      const enabled = !!(toggle && toggle.checked);
+
+      if (enabled) {
+        preview.textContent = `Descontará de ${bankName}: ${formatEUR(bal)} → ${formatEUR(bal - typedAmount)}`;
+        preview.className = 'text-[10px] font-semibold text-apple-green truncate mt-0.5';
+      } else {
+        preview.innerHTML = 'Se guarda en Supabase (tabla <code>gastos</code>)';
+        preview.className = 'text-[10px] text-apple-gray-400 truncate mt-0.5';
       }
     }
 
@@ -6489,18 +7201,32 @@ body.liquidity-modal-open { overflow: hidden; }
         lucide.createIcons();
       }
 
+      const parsedAmount = parseLocaleNumber(form.amount.value);
+      const selectedCat = (document.getElementById('expense-category-input')?.value || '').trim();
+      let rawConcept = (form.concept.value || '').trim();
+
+      if (!rawConcept && selectedCat) {
+        rawConcept = selectedCat;
+      } else if (rawConcept && selectedCat && rawConcept.toLowerCase() !== selectedCat.toLowerCase() && !rawConcept.toLowerCase().includes(selectedCat.toLowerCase())) {
+        rawConcept = `${selectedCat} · ${rawConcept}`;
+      }
+
+      const autodebitEl = document.getElementById('expense-autodebit');
+      const shouldDebit = !!(autodebitEl && autodebitEl.checked);
+      const dateVal = form.date?.value || getLocalDateTimeInputValue(new Date());
+
       const expenseObj = {
         id: 'g_' + Date.now(),
-        fecha: form.date.value,
-        monto: parseFloat(form.amount.value) || 0,
-        concepto: form.concept.value.trim(),
+        fecha: dateVal,
+        monto: parsedAmount,
+        concepto: rawConcept,
         banco: (document.getElementById('expense-bank-select')?.value || 'N26'),
-        descontar_cuenta: !!form.autodebit.checked,
-        monto_debitado: !!form.autodebit.checked ? (parseFloat(form.amount.value) || 0) : 0
+        descontar_cuenta: shouldDebit,
+        monto_debitado: shouldDebit ? parsedAmount : 0
       };
 
       if (!expenseObj.concepto || expenseObj.monto <= 0) {
-        showToast('Revisa el gasto', 'Introduce un concepto y un monto mayor que 0.', false);
+        showToast('Revisa el gasto', 'Introduce un monto mayor que 0 y escribe un concepto o toca una categoría.', false);
         form.dataset.saving = '0';
         if (saveButton) {
           saveButton.disabled = false;
@@ -6540,9 +7266,17 @@ body.liquidity-modal-open { overflow: hidden; }
         renderPersonalModule();
 
         form.reset();
-        document.getElementById('expense-autodebit-panel')?.classList.add('hidden');
+        if (autodebitEl) autodebitEl.checked = false;
+        clearExpenseCategorySelection();
+        updateExpenseAutoDebitUI();
         closeModal('modal-add-expense');
         form.dataset.saving = '0';
+        if (saveButton) {
+          saveButton.disabled = false;
+          saveButton.classList.remove('opacity-70');
+          saveButton.innerHTML = originalButtonHTML;
+          lucide.createIcons();
+        }
 
         showToast(
           '✓ Gasto registrado',
