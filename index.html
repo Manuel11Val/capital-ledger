@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+
 <script>
   // Detecta la Web App instalada y la preferencia de tema oscuro antes del primer layout.
   (function(){
@@ -23,8 +25,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Capital">
-  <meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#F5F7FB" data-dynamic-theme>
 
   <!-- Native Cupertino Icon & Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231C1C1E'/%3E%3Cstop offset='100%25' stop-color='%23000000'/%3E%3C/linearGradient%3E%3ClinearGradient id='accent' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23007AFF'/%3E%3Cstop offset='100%25' stop-color='%2334C759'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='128' fill='url(%23bg)'/%3E%3Crect x='80' y='140' width='352' height='190' rx='28' fill='%232C2C2E' stroke='rgba(255,255,255,0.1)' stroke-width='6'/%3E%3Crect x='80' y='190' width='352' height='190' rx='28' fill='url(%23accent)'/%3E%3Ccircle cx='140' cy='245' r='20' fill='white' opacity='0.9'/%3E%3Crect x='180' y='235' width='160' height='20' rx='10' fill='white' opacity='0.85'/%3E%3C/svg%3E">
@@ -1666,8 +1667,49 @@ body.liquidity-modal-open { overflow: hidden; }
 </style>
 
 
+
+<style id="personal-theme-and-compact-layout">
+  .theme-option-button {
+    display:flex; align-items:center; justify-content:center; gap:.55rem;
+    min-height:42px; padding:.65rem .8rem; border-radius:13px;
+    border:1px solid rgba(120,120,128,.20); background:rgba(120,120,128,.07);
+    color:#636366; font-size:12px; font-weight:700; transition:background .18s ease,border-color .18s ease,transform .18s ease;
+  }
+  .theme-option-button:active { transform:scale(.98); }
+  .theme-option-button[aria-pressed="true"] { background:rgba(10,132,255,.12); color:#007aff; border-color:rgba(10,132,255,.42); box-shadow:inset 0 0 0 1px rgba(10,132,255,.08); }
+  .dark .theme-option-button { color:#d1d1d6; background:rgba(255,255,255,.045); border-color:rgba(255,255,255,.11); }
+  .dark .theme-option-button[aria-pressed="true"] { color:#64d2ff; background:rgba(10,132,255,.20); border-color:rgba(100,210,255,.42); }
+  .dark input, .dark select, .dark textarea { color-scheme:dark; }
+  @media (max-width: 639px) {
+    #personal-credit-card { padding:11px 12px !important; border-radius:21px !important; gap:8px; }
+    #personal-credit-card .credit-card-header, #personal-credit-card .flex.items-center.justify-between.mb-3 { margin-bottom:7px !important; }
+    #personal-credit-card .grid.grid-cols-2 { gap:7px !important; margin-top:7px !important; }
+    #personal-credit-card .grid.grid-cols-2 > div { padding:8px 9px !important; border-radius:13px !important; min-width:0; }
+    #personal-credit-card .grid.grid-cols-2 > div span:first-child { font-size:9px !important; line-height:1.2; }
+    #personal-credit-card .grid.grid-cols-2 > div span:last-child { font-size:12px !important; line-height:1.25; overflow-wrap:anywhere; }
+    #personal-credit-card > div:last-child { margin-top:8px !important; padding-top:8px !important; }
+    #personal-credit-card > div:last-child button { padding:8px 9px !important; font-size:10px !important; border-radius:12px !important; }
+    #personal-fixed-card { padding:12px !important; border-radius:21px !important; }
+    #personal-fixed-card .grid { gap:7px !important; }
+    #personal-fixed-expenses-list { gap:7px !important; }
+    #personal-fixed-expenses-list > div { padding:9px 10px !important; gap:8px !important; border-radius:14px !important; }
+    #personal-fixed-expenses-list > div .text-xs { font-size:11px !important; }
+    #personal-category-insights { padding:13px !important; margin-bottom:12px !important; border-radius:21px !important; }
+    #personal-category-insights > div:first-child { margin-bottom:10px !important; }
+    #personal-category-breakdown { display:grid; grid-template-columns:1fr; gap:8px !important; }
+    #personal-category-breakdown > div { padding:10px !important; border-radius:14px !important; }
+  }
+  @media (min-width: 640px) and (max-width: 1023px) {
+    #personal-category-breakdown { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .theme-option-button { transition:none; }
+  }
+</style>
+
 <style id="final-polish-and-navigation-fixes">
   :root { color-scheme: light; }
+  :root.dark, html.dark { color-scheme: dark; }
   html { scroll-padding-top: 1rem; }
   body {
     -webkit-tap-highlight-color: transparent;
@@ -2258,6 +2300,635 @@ body.liquidity-modal-open { overflow: hidden; }
   #modal-quick-balance .bank-editor-audit-cell small { background: transparent !important; }
 </style>
 
+
+<style id="personal-studio-redesign">
+  #personal-category-insights{position:relative;overflow:hidden;border:1px solid rgba(120,120,128,.14);background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(245,247,251,.78));box-shadow:0 16px 42px rgba(20,30,50,.055)!important}
+  .dark #personal-category-insights{background:linear-gradient(145deg,rgba(35,37,43,.96),rgba(24,25,30,.94));border-color:rgba(255,255,255,.09);box-shadow:0 18px 48px rgba(0,0,0,.18)!important}
+  .personal-studio-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start}
+  .personal-studio-eyebrow{font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8b8b93}
+  .personal-studio-total{font-size:clamp(22px,3vw,30px);line-height:1.05;letter-spacing:-.055em;font-weight:800;font-variant-numeric:tabular-nums}
+  .personal-budget-pill{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:999px;background:rgba(10,132,255,.09);color:#0879e8;font-size:10px;font-weight:750;white-space:nowrap}
+  .dark .personal-budget-pill{background:rgba(100,210,255,.13);color:#64d2ff}
+  .personal-budget-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:16px 0 14px}
+  .personal-budget-stat{min-width:0;padding:11px 12px;border:1px solid rgba(120,120,128,.13);border-radius:17px;background:rgba(120,120,128,.045)}
+  .dark .personal-budget-stat{border-color:rgba(255,255,255,.07);background:rgba(255,255,255,.035)}
+  .personal-budget-stat span{display:block;font-size:9px;font-weight:700;color:#8b8b93;letter-spacing:.04em;text-transform:uppercase}
+  .personal-budget-stat strong{display:block;margin-top:5px;font-size:clamp(13px,2vw,18px);line-height:1.1;letter-spacing:-.035em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+  .personal-category-row{padding:12px 13px;border-radius:17px;background:rgba(120,120,128,.045);border:1px solid rgba(120,120,128,.09);transition:transform .18s ease,border-color .18s ease}
+  .personal-category-row:hover{transform:translateY(-1px);border-color:rgba(10,132,255,.25)}
+  .dark .personal-category-row{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.065)}
+  .personal-category-track{height:5px;border-radius:99px;overflow:hidden;background:rgba(120,120,128,.17)}
+  .personal-category-track>div{height:100%;border-radius:99px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .personal-budget-edit{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 11px;border:1px solid rgba(10,132,255,.2);border-radius:12px;background:rgba(10,132,255,.07);color:#0879e8;font-size:10px;font-weight:800;white-space:nowrap}
+  .dark .personal-budget-edit{color:#64d2ff;border-color:rgba(100,210,255,.18);background:rgba(100,210,255,.08)}
+  .personal-insight-empty{padding:23px 15px;text-align:center;border:1px dashed rgba(120,120,128,.25);border-radius:17px}
+  #personal-fixed-expenses-list .fixed-category-label{display:inline-flex;max-width:100%;margin-top:4px;padding:3px 6px;border-radius:6px;background:rgba(10,132,255,.08);color:#0879e8;font-size:9px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dark #personal-fixed-expenses-list .fixed-category-label{color:#64d2ff;background:rgba(100,210,255,.1)}
+  #modal-category-budgets .budget-editor-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,145px);align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(120,120,128,.12)}
+  #modal-category-budgets .budget-editor-row:last-child{border-bottom:0}
+  #modal-category-budgets input{width:100%;min-width:0;text-align:right;font-variant-numeric:tabular-nums;padding-right:30px!important;box-sizing:border-box}
+  #modal-category-budgets .budget-editor-input-wrap{position:relative;min-width:0}
+  #modal-category-budgets .budget-editor-input-wrap:after{content:"€/mes";position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:9px;color:#8e8e93;pointer-events:none}
+  #modal-category-budgets .budget-editor-help{font-size:10px;color:#8e8e93;line-height:1.4}
+  @media(max-width:420px){#modal-category-budgets .apple-card{padding:16px!important}#modal-category-budgets .budget-editor-row{grid-template-columns:minmax(0,1fr) 125px;gap:8px}}
+  @media(max-width:639px){
+    #personal-category-insights{padding:15px!important;border-radius:23px!important}
+    .personal-budget-summary{gap:6px;margin:13px 0}
+    .personal-budget-stat{padding:9px 8px;border-radius:14px}
+    .personal-budget-stat span{font-size:8px;letter-spacing:0}
+    .personal-budget-stat strong{font-size:14px}
+    .personal-category-row{padding:11px;border-radius:15px}
+    .personal-studio-total{font-size:25px}
+    #personal-fixed-expenses-list>div{align-items:center}
+  }
+  @media(prefers-reduced-motion:reduce){.personal-category-row,.personal-category-track>div{transition:none}}
+</style>
+
+
+<style id="personal-budget-modal-and-editor-fixes">
+  #modal-category-budgets { position:fixed !important; inset:0 !important; z-index:10050 !important; align-items:center; justify-content:center; overflow-y:auto; padding:max(14px,env(safe-area-inset-top,0px)) 14px max(14px,env(safe-area-inset-bottom,0px)); box-sizing:border-box; }
+  #modal-category-budgets.hidden { display:none !important; }
+  #modal-category-budgets:not(.hidden) { display:flex !important; }
+  #modal-category-budgets > .apple-card { width:min(100%,600px); max-height:calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)); overflow:auto; overscroll-behavior:contain; box-sizing:border-box; }
+  #modal-category-budgets .budget-editor-summary { flex-shrink:0; }
+  #modal-category-budgets .budget-editor-track { height:6px; overflow:hidden; border-radius:999px; background:rgba(120,120,128,.18); }
+  #modal-category-budgets .budget-editor-track > div { height:100%; border-radius:999px; background:#0a84ff; transition:width .2s ease,background .2s ease; }
+  #modal-category-budgets .budget-editor-track > div.is-over { background:#ff453a; }
+  #modal-category-budgets .budget-editor-warning { color:#8e8e93; }
+  #modal-category-budgets .budget-editor-warning.is-error { color:#ff453a; font-weight:700; }
+  #modal-category-budgets [data-budget-save]:disabled { opacity:.38 !important; cursor:not-allowed !important; filter:saturate(.5); }
+  #modal-category-budgets input[aria-invalid="true"] { border-color:#ff453a !important; box-shadow:0 0 0 1px rgba(255,69,58,.2); }
+  #modal-add-fixed-expense > .apple-card { max-height:calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)); overflow-y:auto; overscroll-behavior:contain; }
+  @media(min-width:680px) {
+    #modal-category-budgets .budget-editor-row { grid-template-columns:minmax(0,1fr) minmax(150px,190px); }
+  }
+  @media(max-width:679px) {
+    #modal-category-budgets { align-items:flex-start !important; padding-top:max(10px,env(safe-area-inset-top,0px)); padding-bottom:calc(18px + env(safe-area-inset-bottom,0px)); }
+    #modal-category-budgets > .apple-card { max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px)); border-radius:24px; }
+    #modal-category-budgets .budget-editor-row { grid-template-columns:minmax(0,1fr) minmax(112px,130px); gap:8px; padding:10px 0; }
+    #modal-category-budgets .budget-editor-row input { padding-left:7px!important; padding-right:38px!important; }
+  }
+</style>
+
+
+<style id="personal-expense-edit-and-budget-polish">
+  /* Budget editor: compact financial dashboard rather than plain form rows. */
+  #modal-category-budgets > .apple-card { width:min(100%,780px)!important; padding:clamp(16px,2.4vw,26px)!important; }
+  #modal-category-budgets #category-budget-title { font-size:clamp(19px,2vw,24px)!important; letter-spacing:-.04em; }
+  #modal-category-budgets .budget-editor-summary { padding:18px 19px; margin:14px 0 20px; border:1px solid rgba(10,132,255,.16); border-radius:23px; background:linear-gradient(135deg,rgba(10,132,255,.095),rgba(94,92,230,.045)); }
+  .dark #modal-category-budgets .budget-editor-summary { background:linear-gradient(135deg,rgba(10,132,255,.18),rgba(94,92,230,.09)); border-color:rgba(100,210,255,.16); }
+  #modal-category-budgets .budget-editor-summary-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  #modal-category-budgets .budget-editor-kicker { display:block; color:#8e8e93; font-size:9px; text-transform:uppercase; letter-spacing:.12em; font-weight:850; }
+  #modal-category-budgets .budget-editor-summary-title { margin-top:4px; font-size:15px; font-weight:800; letter-spacing:-.025em; color:var(--apple-gray-900,#1c1c1e); }
+  .dark #modal-category-budgets .budget-editor-summary-title { color:#fff; }
+  #modal-category-budgets #budget-editor-general { font-size:clamp(22px,3vw,30px); letter-spacing:-.055em; line-height:1; font-variant-numeric:tabular-nums; color:#0879e8; }
+  .dark #modal-category-budgets #budget-editor-general { color:#64d2ff; }
+  #modal-category-budgets .budget-editor-stats { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:17px; }
+  #modal-category-budgets .budget-editor-stats>div { padding:11px 12px; background:rgba(120,120,128,.07); border:1px solid rgba(120,120,128,.09); border-radius:15px; min-width:0; }
+  .dark #modal-category-budgets .budget-editor-stats>div { background:rgba(0,0,0,.13); border-color:rgba(255,255,255,.055); }
+  #modal-category-budgets .budget-editor-stats span { display:block; font-size:9px; font-weight:800; color:#8e8e93; text-transform:uppercase; letter-spacing:.07em; }
+  #modal-category-budgets .budget-editor-stats strong { display:block; margin-top:5px; font-size:16px; font-weight:850; letter-spacing:-.035em; font-variant-numeric:tabular-nums; color:var(--apple-gray-900,#1c1c1e); }
+  .dark #modal-category-budgets .budget-editor-stats strong { color:#fff; }
+  #modal-category-budgets #budget-editor-unallocated.is-positive { color:#248a55!important; }
+  #modal-category-budgets #budget-editor-unallocated.is-negative { color:#ff453a!important; }
+  #modal-category-budgets .budget-editor-track { height:7px; margin-top:14px; overflow:hidden; border-radius:999px; background:rgba(120,120,128,.18); }
+  #modal-category-budgets .budget-editor-track>div { height:100%; border-radius:inherit; background:linear-gradient(90deg,#0a84ff,#5e5ce6); transition:width .22s ease; }
+  #modal-category-budgets .budget-editor-track>div.is-over { background:#ff453a; }
+  #modal-category-budgets .budget-editor-warning { margin-top:10px; font-size:10px; color:#777780; line-height:1.45; }
+  #modal-category-budgets .budget-editor-warning.is-error { color:#ff453a; font-weight:800; }
+  #modal-category-budgets .budget-editor-warning.is-ok { color:#248a55; font-weight:750; }
+  #modal-category-budgets .budget-editor-section-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin:0 1px 11px; }
+  #modal-category-budgets .budget-editor-section-heading h4 { font-size:14px; font-weight:850; letter-spacing:-.025em; color:var(--apple-gray-900,#1c1c1e); }
+  .dark #modal-category-budgets .budget-editor-section-heading h4 { color:#fff; }
+  #modal-category-budgets .budget-editor-section-heading p { max-width:470px; font-size:10px; line-height:1.45; color:#8e8e93; margin-top:4px; }
+  #modal-category-budgets .budget-editor-cycle-pill { display:inline-flex; align-items:center; gap:5px; padding:6px 8px; white-space:nowrap; border-radius:99px; color:#0879e8; background:rgba(10,132,255,.08); font-size:9px; font-weight:800; }
+  .dark #modal-category-budgets .budget-editor-cycle-pill { color:#64d2ff; background:rgba(100,210,255,.1); }
+  #modal-category-budgets .budget-editor-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+  #modal-category-budgets .budget-editor-row { display:grid; grid-template-columns:36px minmax(0,1fr) minmax(115px,128px); gap:9px; align-items:start; min-width:0; padding:12px; border:1px solid rgba(120,120,128,.14); border-radius:18px; background:rgba(120,120,128,.035); transition:border-color .16s ease,background .16s ease; }
+  #modal-category-budgets .budget-editor-row:focus-within { border-color:rgba(10,132,255,.55); background:rgba(10,132,255,.035); }
+  #modal-category-budgets .budget-editor-row.is-over { border-color:rgba(255,69,58,.27); }
+  .dark #modal-category-budgets .budget-editor-row { background:rgba(255,255,255,.028); border-color:rgba(255,255,255,.08); }
+  .dark #modal-category-budgets .budget-editor-row:focus-within { border-color:rgba(100,210,255,.42); background:rgba(100,210,255,.055); }
+  #modal-category-budgets .budget-editor-category-icon { width:34px; height:34px; display:flex; align-items:center; justify-content:center; color:#0879e8; background:rgba(10,132,255,.095); border-radius:12px; }
+  .dark #modal-category-budgets .budget-editor-category-icon { color:#64d2ff; background:rgba(100,210,255,.105); }
+  #modal-category-budgets .budget-editor-category-main { min-width:0; padding-top:1px; }
+  #modal-category-budgets .budget-editor-category-name { font-size:11px; font-weight:850; color:var(--apple-gray-900,#1c1c1e); line-height:1.2; }
+  .dark #modal-category-budgets .budget-editor-category-name { color:#fff; }
+  #modal-category-budgets .budget-editor-category-desc { margin-top:3px; font-size:9px; color:#8e8e93; line-height:1.25; }
+  #modal-category-budgets .budget-editor-category-usage { margin-top:7px; font-size:9px; color:#7d7d85; line-height:1.3; }
+  #modal-category-budgets .budget-editor-row.is-over .budget-editor-category-usage { color:#ff453a; }
+  #modal-category-budgets .budget-editor-row-track { height:4px; border-radius:99px; overflow:hidden; background:rgba(120,120,128,.16); margin-top:7px; }
+  #modal-category-budgets .budget-editor-row-track>div { width:0; height:100%; border-radius:99px; background:#0a84ff; transition:width .18s ease; }
+  #modal-category-budgets .budget-editor-row-track>div.is-over { background:#ff453a; }
+  #modal-category-budgets .budget-editor-row-track>div.is-empty { background:#a1a1aa; opacity:.45; }
+  #modal-category-budgets .budget-editor-input-wrap { display:flex; flex-direction:column; align-items:stretch; gap:5px; min-width:0; }
+  #modal-category-budgets .budget-editor-input-wrap:after { content:none!important; display:none!important; }
+  #modal-category-budgets .budget-editor-input-label { font-size:8px; font-weight:850; text-align:right; letter-spacing:.1em; color:#8e8e93; }
+  #modal-category-budgets .budget-editor-input-shell { display:flex; align-items:center; gap:3px; min-width:0; padding:0 7px; border:1px solid rgba(120,120,128,.18); border-radius:11px; background:rgba(120,120,128,.055); }
+  .dark #modal-category-budgets .budget-editor-input-shell { background:rgba(255,255,255,.045); border-color:rgba(255,255,255,.1); }
+  #modal-category-budgets .budget-editor-euro { color:#8e8e93; font-size:11px; font-weight:800; }
+  #modal-category-budgets .budget-editor-input-shell input { width:100%; min-width:0; padding:10px 0!important; border:0!important; background:transparent!important; outline:none!important; box-shadow:none!important; text-align:right; font-size:12px; font-weight:850; font-variant-numeric:tabular-nums; color:var(--apple-gray-900,#1c1c1e); }
+  .dark #modal-category-budgets .budget-editor-input-shell input { color:#fff; }
+  #modal-category-budgets .budget-editor-input-shell input::placeholder { color:#a1a1aa; font-size:10px; font-weight:600; }
+  #modal-category-budgets .budget-editor-footer-note { display:flex; align-items:flex-start; gap:8px; margin:13px 2px 0; color:#8e8e93; font-size:9px; line-height:1.45; }
+  #modal-category-budgets .budget-editor-footer-note svg { color:#0a84ff; }
+  #modal-category-budgets [data-budget-save]:disabled { opacity:.38!important; cursor:not-allowed!important; filter:saturate(.5); }
+  #modal-category-budgets input[aria-invalid="true"] { border-color:#ff453a!important; box-shadow:0 0 0 1px rgba(255,69,58,.2)!important; }
+  .personal-expense-category { display:inline-flex; align-items:center; gap:4px; max-width:min(42vw,280px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:2px 6px; border-radius:6px; background:rgba(10,132,255,.08); color:#0879e8; font-size:9px; font-weight:750; }
+  .dark .personal-expense-category { background:rgba(100,210,255,.1); color:#64d2ff; }
+  .personal-expense-category.is-uncategorized { color:#9a7b32; background:rgba(255,159,10,.1); }
+  .dark .personal-expense-category.is-uncategorized { color:#ffbf5f; background:rgba(255,159,10,.12); }
+  .personal-expense-edit { display:flex; align-items:center; justify-content:center; }
+  @media(max-width:720px) {
+    #modal-category-budgets .budget-editor-list { grid-template-columns:1fr; gap:7px; }
+    #modal-category-budgets .budget-editor-row { grid-template-columns:34px minmax(0,1fr) minmax(110px,132px); padding:10px; border-radius:15px; }
+    #modal-category-budgets .budget-editor-summary { padding:15px; margin:12px 0 17px; }
+    #modal-category-budgets .budget-editor-category-desc { font-size:8.5px; }
+    .personal-expense-category { max-width:48vw; }
+  }
+  @media(max-width:390px) {
+    #modal-category-budgets .budget-editor-row { grid-template-columns:30px minmax(0,1fr) minmax(102px,116px); gap:7px; padding:9px; }
+    #modal-category-budgets .budget-editor-category-icon { width:30px;height:30px;border-radius:10px; }
+    #modal-category-budgets .budget-editor-category-name { font-size:10px; }
+    #modal-category-budgets .budget-editor-section-heading { flex-direction:column; }
+  }
+</style>
+
+
+<style id="personal-budget-studio-redesign">
+/* Personal Studio — presupuesto: rediseño limpio y sin campos superpuestos */
+#modal-category-budgets{z-index:10050!important;padding:clamp(10px,2.5vw,28px)!important;align-items:center!important;}
+#modal-category-budgets>.apple-card{width:min(920px,100%)!important;max-width:920px!important;max-height:min(92dvh,960px)!important;padding:clamp(18px,3vw,30px)!important;border-radius:28px!important;overflow-y:auto!important;overscroll-behavior:contain!important;background:var(--apple-card-bg,rgba(250,250,252,.97))!important;box-shadow:0 28px 90px rgba(0,0,0,.24)!important;}
+.dark #modal-category-budgets>.apple-card{background:rgba(28,28,30,.98)!important;border:1px solid rgba(255,255,255,.09)!important;}
+#modal-category-budgets #category-budget-title{font-size:clamp(22px,3vw,30px)!important;letter-spacing:-.045em!important;line-height:1.08!important;}
+#modal-category-budgets .personal-studio-eyebrow{font-size:10px!important;letter-spacing:.14em!important;}
+#modal-category-budgets #category-budget-editor-rows{margin-top:16px!important;}
+#modal-category-budgets .budget-editor-summary{padding:clamp(17px,2.5vw,25px)!important;border-radius:22px!important;background:linear-gradient(135deg,rgba(10,132,255,.11),rgba(10,132,255,.035) 60%,rgba(52,199,89,.06))!important;border:1px solid rgba(10,132,255,.18)!important;margin-bottom:24px!important;}
+.dark #modal-category-budgets .budget-editor-summary{background:linear-gradient(135deg,rgba(10,132,255,.17),rgba(10,132,255,.055) 60%,rgba(52,199,89,.06))!important;border-color:rgba(100,210,255,.18)!important;}
+#modal-category-budgets .budget-editor-summary-top{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;flex-wrap:wrap!important;}
+#modal-category-budgets .budget-editor-summary-top>strong{font-size:clamp(25px,4vw,40px)!important;letter-spacing:-.05em!important;line-height:1.05!important;white-space:nowrap!important;}
+#modal-category-budgets .budget-editor-stats{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;margin-top:18px!important;}
+#modal-category-budgets .budget-editor-stats>div{padding:13px 15px!important;border-radius:16px!important;background:rgba(120,120,128,.075)!important;border:1px solid rgba(120,120,128,.08)!important;min-width:0!important;}
+.dark #modal-category-budgets .budget-editor-stats>div{background:rgba(255,255,255,.045)!important;border-color:rgba(255,255,255,.055)!important;}
+#modal-category-budgets .budget-editor-stats span{display:block!important;font-size:9px!important;font-weight:850!important;letter-spacing:.09em!important;color:#85858d!important;text-transform:uppercase!important;margin-bottom:5px!important;}
+#modal-category-budgets .budget-editor-stats strong{display:block!important;font-size:clamp(17px,2vw,22px)!important;letter-spacing:-.03em!important;font-variant-numeric:tabular-nums!important;overflow-wrap:anywhere!important;}
+#modal-category-budgets .budget-editor-track{height:7px!important;margin-top:15px!important;background:rgba(120,120,128,.18)!important;border-radius:99px!important;overflow:hidden!important;}
+#modal-category-budgets .budget-editor-track>div{height:100%!important;border-radius:99px!important;background:linear-gradient(90deg,#0a84ff,#34c759)!important;transition:width .2s ease!important;}
+#modal-category-budgets .budget-editor-section-heading{align-items:center!important;margin:0 0 14px!important;}
+#modal-category-budgets .budget-editor-section-heading h4{font-size:17px!important;letter-spacing:-.035em!important;}
+#modal-category-budgets .budget-editor-section-heading p{font-size:12px!important;line-height:1.5!important;max-width:540px!important;}
+#modal-category-budgets .budget-editor-cycle-pill{padding:8px 11px!important;font-size:10px!important;}
+#modal-category-budgets .budget-editor-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;}
+#modal-category-budgets .budget-editor-row{grid-template-columns:40px minmax(0,1fr)!important;grid-template-areas:'icon main' 'input input'!important;gap:11px 12px!important;padding:16px!important;border-radius:19px!important;align-items:start!important;min-width:0!important;}
+#modal-category-budgets .budget-editor-category-icon{grid-area:icon!important;width:40px!important;height:40px!important;border-radius:14px!important;}
+#modal-category-budgets .budget-editor-category-main{grid-area:main!important;min-width:0!important;}
+#modal-category-budgets .budget-editor-category-name{font-size:14px!important;line-height:1.25!important;overflow-wrap:anywhere!important;}
+#modal-category-budgets .budget-editor-category-desc{font-size:11px!important;line-height:1.4!important;overflow-wrap:anywhere!important;}
+#modal-category-budgets .budget-editor-category-usage{font-size:10px!important;line-height:1.4!important;overflow-wrap:anywhere!important;}
+#modal-category-budgets .budget-editor-input-wrap{grid-area:input!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important;width:100%!important;min-width:0!important;}
+#modal-category-budgets .budget-editor-input-label{text-align:left!important;font-size:9px!important;letter-spacing:.08em!important;}
+#modal-category-budgets .budget-editor-input-shell{width:100%!important;min-width:0!important;min-height:44px!important;padding:0 12px!important;border-radius:13px!important;background:rgba(120,120,128,.07)!important;}
+#modal-category-budgets .budget-editor-input-shell input{width:100%!important;min-width:0!important;min-height:42px!important;padding:8px 0!important;text-align:right!important;font-size:16px!important;line-height:1.2!important;}
+#modal-category-budgets .budget-editor-euro{font-size:14px!important;}
+#modal-category-budgets .budget-editor-footer-note{font-size:11px!important;line-height:1.55!important;margin:17px 2px 0!important;}
+#modal-category-budgets [data-budget-save]{min-height:44px!important;padding:0 20px!important;border-radius:14px!important;font-size:13px!important;}
+#modal-category-budgets .budget-editor-warning{font-size:11px!important;line-height:1.45!important;margin-top:12px!important;}
+.fixed-bill-guidance{margin-top:9px;padding:10px 12px;border-radius:12px;background:rgba(10,132,255,.075);color:#777780;font-size:11px;line-height:1.5}
+.fixed-bill-guidance strong{color:#0879e8}
+.dark .fixed-bill-guidance{background:rgba(100,210,255,.09);color:#b4b4bc}
+.dark .fixed-bill-guidance strong{color:#64d2ff}
+@media(max-width:620px){
+ #modal-category-budgets{padding:8px!important;align-items:flex-end!important}
+ #modal-category-budgets>.apple-card{max-height:94dvh!important;padding:18px 14px calc(14px + env(safe-area-inset-bottom,0px))!important;border-radius:25px 25px 18px 18px!important;width:100%!important}
+ #modal-category-budgets .budget-editor-list{grid-template-columns:1fr!important;gap:9px!important}
+ #modal-category-budgets .budget-editor-row{grid-template-columns:36px minmax(0,1fr)!important;grid-template-areas:'icon main' 'input input'!important;padding:13px!important;gap:9px 10px!important}
+ #modal-category-budgets .budget-editor-category-icon{width:36px!important;height:36px!important}
+ #modal-category-budgets .budget-editor-category-name{font-size:13px!important}
+ #modal-category-budgets .budget-editor-category-desc{font-size:10px!important}
+ #modal-category-budgets .budget-editor-input-wrap{grid-template-columns:72px minmax(0,1fr)!important;gap:9px!important}
+ #modal-category-budgets .budget-editor-input-label{font-size:9px!important}
+ #modal-category-budgets .budget-editor-section-heading{align-items:flex-start!important}
+ #modal-category-budgets .budget-editor-section-heading p{font-size:11px!important}
+ #modal-category-budgets .budget-editor-summary-top>strong{font-size:28px!important}
+ #modal-category-budgets .budget-editor-stats>div{padding:11px!important}
+ #modal-category-budgets .flex.gap-2.justify-end{position:sticky!important;bottom:-14px!important;background:inherit!important;padding:12px 0 calc(3px + env(safe-area-inset-bottom,0px))!important;}
+}
+@media(prefers-reduced-motion:reduce){#modal-category-budgets *{transition:none!important;animation:none!important}}
+</style>
+
+
+<style id="personal-category-detail-view">
+  .personal-category-row{cursor:pointer;outline:none}
+  .personal-category-row:focus-visible{box-shadow:0 0 0 3px rgba(10,132,255,.25);border-color:rgba(10,132,255,.55)}
+  .personal-detail-topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+  .personal-detail-back{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid rgba(120,120,128,.16);border-radius:12px;background:rgba(120,120,128,.055);color:var(--apple-gray-900,#1c1c1e);font-size:11px;font-weight:800}
+  .dark .personal-detail-back{color:#f5f5f7;border-color:rgba(255,255,255,.09);background:rgba(255,255,255,.045)}
+  .personal-detail-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;padding:16px;border:1px solid rgba(10,132,255,.16);border-radius:21px;background:linear-gradient(135deg,rgba(10,132,255,.08),rgba(120,120,128,.035))}
+  .dark .personal-detail-hero{background:linear-gradient(135deg,rgba(10,132,255,.13),rgba(255,255,255,.025));border-color:rgba(100,210,255,.14)}
+  .personal-detail-icon{width:42px;height:42px;flex:0 0 auto;border-radius:15px;background:rgba(10,132,255,.12);color:#0879e8;display:flex;align-items:center;justify-content:center}
+  .dark .personal-detail-icon{color:#64d2ff;background:rgba(100,210,255,.13)}
+  .personal-detail-spent{text-align:right;flex:0 0 auto;max-width:48%}
+  .personal-detail-spent span,.personal-detail-metrics span{display:block;font-size:9px;font-weight:750;letter-spacing:.04em;text-transform:uppercase;color:#8b8b93}
+  .personal-detail-spent strong{display:block;margin-top:5px;font-size:clamp(19px,3vw,27px);line-height:1.05;font-weight:850;letter-spacing:-.045em;font-variant-numeric:tabular-nums;color:var(--apple-gray-900,#1c1c1e)}
+  .dark .personal-detail-spent strong{color:#fff}
+  .personal-detail-spent small{display:block;margin-top:5px;font-size:9px;color:#8b8b93}
+  .personal-detail-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
+  .personal-detail-metrics>div{padding:11px;border:1px solid rgba(120,120,128,.12);border-radius:15px;background:rgba(120,120,128,.04);min-width:0}
+  .dark .personal-detail-metrics>div{border-color:rgba(255,255,255,.07);background:rgba(255,255,255,.025)}
+  .personal-detail-metrics strong{display:block;margin-top:5px;font-size:13px;font-weight:850;font-variant-numeric:tabular-nums;color:var(--apple-gray-900,#1c1c1e);overflow-wrap:anywhere}
+  .dark .personal-detail-metrics strong{color:#fff}
+  .personal-detail-budget-progress{margin:10px 0 16px;padding:13px 14px;border:1px solid rgba(120,120,128,.12);border-radius:16px}
+  .dark .personal-detail-budget-progress{border-color:rgba(255,255,255,.07)}
+  .personal-detail-track{height:6px;margin-top:8px;border-radius:99px;overflow:hidden;background:rgba(120,120,128,.16)}
+  .personal-detail-track>div{height:100%;border-radius:99px;background:#0a84ff;transition:width .25s ease}
+  .personal-detail-section{margin-top:19px}
+  .personal-detail-sub-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .personal-detail-sub-row{min-width:0;padding:12px;border:1px solid rgba(120,120,128,.12);border-radius:15px;background:rgba(120,120,128,.035)}
+  .dark .personal-detail-sub-row{border-color:rgba(255,255,255,.07);background:rgba(255,255,255,.025)}
+  .personal-detail-expenses,.personal-detail-fixed-list{border:1px solid rgba(120,120,128,.12);border-radius:16px;overflow:hidden}
+  .dark .personal-detail-expenses,.dark .personal-detail-fixed-list{border-color:rgba(255,255,255,.08)}
+  .personal-detail-expense-row{display:flex;align-items:center;gap:8px;padding:11px 12px;border-bottom:1px solid rgba(120,120,128,.09)}
+  .personal-detail-expense-row:last-child{border-bottom:0}
+  .dark .personal-detail-expense-row{border-color:rgba(255,255,255,.06)}
+  .personal-detail-fixed-list>div{padding:11px 12px;border-bottom:1px solid rgba(120,120,128,.09)}
+  .personal-detail-fixed-list>div:last-child{border-bottom:0}
+  .dark .personal-detail-fixed-list>div{border-color:rgba(255,255,255,.06)}
+  @media(max-width:540px){
+    .personal-detail-hero{padding:13px;gap:8px;flex-wrap:wrap}
+    .personal-detail-icon{width:36px;height:36px;border-radius:13px}
+    .personal-detail-spent{max-width:none;text-align:left;width:100%;padding-left:49px;margin-top:-4px}
+    .personal-detail-metrics{gap:6px}
+    .personal-detail-metrics>div{padding:9px 8px;border-radius:12px}
+    .personal-detail-metrics span{font-size:8px;letter-spacing:0}
+    .personal-detail-metrics strong{font-size:12px}
+    .personal-detail-sub-list{grid-template-columns:1fr}
+    .personal-detail-topline{align-items:flex-start}
+  }
+  @media(prefers-reduced-motion:reduce){.personal-detail-track>div{transition:none}}
+</style>
+
+
+<style id="visual-refresh-wealth-v6">
+/* Visual refresh: clearer hierarchy, restrained motion, consistent surfaces. */
+:root { --vl-ease: cubic-bezier(.2,.75,.25,1); }
+#hero-capital-card {
+  isolation:isolate; border:1px solid rgba(148,163,184,.20) !important;
+  background:linear-gradient(135deg,rgba(255,255,255,.97) 0%,rgba(247,250,255,.94) 58%,rgba(238,246,255,.91) 100%) !important;
+  box-shadow:0 18px 48px rgba(25,48,85,.075), inset 0 1px 0 rgba(255,255,255,.9) !important;
+  transition:box-shadow .35s var(--vl-ease), transform .35s var(--vl-ease);
+}
+.dark #hero-capital-card {
+  background:linear-gradient(135deg,rgba(30,32,38,.98) 0%,rgba(25,29,38,.98) 58%,rgba(22,35,52,.97) 100%) !important;
+  border-color:rgba(255,255,255,.085) !important;
+  box-shadow:0 20px 54px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+#hero-capital-card:before {content:"";position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 90% 8%,rgba(0,122,255,.10),transparent 42%),linear-gradient(115deg,transparent 35%,rgba(255,255,255,.18),transparent 68%);opacity:.8}
+.dark #hero-capital-card:before {background:radial-gradient(ellipse at 90% 8%,rgba(10,132,255,.16),transparent 43%),linear-gradient(115deg,transparent 35%,rgba(255,255,255,.025),transparent 68%)}
+#hero-capital-card #stat-airtm-capital-total {letter-spacing:-.055em !important; text-shadow:0 1px 0 rgba(255,255,255,.35); font-feature-settings:"tnum";}
+.dark #hero-capital-card #stat-airtm-capital-total {text-shadow:0 2px 22px rgba(0,0,0,.15)}
+#hero-capital-card .hero-sparkline-backdrop {opacity:.43 !important;mask-image:linear-gradient(to bottom,black 20%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,black 20%,transparent 100%);}
+.dark #hero-capital-card .hero-sparkline-backdrop {opacity:.54 !important}
+#hero-capital-card .wealth-allocation-bar {height:9px !important;border-radius:99px !important;overflow:hidden;background:rgba(127,140,160,.14);box-shadow:inset 0 1px 2px rgba(0,0,0,.07)}
+#hero-capital-card .wealth-segment {transition:width .65s var(--vl-ease),filter .25s ease;min-width:0}
+#hero-metrics-grid {gap:10px !important}
+#hero-metrics-grid .hero-metric-tile {position:relative;overflow:hidden;border:1px solid rgba(148,163,184,.15);background:rgba(245,247,251,.77);box-shadow:inset 0 1px 0 rgba(255,255,255,.65);transition:transform .22s var(--vl-ease),border-color .22s ease,background .22s ease;}
+.dark #hero-metrics-grid .hero-metric-tile {background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.07);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+#hero-metrics-grid .hero-metric-tile:after {content:"";position:absolute;left:12px;right:12px;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);opacity:.75}
+#hero-metrics-grid .hero-metric-tile:hover {transform:translateY(-2px);border-color:rgba(0,122,255,.25);background:rgba(255,255,255,.94)}
+.dark #hero-metrics-grid .hero-metric-tile:hover {background:rgba(255,255,255,.065)}
+#hero-metrics-grid .hero-metric-icon {width:29px;height:29px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+#hero-metrics-grid .stat-metric-number {font-variant-numeric:tabular-nums;letter-spacing:-.035em}
+#hero-capital-card #snapshot-action-wrap button {transition:transform .2s var(--vl-ease),filter .2s ease,box-shadow .2s ease}
+#hero-capital-card #snapshot-action-wrap button:hover {transform:translateY(-1px);filter:brightness(1.04);box-shadow:0 9px 22px rgba(0,100,220,.22)}
+#hero-capital-card #snapshot-action-wrap button:active {transform:scale(.97)}
+/* General cards and controls: less visual noise, more consistent spacing. */
+.apple-card {transition:border-color .22s ease,box-shadow .25s ease,background-color .25s ease}
+button.ios-tap,button:not(:disabled) { -webkit-tap-highlight-color:transparent; }
+button.ios-tap {transition:transform .18s var(--vl-ease),background-color .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease}
+button.ios-tap:active {transform:scale(.975)}
+input,select,textarea {transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible {outline:2px solid rgba(0,122,255,.72);outline-offset:2px}
+/* Compact, calmer spacing on phones without shrinking readable text. */
+@media(max-width:639px) {
+ #hero-capital-card {border-radius:25px !important;padding:18px !important}
+ #hero-capital-card #stat-airtm-capital-total {font-size:clamp(32px,9vw,43px) !important;max-width:100%;}
+ #hero-capital-card .relative.z-10.mt-5.sm\:mt-6 {margin-top:17px !important;padding-top:13px !important}
+ #hero-metrics-grid {gap:8px !important;margin-top:13px !important}
+ #hero-metrics-grid .hero-metric-tile {padding:11px !important;border-radius:17px !important;min-width:0}
+ #hero-metrics-grid .stat-metric-number {font-size:clamp(15px,4.2vw,19px) !important;letter-spacing:-.045em}
+ #hero-metrics-grid .hero-metric-sub {line-height:1.25;min-height:12px}
+ main {row-gap:16px !important}
+}
+@media(min-width:640px) {
+ #hero-capital-card {border-radius:30px !important}
+ #hero-metrics-grid .hero-metric-tile {padding:14px !important}
+}
+@media(prefers-reduced-motion:reduce) {
+ *,*::before,*::after {scroll-behavior:auto !important;animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+
+<style id="visual-refresh-v7-theme-motion">
+/* ---------- A deliberate, consistent visual language ---------- */
+:root {
+  --vl-ease: cubic-bezier(.2,.75,.25,1);
+  --vl-bg: #f3f6fb;
+  --vl-surface: rgba(255,255,255,.82);
+  --vl-border: rgba(116,136,164,.18);
+  --vl-ink: #172235;
+  --vl-muted: #718096;
+  color-scheme: light;
+}
+html.dark { color-scheme: dark; }
+html:not(.dark) body {
+  background-color: #f3f6fb !important;
+  background-image: radial-gradient(ellipse at 8% -6%, rgba(76,145,245,.10), transparent 35%),
+                    radial-gradient(ellipse at 92% 8%, rgba(80,190,160,.065), transparent 27%),
+                    linear-gradient(180deg,#f7f9fc 0%,#f1f4f9 55%,#edf1f7 100%) !important;
+}
+html.dark body {
+  background-color: #0b1018 !important;
+  background-image: radial-gradient(ellipse at 12% -8%, rgba(39,93,166,.20), transparent 34%),
+                    radial-gradient(ellipse at 96% 12%, rgba(26,118,104,.095), transparent 28%),
+                    linear-gradient(180deg,#0b1018 0%,#0e131d 54%,#0a0f16 100%) !important;
+  color: #e8eef8 !important;
+}
+#app-shell { min-height: 100vh; }
+header.apple-glass {
+  border-bottom-color: rgba(118,139,169,.16) !important;
+  box-shadow: 0 5px 24px rgba(31,49,76,.035);
+  transition: none !important;
+}
+html:not(.dark) header.apple-glass { background: rgba(248,250,253,.78) !important; }
+html.dark header.apple-glass {
+  background: rgba(12,17,25,.78) !important;
+  border-bottom-color: rgba(165,185,216,.10) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,.20);
+}
+/* Main panels have more separation from the canvas, especially in dark mode. */
+html:not(.dark) #view-airtm .apple-card:not(#hero-capital-card),
+html:not(.dark) #view-personal .apple-card,
+html:not(.dark) #view-prestamos .apple-card {
+  border-color: rgba(130,148,175,.17) !important;
+  box-shadow: 0 8px 28px rgba(35,54,86,.045), inset 0 1px 0 rgba(255,255,255,.72);
+}
+html.dark #view-airtm .apple-card:not(#hero-capital-card),
+html.dark #view-personal .apple-card,
+html.dark #view-prestamos .apple-card {
+  background: linear-gradient(145deg,rgba(25,32,43,.92),rgba(19,25,35,.91)) !important;
+  border-color: rgba(155,178,211,.12) !important;
+  box-shadow: 0 13px 36px rgba(0,0,0,.19), inset 0 1px 0 rgba(255,255,255,.025) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+  backdrop-filter: blur(18px) saturate(125%);
+}
+/* The capital hero is visibly premium without hiding the distribution bar. */
+#hero-capital-card {
+  position: relative;
+  isolation: isolate;
+  border-radius: 30px !important;
+  border: 1px solid rgba(130,157,193,.23) !important;
+  background:
+    radial-gradient(ellipse at 88% 3%,rgba(91,155,255,.14),transparent 40%),
+    radial-gradient(ellipse at 3% 100%,rgba(64,195,158,.09),transparent 44%),
+    linear-gradient(135deg,#ffffff 0%,#f7faff 52%,#edf4ff 100%) !important;
+  box-shadow: 0 22px 55px rgba(40,69,112,.105), 0 3px 10px rgba(37,57,88,.035), inset 0 1px 0 rgba(255,255,255,.94) !important;
+  transition: box-shadow .28s var(--vl-ease), border-color .28s ease !important;
+}
+html.dark #hero-capital-card {
+  background:
+    radial-gradient(ellipse at 88% 0%,rgba(53,125,226,.22),transparent 42%),
+    radial-gradient(ellipse at 2% 100%,rgba(37,167,132,.11),transparent 43%),
+    linear-gradient(132deg,#151e2c 0%,#111a27 52%,#111c2c 100%) !important;
+  border-color: rgba(123,169,231,.20) !important;
+  box-shadow: 0 24px 62px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.045), 0 0 0 1px rgba(73,127,201,.035) !important;
+}
+#hero-capital-card::before {
+  content:""; position:absolute; inset:0; z-index:0; pointer-events:none; border-radius:inherit;
+  background: linear-gradient(112deg,transparent 12%,rgba(255,255,255,.42) 37%,transparent 59%);
+  opacity:.28; transform:translateX(-15%); animation:hero-soft-glint 13s ease-in-out infinite;
+}
+html.dark #hero-capital-card::before {
+  background:linear-gradient(112deg,transparent 15%,rgba(155,197,255,.10) 42%,transparent 63%);
+  opacity:.45;
+}
+#hero-capital-card::after {
+  content:""; position:absolute; pointer-events:none; z-index:0;
+  width:40%; height:165%; right:-16%; top:-36%; border-radius:50%;
+  background:radial-gradient(ellipse,rgba(44,130,246,.13),rgba(50,190,155,.055) 38%,transparent 70%);
+  filter:blur(13px); transform:rotate(-12deg); opacity:.8;
+  animation:hero-aurora-drift 15s ease-in-out infinite alternate;
+}
+html.dark #hero-capital-card::after {
+  background:radial-gradient(ellipse,rgba(48,126,240,.20),rgba(46,194,160,.085) 38%,transparent 71%);
+  opacity:1;
+}
+#hero-capital-card > .relative.z-10 { position:relative; z-index:2 !important; }
+#hero-capital-card #stat-airtm-capital-total {
+  font-size:clamp(40px,4.7vw,64px) !important;
+  line-height:.99 !important; font-weight:820 !important;
+  letter-spacing:-.065em !important; font-variant-numeric:tabular-nums;
+  color:#17304d !important; text-shadow:none !important;
+}
+html.dark #hero-capital-card #stat-airtm-capital-total {
+  color:#f2f7ff !important; text-shadow:0 4px 28px rgba(56,135,244,.14) !important;
+}
+#hero-capital-card .hero-sparkline-backdrop {
+  top:40px !important; height:178px !important; opacity:.29 !important;
+  mask-image:linear-gradient(to bottom,transparent 0%,black 28%,transparent 100%) !important;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 28%,transparent 100%) !important;
+}
+html.dark #hero-capital-card .hero-sparkline-backdrop { opacity:.38 !important; }
+.sparkline-path-line { stroke-dasharray:1; stroke-dashoffset:1; animation:sparkline-draw 1.25s cubic-bezier(.2,.7,.2,1) .1s forwards; }
+.sparkline-dot-pulse { transform-box:fill-box; transform-origin:center; animation:sparkline-dot 2.8s ease-in-out 1.1s infinite; }
+#hero-capital-card .wealth-allocation-bar {
+  height:9px !important; position:relative; isolation:isolate; padding:1px !important; gap:2px !important;
+  border-radius:999px !important; overflow:hidden;
+  background:rgba(113,131,159,.16) !important;
+  box-shadow:inset 0 1px 2px rgba(25,43,69,.10),0 1px 0 rgba(255,255,255,.50);
+}
+html.dark #hero-capital-card .wealth-allocation-bar {
+  background:rgba(3,7,13,.58) !important;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.38),0 1px 0 rgba(255,255,255,.035);
+}
+#hero-capital-card .wealth-segment {
+  min-width:0 !important; position:relative; border-radius:999px !important;
+  transition:width .8s cubic-bezier(.2,.75,.25,1),filter .24s ease !important;
+}
+#hero-capital-card .wealth-segment:hover { filter:brightness(1.16) saturate(1.1); }
+#hero-capital-card .wealth-allocation-bar::after {
+  content:""; position:absolute; z-index:3; inset:-1px auto -1px -30%; width:22%; pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.48),transparent);
+  transform:skewX(-17deg); animation:allocation-glide 7.2s ease-in-out 1.3s infinite;
+}
+html.dark #hero-capital-card .wealth-allocation-bar::after { background:linear-gradient(90deg,transparent,rgba(218,235,255,.48),transparent); }
+#hero-metrics-grid { gap:10px !important; }
+#hero-metrics-grid .hero-metric-tile {
+  border-radius:19px !important; border:1px solid rgba(127,149,180,.19) !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.88),rgba(244,247,252,.82)) !important;
+  box-shadow:0 5px 16px rgba(32,51,82,.035),inset 0 1px 0 rgba(255,255,255,.88) !important;
+  transition:transform .24s var(--vl-ease),border-color .24s ease,box-shadow .24s ease,background .24s ease !important;
+  animation:metric-rise .48s var(--vl-ease) both;
+}
+#hero-metrics-grid .hero-metric-tile:nth-child(2) { animation-delay:35ms; }
+#hero-metrics-grid .hero-metric-tile:nth-child(3) { animation-delay:70ms; }
+#hero-metrics-grid .hero-metric-tile:nth-child(4) { animation-delay:105ms; }
+#hero-metrics-grid .hero-metric-tile:nth-child(5) { animation-delay:140ms; }
+#hero-metrics-grid .hero-metric-tile:nth-child(6) { animation-delay:175ms; }
+#hero-metrics-grid .hero-metric-tile:nth-child(7) { animation-delay:210ms; }
+html.dark #hero-metrics-grid .hero-metric-tile {
+  background:linear-gradient(145deg,rgba(32,42,56,.86),rgba(23,31,43,.82)) !important;
+  border-color:rgba(133,164,208,.15) !important;
+  box-shadow:0 8px 20px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+#hero-metrics-grid .hero-metric-tile::after {
+  content:""; position:absolute; left:16px; right:16px; top:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent); opacity:.75;
+}
+html.dark #hero-metrics-grid .hero-metric-tile::after { background:linear-gradient(90deg,transparent,rgba(182,211,255,.26),transparent); }
+#hero-metrics-grid .hero-metric-tile:hover {
+  transform:translateY(-3px); border-color:rgba(59,130,246,.30) !important;
+  box-shadow:0 12px 24px rgba(35,77,135,.09),inset 0 1px 0 rgba(255,255,255,.86) !important;
+}
+html.dark #hero-metrics-grid .hero-metric-tile:hover {
+  background:linear-gradient(145deg,rgba(37,53,74,.95),rgba(25,37,53,.93)) !important;
+  box-shadow:0 14px 28px rgba(0,0,0,.22),0 0 0 1px rgba(81,145,237,.06) !important;
+}
+#hero-metrics-grid .hero-metric-icon { box-shadow:inset 0 1px 0 rgba(255,255,255,.22); transition:transform .25s var(--vl-ease); }
+#hero-metrics-grid .hero-metric-tile:hover .hero-metric-icon { transform:translateY(-1px) scale(1.06); }
+
+/* Tune dark-mode contrast throughout, including controls, tables, and secondary panels. */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select, html.dark textarea {
+  color:#edf3fc !important; background-color:rgba(8,13,21,.58) !important;
+  border-color:rgba(145,169,202,.25) !important; color-scheme:dark;
+}
+html.dark input::placeholder, html.dark textarea::placeholder { color:#7f8da2 !important; opacity:1; }
+html.dark select option { color:#eaf1fb; background:#161e2a; }
+html.dark .appearance-settings-card,
+html.dark .personal-insight-empty,
+html.dark .personal-detail-section,
+html.dark .personal-budget-stat,
+html.dark .personal-category-item {
+  background-color:rgba(15,22,32,.66) !important;
+  border-color:rgba(145,169,202,.14) !important;
+}
+html.dark table thead { background-color:rgba(30,41,56,.92) !important; }
+html.dark table tbody tr { border-color:rgba(145,169,202,.12) !important; }
+html.dark hr, html.dark .border-apple-gray-200\/50, html.dark .border-apple-gray-200\/70 {
+  border-color:rgba(145,169,202,.14) !important;
+}
+html.dark .shadow-ios-card { box-shadow:0 12px 36px rgba(0,0,0,.17) !important; }
+html.dark .ios-bottom-tab { color:#8f9cb0; }
+html.dark .ios-bottom-tab.active { color:#f4f7fd; }
+/* Keep subtle motion while making theme changes a single, calm transition. */
+html.theme-switching *, html.theme-switching *::before, html.theme-switching *::after {
+  transition:none !important; animation:none !important; caret-color:transparent !important;
+}
+::view-transition-group(root) { animation-duration:390ms; }
+::view-transition-old(root) { animation:theme-snapshot-out 180ms ease both; }
+::view-transition-new(root) { animation:theme-snapshot-in 390ms cubic-bezier(.2,.75,.25,1) both; }
+@keyframes theme-snapshot-out { from { opacity:1; } to { opacity:.82; } }
+@keyframes theme-snapshot-in { from { opacity:.72; transform:translateY(3px) scale(1.003); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes hero-soft-glint { 0%,35% { transform:translateX(-22%); opacity:.14; } 68%,100% { transform:translateX(20%); opacity:.32; } }
+@keyframes hero-aurora-drift { from { transform:translate3d(0,-2%,0) rotate(-12deg) scale(.96); } to { transform:translate3d(-7%,4%,0) rotate(-4deg) scale(1.08); } }
+@keyframes allocation-glide { 0%,20% { left:-30%; opacity:0; } 30% { opacity:.78; } 62% { left:115%; opacity:.45; } 70%,100% { left:115%; opacity:0; } }
+@keyframes sparkline-draw { to { stroke-dashoffset:0; } }
+@keyframes sparkline-dot { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.17); opacity:.84; } }
+@keyframes metric-rise { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+@media(max-width:639px) {
+  #hero-capital-card { border-radius:25px !important; padding:18px !important; }
+  #hero-capital-card #stat-airtm-capital-total { font-size:clamp(36px,9vw,47px) !important; letter-spacing:-.06em !important; }
+  #hero-capital-card .hero-sparkline-backdrop { top:50px !important; height:130px !important; }
+  #hero-metrics-grid { gap:8px !important; }
+  #hero-metrics-grid .hero-metric-tile { border-radius:16px !important; padding:10px !important; }
+  #hero-metrics-grid .stat-metric-number { font-size:clamp(15px,4vw,19px) !important; }
+  html.dark #hero-capital-card { box-shadow:0 18px 42px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.04) !important; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #hero-capital-card::before, #hero-capital-card::after,
+  #hero-capital-card .wealth-allocation-bar::after,
+  .sparkline-path-line, .sparkline-dot-pulse,
+  #hero-metrics-grid .hero-metric-tile { animation:none !important; }
+  #hero-capital-card .wealth-segment,
+  #hero-metrics-grid .hero-metric-tile, button.ios-tap { transition:none !important; }
+}
+</style>
+
+
+<style id="v8-mobile-capital-sparkline-refinement">
+  /* Móvil: la curva se concentra en la mitad derecha para no cruzarse
+     visualmente con el importe principal, pero conserva presencia en ambos temas. */
+  @media (max-width: 639px) {
+    #hero-capital-card .hero-sparkline-backdrop {
+      top: 67px !important;
+      left: 14% !important;
+      right: -8px !important;
+      width: auto !important;
+      height: 96px !important;
+      opacity: .48 !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+      mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.16) 19%, rgba(0,0,0,.78) 47%, #000 74%) !important;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.16) 19%, rgba(0,0,0,.78) 47%, #000 74%) !important;
+    }
+    html.dark #hero-capital-card .hero-sparkline-backdrop {
+      opacity: .59 !important;
+    }
+    #hero-capital-card #capital-evolution-svg {
+      width: 100% !important;
+      height: 100% !important;
+      overflow: visible !important;
+    }
+    #hero-capital-card #capital-evolution-svg .sparkline-glow-line {
+      stroke-width: 10 !important;
+      stroke-opacity: .12 !important;
+      filter: blur(.8px) !important;
+    }
+    #hero-capital-card #capital-evolution-svg .sparkline-path-line {
+      stroke-width: 4.1 !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+      filter: drop-shadow(0 1px 3px rgba(41, 133, 238, .16));
+    }
+    #hero-capital-card #capital-evolution-svg .sparkline-dot-pulse {
+      filter: drop-shadow(0 0 4px rgba(52, 199, 89, .24));
+    }
+    html.dark #hero-capital-card #capital-evolution-svg .sparkline-path-line {
+      filter: drop-shadow(0 1px 5px rgba(67, 151, 255, .19));
+    }
+    html.dark #hero-capital-card #capital-evolution-svg .sparkline-dot-pulse {
+      filter: drop-shadow(0 0 5px rgba(107, 178, 255, .28));
+    }
+    /* El contenido siempre queda por encima de la curva de fondo. */
+    #hero-capital-card > .relative.z-10 {
+      z-index: 2 !important;
+    }
+    #hero-capital-card #capital-evolution-pill,
+    #hero-capital-card #airtm-mother-badge,
+    #hero-capital-card #airtm-fijos-alert-badge {
+      position: relative;
+      z-index: 3;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+  }
+  @media (max-width: 380px) {
+    #hero-capital-card .hero-sparkline-backdrop {
+      top: 73px !important;
+      left: 17% !important;
+      right: -10px !important;
+      height: 84px !important;
+      opacity: .43 !important;
+    }
+    html.dark #hero-capital-card .hero-sparkline-backdrop { opacity: .54 !important; }
+    #hero-capital-card #capital-evolution-svg .sparkline-path-line { stroke-width: 3.7 !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #hero-capital-card #capital-evolution-svg .sparkline-path-line,
+    #hero-capital-card #capital-evolution-svg .sparkline-dot-pulse { animation: none !important; }
+  }
+</style>
+
 </head>
 
 <body class="h-full bg-apple-gray-100 dark:bg-apple-gray-900 text-apple-gray-800 dark:text-apple-gray-100 font-sans select-none selection:bg-apple-blue selection:text-white transition-colors duration-300">
@@ -2707,7 +3378,7 @@ body.liquidity-modal-open { overflow: hidden; }
           </div>
 
           <!-- BCP Credit Card Tracker Card (Ultra-compact 2-column billing on mobile, full card on desktop) -->
-          <div class="apple-card rounded-3xl p-4 sm:p-6 shadow-ios-card flex flex-col justify-between">
+          <div id="personal-credit-card" class="personal-credit-card apple-card rounded-3xl p-4 sm:p-6 shadow-ios-card flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-3 sm:mb-4">
                 <div class="flex items-center gap-2.5">
@@ -2750,8 +3421,42 @@ body.liquidity-modal-open { overflow: hidden; }
 
         </div>
 
+        <div id="personal-category-insights" class="personal-category-card apple-card rounded-3xl p-4 sm:p-6 shadow-ios-card mb-4">
+          <div class="personal-studio-top">
+            <div class="min-w-0">
+              <div class="personal-studio-eyebrow">Tu estudio financiero</div>
+              <h3 class="text-base sm:text-lg font-extrabold text-apple-gray-900 dark:text-white mt-1 tracking-tight">Tu dinero, en perspectiva</h3>
+              <p id="personal-category-period" class="text-[10px] sm:text-xs text-apple-gray-400 mt-1">Distribución del ciclo actual</p>
+            </div>
+            <button type="button" onclick="openCategoryBudgetEditor()" class="personal-budget-edit"><i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i><span>Límites</span></button>
+          </div>
+          <div class="personal-budget-summary">
+            <div class="personal-budget-stat"><span>Gastado</span><strong id="personal-category-total" class="text-apple-gray-900 dark:text-white">€0,00</strong></div>
+            <div class="personal-budget-stat"><span>Presupuesto</span><strong id="personal-budget-total" class="text-apple-blue">Sin límite</strong></div>
+            <div class="personal-budget-stat"><span>Disponible</span><strong id="personal-budget-remaining" class="text-apple-green">—</strong></div>
+          </div>
+          <div id="personal-category-overview">
+            <div class="flex items-center justify-between gap-3 mb-2.5">
+              <div><p class="text-[11px] font-bold text-apple-gray-900 dark:text-white">Categorías</p><p id="personal-budget-caption" class="text-[9px] text-apple-gray-400 mt-0.5">Pulsa una categoría para ver el detalle</p></div>
+              <span id="personal-category-count" class="text-[9px] font-bold px-2 py-1 rounded-full bg-apple-gray-100 dark:bg-apple-gray-800 text-apple-gray-500">0 categorías</span>
+            </div>
+            <div id="personal-category-breakdown" class="space-y-2"><div class="personal-insight-empty"><p class="text-xs text-apple-gray-400">Tus categorías aparecerán aquí cuando registres gastos.</p></div></div>
+          </div>
+          <div id="personal-category-detail" class="hidden" aria-live="polite"></div>
+        </div>
+  <div id="modal-category-budgets" class="fixed inset-0 flex items-center justify-center p-3.5 bg-black/45 backdrop-blur-md hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="category-budget-title" tabindex="-1" onclick="if(event.target===this) closeCategoryBudgetEditor()">
+    <div class="apple-card rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-ios-sheet max-h-[88dvh] overflow-y-auto">
+      <div class="flex items-start justify-between gap-3 pb-4 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50">
+        <div><p class="personal-studio-eyebrow">Personal · configuración</p><h3 id="category-budget-title" class="text-lg font-extrabold text-apple-gray-900 dark:text-white mt-1">Límites por categoría</h3><p class="text-xs text-apple-gray-400 mt-1">Máximo por categoría. Deja vacío para no limitar.</p></div>
+        <button type="button" onclick="closeCategoryBudgetEditor()" class="p-2 rounded-full text-apple-gray-400 hover:bg-apple-gray-100 dark:hover:bg-apple-gray-800" aria-label="Cerrar"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="category-budget-editor-rows" class="mt-2"></div>
+      <div class="flex gap-2 justify-end pt-4 mt-2 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50"><button type="button" onclick="closeCategoryBudgetEditor()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-apple-gray-500">Cancelar</button><button type="button" data-budget-save onclick="saveCategoryBudgets()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-apple-blue text-white shadow-ios-sm disabled:opacity-40 disabled:cursor-not-allowed">Guardar límites</button></div>
+    </div>
+  </div>
+
         <!-- Fixed Recurring Expenses Section with Interactive Cupertino Check -->
-        <div class="apple-card rounded-3xl p-4 sm:p-6 shadow-ios-card">
+        <div id="personal-fixed-card" class="personal-fixed-card apple-card rounded-3xl p-4 sm:p-6 shadow-ios-card">
           <div class="flex items-center justify-between gap-2 mb-3 sm:mb-4">
             <div class="min-w-0">
               <div class="flex items-center gap-1.5 sm:gap-2">
@@ -2769,7 +3474,7 @@ body.liquidity-modal-open { overflow: hidden; }
             </div>
             <button onclick="openModal('modal-add-fixed-expense')" class="ios-tap px-3 sm:px-3.5 py-1.5 sm:py-2 bg-apple-gray-200/80 dark:bg-apple-gray-800 text-apple-gray-800 dark:text-white hover:bg-apple-gray-300 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-semibold flex items-center gap-1 sm:gap-1.5 transition shrink-0 whitespace-nowrap">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Añadir Fijo</span>
+              <span>Añadir fijo</span>
             </button>
           </div>
 
@@ -2777,6 +3482,8 @@ body.liquidity-modal-open { overflow: hidden; }
             <!-- Injected via JavaScript with Apple Checklist UI -->
           </div>
         </div>
+
+
 
         <!-- Personal Expenses Log -->
         <div class="apple-card rounded-3xl p-4 sm:p-6 shadow-ios-card">
@@ -3256,7 +3963,7 @@ body.liquidity-modal-open { overflow: hidden; }
       <!-- Cabecera compacta con botón para alternar descuento de saldo y cerrar -->
       <div class="flex items-center justify-between gap-2 pb-2.5 mb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50">
         <div class="min-w-0">
-          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white leading-tight truncate">Registrar Gasto Personal</h3>
+          <h3 id="expense-modal-title" class="text-base font-bold text-apple-gray-900 dark:text-white leading-tight truncate">Registrar Gasto Personal</h3>
           <p id="expense-bank-preview" class="text-[10px] text-apple-gray-400 truncate mt-0.5">Se guarda en Supabase (tabla <code>gastos</code>)</p>
         </div>
         <div class="flex items-center gap-1.5 shrink-0">
@@ -3273,6 +3980,7 @@ body.liquidity-modal-open { overflow: hidden; }
       </div>
 
       <form id="form-expense" onsubmit="handleSaveExpense(event)" class="space-y-3">
+        <input type="hidden" name="editId" value="">
         <input type="hidden" name="category" id="expense-category-input" value="">
         <input type="hidden" name="date" id="input-expense-date" value="">
 
@@ -3351,13 +4059,22 @@ body.liquidity-modal-open { overflow: hidden; }
           </button>
         </div>
 
+        <div class="mt-2">
+          <label for="expense-subcategory-select" class="block text-[10px] font-extrabold uppercase tracking-wider text-apple-gray-400 mb-1 px-0.5">Subcategoría <span class="normal-case font-medium tracking-normal">(opcional)</span></label>
+          <div class="expense-wireframe-field px-3 py-2">
+            <select id="expense-subcategory-select" class="w-full bg-transparent text-xs font-semibold text-apple-gray-900 dark:text-white focus:outline-none" disabled>
+              <option value="">Elige una categoría principal primero</option>
+            </select>
+          </div>
+        </div>
+
         <!-- BOTONES DE ACCIÓN -->
         <div class="pt-2 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex items-center justify-end gap-2.5 sticky bottom-0 bg-inherit">
           <button type="button" onclick="closeModal('modal-add-expense')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-400 hover:text-apple-gray-700 dark:hover:text-white transition">
             Cancelar
           </button>
           <button type="submit" class="ios-tap px-5 py-2.5 rounded-2xl text-xs font-bold bg-apple-blue hover:bg-blue-600 text-white shadow-ios-sm flex items-center gap-1.5 transition">
-            <span>Guardar Gasto</span>
+            <span id="expense-submit-label">Guardar gasto</span>
           </button>
         </div>
       </form>
@@ -3365,12 +4082,13 @@ body.liquidity-modal-open { overflow: hidden; }
   </div>
 
   <!-- MODAL: REGISTRAR GASTO FIJO MENSUAL -->
-  <div id="modal-add-fixed-expense" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity">
+  <div id="modal-add-fixed-expense" class="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/40 backdrop-blur-md hidden transition-opacity" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="fixed-expense-modal-title">
     <div class="apple-card rounded-3xl w-full max-w-sm p-5 sm:p-6 shadow-ios-sheet">
       <div class="flex items-center justify-between pb-3 border-b border-apple-gray-200/50 dark:border-apple-gray-700/50 mb-4">
         <div>
-          <h3 class="text-base font-bold text-apple-gray-900 dark:text-white">Nuevo Gasto Fijo</h3>
-          <p class="text-xs text-apple-gray-400">Compromiso mensual recurrente</p>
+          <h3 id="fixed-expense-modal-title" class="text-base font-bold text-apple-gray-900 dark:text-white">Nuevo Gasto Fijo</h3>
+          <p id="fixed-expense-modal-subtitle" class="text-xs text-apple-gray-400">Compromiso mensual recurrente</p>
+          <p class="fixed-bill-guidance"><strong>¿Factura variable?</strong> Registra aquí una reserva mensual estimada para luz o agua. Para el agua bimestral, divide la última factura entre 2. No marques la reserva como pagada: cuando llegue la factura real, registra el importe real como gasto.</p>
         </div>
         <button onclick="closeModal('modal-add-fixed-expense')" class="p-1 rounded-full text-apple-gray-400 hover:text-apple-700">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -3378,6 +4096,7 @@ body.liquidity-modal-open { overflow: hidden; }
       </div>
 
       <form id="form-fixed-expense" onsubmit="handleSaveFixedExpense(event)" class="space-y-3.5">
+        <input type="hidden" name="editId" value="">
         <div>
           <label class="block text-xs font-medium text-apple-gray-500 mb-1">Concepto</label>
           <input type="text" required name="concept" placeholder="Ej: Alquiler, Gimnasio, Spotify..." class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
@@ -3390,6 +4109,19 @@ body.liquidity-modal-open { overflow: hidden; }
           <div>
             <label class="block text-xs font-medium text-apple-gray-500 mb-1">Día de Cobro</label>
             <input type="number" min="1" max="31" required name="chargeDay" value="1" class="w-full px-3 py-2 text-sm font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700" inputmode="numeric">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Categoría</label>
+            <select id="fixed-expense-category" name="category" onchange="updateFixedExpenseSubcategories()" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700">
+              <option value="">Sin categoría</option>
+              <option>Supermercado</option><option>Comida y Ocio</option><option>Transporte</option><option>Hogar</option><option>Salud y Deporte</option><option>Compras y Otros</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-apple-gray-500 mb-1">Subcategoría</label>
+            <select id="fixed-expense-subcategory" name="subcategory" class="w-full px-2.5 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700"><option value="">Opcional</option></select>
           </div>
         </div>
         <div>
@@ -3794,6 +4526,20 @@ body.liquidity-modal-open { overflow: hidden; }
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
+
+      <section class="appearance-settings-card rounded-2xl border border-apple-gray-200/70 dark:border-apple-gray-700/70 bg-apple-gray-50/80 dark:bg-apple-gray-800/45 p-3.5 mb-4">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-apple-gray-900 dark:text-white">Apariencia</p>
+            <p class="text-[10px] text-apple-gray-500 dark:text-apple-gray-400 mt-0.5">Elige el tema para toda la aplicación</p>
+          </div>
+          <i data-lucide="palette" class="w-4 h-4 text-apple-blue shrink-0"></i>
+        </div>
+        <div class="grid grid-cols-2 gap-2" role="group" aria-label="Seleccionar apariencia">
+          <button type="button" id="theme-option-light" onclick="setThemeMode('light')" class="theme-option-button" aria-pressed="false"><i data-lucide="sun" class="w-4 h-4"></i><span>Claro</span></button>
+          <button type="button" id="theme-option-dark" onclick="setThemeMode('dark')" class="theme-option-button" aria-pressed="false"><i data-lucide="moon" class="w-4 h-4"></i><span>Oscuro</span></button>
+        </div>
+      </section>
 
       <div class="space-y-3 mb-4 text-xs text-apple-gray-500 leading-relaxed">
         <p>🌐 <strong>Servidor:</strong> <code class="font-mono text-apple-blue">twslpgpawqrxpadrrshb.supabase.co</code></p>
@@ -4807,7 +5553,7 @@ body.liquidity-modal-open { overflow: hidden; }
         </defs>
         <path d="${areaPath}" fill="url(#capitalSparkGrad)" />
         <path d="${dPath}" fill="none" stroke="${strokeColor}" stroke-opacity="0.20" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" class="sparkline-glow-line" />
-        <path d="${dPath}" fill="none" stroke="url(#capitalLineFade)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" class="sparkline-path-line" />
+        <path d="${dPath}" fill="none" stroke="url(#capitalLineFade)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" class="sparkline-path-line" pathLength="1" />
         <circle cx="${lastPt.x}" cy="${lastPt.y}" r="7" fill="${strokeColor}" fill-opacity="0.16" />
         <circle cx="${lastPt.x}" cy="${lastPt.y}" r="4.2" fill="${strokeColor}" stroke="white" stroke-opacity="0.82" stroke-width="1.4" class="sparkline-dot-pulse" />
       `;
@@ -5318,31 +6064,37 @@ body.liquidity-modal-open { overflow: hidden; }
         }
       });
 
-      let totalFixed = 0;
-      (state.personalFixedExpenses || []).forEach(f => {
-        totalFixed += Number(f.amount || 0);
-      });
-
       const cycState = (state.fixedExpensesCycleState && state.fixedExpensesCycleState[activeKey]) || {};
+      let totalFixed = 0;
       let totalFixedPaid = 0;
       let totalFixedPending = 0;
       let countPaid = 0;
       let countPending = 0;
 
       (state.personalFixedExpenses || []).forEach(f => {
-        const isPaid = cycState[f.id] && cycState[f.id].paid;
+        const paymentInfo = cycState[f.id] || cycState[String(f.id)] || null;
+        const isPaid = !!(paymentInfo && paymentInfo.paid);
+        // When a recurring template is edited after payment, keep that cycle's actual paid amount intact.
+        const linkedPaidExpense = paymentInfo?.expenseId ? (state.personalExpenses || []).find(exp => String(exp.id) === String(paymentInfo.expenseId)) : null;
+        const cycleAmount = isPaid
+          ? Math.max(0, Number(paymentInfo.paidAmount ?? linkedPaidExpense?.amount ?? f.amount) || 0)
+          : Math.max(0, Number(f.amount || 0));
+        totalFixed += cycleAmount;
         if (isPaid) {
-          totalFixedPaid += Number(f.amount || 0);
+          totalFixedPaid += cycleAmount;
           countPaid++;
         } else {
-          totalFixedPending += Number(f.amount || 0);
+          totalFixedPending += cycleAmount;
           countPending++;
         }
       });
 
       const variableBudget = Math.max(0, budget - totalFixed);
       const availableVariable = Math.max(0, variableBudget - totalSpent);
-      const availableTotal = budget - (totalSpent + totalFixedPaid);
+      // One source of truth for every 'Disponible' indicator: general budget minus
+      // variable spending and all fixed costs (paid + pending). This keeps the top
+      // alert, daily allowance and Financial Study aligned.
+      const availableTotal = budget - (totalSpent + totalFixed);
 
       const msPerDay = 1000 * 60 * 60 * 24;
       const daysRemaining = Math.max(1, Math.ceil((cycleEnd - now) / msPerDay));
@@ -5428,7 +6180,7 @@ body.liquidity-modal-open { overflow: hidden; }
       const circle = document.getElementById('personal-ring-circle');
       if (circle) {
         const circumference = 314.16;
-        const totalComprometido = cyc.totalFixedPaid + cyc.totalSpent;
+        const totalComprometido = cyc.totalFixed + cyc.totalSpent;
         const pct = Math.min(100, Math.max(0, (totalComprometido / cyc.budget) * 100));
         const offset = circumference - (pct / 100) * circumference;
         circle.style.strokeDashoffset = offset;
@@ -5445,7 +6197,7 @@ body.liquidity-modal-open { overflow: hidden; }
         if (dispEl) animateNumericValue(dispEl, cyc.availableVariable, formatEUR, 520);
 
         const ringPct = document.getElementById('personal-ring-percent');
-        if (ringPct) ringPct.innerText = `${formatEUR(cyc.availableTotal)} libre total`;
+        if (ringPct) ringPct.innerText = `${Math.min(100, Math.max(0, (totalComprometido / Math.max(1, cyc.budget)) * 100)).toLocaleString('es-ES', {maximumFractionDigits:0})}% comprometido`;
 
         const daysPill = document.getElementById('personal-days-remaining-pill');
         if (daysPill) {
@@ -5512,6 +6264,7 @@ body.liquidity-modal-open { overflow: hidden; }
       }
 
       renderFixedExpensesList();
+      renderPersonalCategoryInsights(cyc);
 
       const bcpPen = document.getElementById('bcp-val-pen');
       if (bcpPen) bcpPen.innerText = formatPEN(state.bcp?.pen || 0);
@@ -5552,8 +6305,25 @@ body.liquidity-modal-open { overflow: hidden; }
       }
 
       items.forEach(f => {
-        const paymentInfo = cycState[f.id];
-        const isPaid = paymentInfo && paymentInfo.paid;
+        const paymentInfo = cycState[f.id] || cycState[String(f.id)];
+        const isPaid = !!(paymentInfo && paymentInfo.paid);
+        const linkedPaidExpense = paymentInfo?.expenseId ? (state.personalExpenses || []).find(exp => String(exp.id) === String(paymentInfo.expenseId)) : null;
+        const cycleAmount = isPaid ? Math.max(0, Number(paymentInfo.paidAmount ?? linkedPaidExpense?.amount ?? f.amount) || 0) : Number(f.amount || 0);
+        const paidTemplateAmount = Number(paymentInfo?.paidRecurringAmount ?? paymentInfo?.paidAmount ?? f.amount) || 0;
+        const paidTemplateConcept = paymentInfo?.paidRecurringConcept ?? paymentInfo?.paidConcept ?? f.concept;
+        const paidTemplateCategory = paymentInfo?.paidRecurringCategory ?? (f.category || '');
+        const paidTemplateSubcategory = paymentInfo?.paidRecurringSubcategory ?? (f.subcategory || '');
+        const recurringDetailsChanged = isPaid && (
+          Math.abs(Number(f.amount || 0) - paidTemplateAmount) >= 0.005 ||
+          String(f.concept || '') !== String(paidTemplateConcept || '') ||
+          String(f.category || '') !== String(paidTemplateCategory || '') ||
+          String(f.subcategory || '') !== String(paidTemplateSubcategory || '') ||
+          Number(f.chargeDay || 1) !== Number(paymentInfo?.paidChargeDay ?? f.chargeDay ?? 1) ||
+          (paymentInfo?.paidRecurringBank && String(f.bank || '') !== String(paymentInfo.paidRecurringBank))
+        );
+        const displayConcept = isPaid ? (paymentInfo?.paidConcept || f.concept) : f.concept;
+        const displayCategory = isPaid && paymentInfo?.paidCategory ? paymentInfo.paidCategory : getFixedExpenseCategoryInfo(f).category;
+        const displaySubcategory = isPaid && paymentInfo?.paidSubcategory ? paymentInfo.paidSubcategory : getFixedExpenseCategoryInfo(f).subcategory;
 
         const card = document.createElement('div');
         card.className = `p-2.5 sm:p-3.5 rounded-2xl apple-card shadow-ios-sm border transition-all flex sm:flex-col items-center sm:items-stretch justify-between gap-2.5 ${isPaid ? 'border-apple-green/30 bg-apple-green/5 dark:bg-apple-green/5' : 'border-apple-gray-200/50 dark:border-apple-gray-700/50 hover:border-apple-blue/40'}`;
@@ -5570,15 +6340,13 @@ body.liquidity-modal-open { overflow: hidden; }
             <div class="flex items-center gap-2.5 flex-1 min-w-0">
               ${checkHtml}
               <div class="truncate">
-                <span class="text-xs font-bold text-apple-gray-900 dark:text-white block truncate ${isPaid ? 'line-through text-apple-gray-400' : ''}">${escapeHTML(f.concept)}</span>
-                <span class="text-[9px] sm:text-[10px] text-apple-gray-400 block mt-0.5 truncate">
-                  ${isPaid ? `Pagado (${escapeHTML(paymentInfo.bank || f.bank)})` : `Día ${f.chargeDay} • ${escapeHTML(f.bank)}`}
+                <span class="text-xs font-bold text-apple-gray-900 dark:text-white block truncate ${isPaid ? 'line-through text-apple-gray-400' : ''}">${escapeHTML(displayConcept)}</span>
+                <span class="text-[9px] sm:text-[10px] text-apple-gray-400 block mt-0.5 ${isPaid && recurringDetailsChanged ? 'whitespace-normal' : 'truncate'}">
+                  ${isPaid ? `Pagado (${escapeHTML(paymentInfo.bank || f.bank)})${recurringDetailsChanged ? ` · Próximo: ${escapeHTML(f.concept)} · ${formatEUR(f.amount)}` : ''}` : `Día ${f.chargeDay} • ${escapeHTML(f.bank)}`}
                 </span>
+                ${(displayCategory) ? `<span class="fixed-category-label">${escapeHTML(displayCategory)}${displaySubcategory ? ' › ' + escapeHTML(displaySubcategory) : ''}${isPaid && recurringDetailsChanged && getFixedExpenseCategoryInfo(f).category && getFixedExpenseCategoryInfo(f).category !== displayCategory ? ` · Próximo: ${escapeHTML(getFixedExpenseCategoryInfo(f).category)}` : ''}</span>` : '<span class="fixed-category-label" style="background:rgba(120,120,128,.08);color:#8b8b93">Sin categoría</span>'}
               </div>
             </div>
-            <button onclick="deleteFixedExpense(${f.id})" class="hidden sm:inline-flex text-apple-gray-300 hover:text-apple-red p-1 shrink-0 transition" title="Eliminar gasto fijo recurrente">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
           </div>
 
           <div class="sm:mt-3 sm:pt-2.5 sm:border-t border-apple-gray-200/40 dark:border-apple-gray-700/40 flex items-center gap-2 sm:justify-between shrink-0">
@@ -5586,9 +6354,12 @@ body.liquidity-modal-open { overflow: hidden; }
               ${isPaid ? 'Liquidado' : 'Por Pagar'}
             </span>
             <span class="font-mono font-bold text-xs sm:text-sm whitespace-nowrap ${isPaid ? 'text-apple-gray-400 line-through' : 'text-apple-gray-900 dark:text-white'}">
-              ${formatEUR(f.amount)}
+              ${formatEUR(cycleAmount)}
             </span>
-            <button onclick="deleteFixedExpense(${f.id})" class="sm:hidden text-apple-gray-300 hover:text-apple-red p-1 shrink-0 transition" title="Eliminar gasto fijo recurrente">
+            <button data-fixed-edit-id="${escapeHTML(f.id)}" onclick="editFixedExpense(${f.id})" class="ios-tap text-apple-blue hover:bg-apple-blue/10 rounded-lg p-1.5 shrink-0 transition" title="${isPaid ? 'Editar los siguientes cargos; el pago del ciclo actual se conserva' : 'Editar gasto fijo'}" aria-label="Editar ${escapeHTML(f.concept)}">
+              <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="deleteFixedExpense(${f.id})" class="text-apple-gray-300 hover:text-apple-red p-1.5 shrink-0 transition" title="Eliminar gasto fijo recurrente" aria-label="Eliminar ${escapeHTML(f.concept)}">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -5673,10 +6444,21 @@ body.liquidity-modal-open { overflow: hidden; }
           ...state.personalExpenses.filter(x => String(x.id) !== String(expenseObj.id))
         ];
 
+        const paidCategoryInfo = getFixedExpenseCategoryInfo(f);
         state.fixedExpensesCycleState[activeKey][fixedId] = {
           paid: true,
           paidAt: date,
           bank: bank,
+          paidAmount: amount,
+          paidConcept: f.concept,
+          paidCategory: paidCategoryInfo.category || '',
+          paidSubcategory: paidCategoryInfo.subcategory || '',
+          paidRecurringAmount: amount,
+          paidRecurringConcept: f.concept,
+          paidRecurringCategory: f.category || '',
+          paidRecurringSubcategory: f.subcategory || '',
+          paidChargeDay: Number(f.chargeDay || 1),
+          paidRecurringBank: f.bank || '',
           amountDebited: autodebit ? amount : 0,
           expenseId: fixedExpenseId
         };
@@ -5774,39 +6556,51 @@ body.liquidity-modal-open { overflow: hidden; }
       if (!list) return;
       list.innerHTML = '';
 
-      if (!state.personalExpenses || state.personalExpenses.length === 0) {
+      const expenses = Array.isArray(state.personalExpenses) ? state.personalExpenses : [];
+      if (!expenses.length) {
         list.innerHTML = `<p class="py-6 text-center text-xs text-apple-gray-400">Sin gastos registrados en la nube</p>`;
         return;
       }
 
-      state.personalExpenses.forEach(exp => {
+      expenses.forEach(exp => {
         const item = document.createElement('div');
-        item.className = 'py-2.5 sm:py-3 flex items-center justify-between gap-3 group hover:bg-apple-gray-50/50 dark:hover:bg-apple-gray-800/20 px-2 rounded-2xl transition';
+        item.className = 'personal-expense-item py-2.5 sm:py-3 flex items-center justify-between gap-3 group hover:bg-apple-gray-50/50 dark:hover:bg-apple-gray-800/20 px-2 rounded-2xl transition';
         const vis = getExpenseVisualStyle(exp.concept);
+        const parsed = parseExpenseConcept(exp.concept);
+        const shownConcept = parsed.description || (parsed.category ? parsed.category : (exp.concept || 'Gasto'));
+        const catInfo = getExpenseCategoryInfo(exp.concept, exp);
+        const hasCategory = catInfo.category && catInfo.category !== 'Sin categoría';
+        const categoryText = hasCategory ? `${catInfo.category}${catInfo.subcategory && catInfo.subcategory !== 'Sin subcategoría' ? ' · ' + catInfo.subcategory : ''}` : 'Asignar categoría';
 
         item.innerHTML = `
-          <div class="flex items-center gap-3 min-w-0">
+          <div class="flex items-center gap-3 min-w-0 flex-1">
             <div class="w-9 h-9 rounded-2xl ${vis.cls} flex items-center justify-center shrink-0">
               <i data-lucide="${vis.icon}" class="w-4 h-4"></i>
             </div>
-            <div class="min-w-0">
-              <p class="text-xs font-bold text-apple-gray-900 dark:text-white truncate">${escapeHTML(exp.concept)}</p>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="text-[10px] text-apple-gray-400 font-mono">${escapeHTML(formatExpenseDateTime(exp.date))}</span>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold text-apple-gray-900 dark:text-white truncate" title="${escapeHTML(shownConcept)}">${escapeHTML(shownConcept)}</p>
+              <div class="flex items-center gap-1.5 mt-0.5 min-w-0 flex-wrap">
+                <span class="text-[10px] text-apple-gray-400 font-mono">${escapeHTML(formatExpenseDateTime(exp.date || exp.fecha))}</span>
                 <span class="text-[10px] text-apple-gray-300">•</span>
-                <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded-md bg-apple-blue/10 text-apple-blue">${escapeHTML(exp.bank)}</span>
+                <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-apple-blue/10 text-apple-blue">${escapeHTML(exp.bank || 'N26')}</span>
+                <span class="personal-expense-category ${hasCategory ? '' : 'is-uncategorized'}" title="${escapeHTML(categoryText)}">${hasCategory ? escapeHTML(categoryText) : '<i data-lucide="tag" class="w-2.5 h-2.5"></i> Asignar categoría'}</span>
               </div>
             </div>
           </div>
 
-          <div class="flex items-center gap-2 shrink-0">
-            <span class="text-xs font-mono font-bold text-apple-red">-${formatEUR(exp.amount)}</span>
-            <button onclick="deleteExpense('${exp.id}')" class="opacity-70 group-hover:opacity-100 p-1 text-apple-gray-400 hover:text-apple-red transition" aria-label="Eliminar gasto">
+          <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <span class="text-xs font-mono font-bold text-apple-red whitespace-nowrap">-${formatEUR(exp.amount)}</span>
+            <button type="button" data-expense-edit-id="${escapeHTML(String(exp.id))}" class="personal-expense-edit opacity-80 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 p-2 rounded-xl text-apple-blue hover:bg-apple-blue/10 transition" aria-label="Editar gasto: ${escapeHTML(shownConcept)}" title="Editar gasto y categoría">
+              <i data-lucide="pencil-line" class="w-3.5 h-3.5"></i>
+            </button>
+            <button type="button" data-expense-delete-id="${escapeHTML(String(exp.id))}" class="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 p-2 rounded-xl text-apple-gray-400 hover:text-apple-red hover:bg-apple-red/10 transition" aria-label="Eliminar gasto: ${escapeHTML(shownConcept)}" title="Eliminar gasto">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
           </div>
         `;
         list.appendChild(item);
+        item.querySelector('[data-expense-edit-id]')?.addEventListener('click', () => editExpense(exp.id));
+        item.querySelector('[data-expense-delete-id]')?.addEventListener('click', () => deleteExpense(exp.id));
       });
       refreshIcons(list);
     }
@@ -5816,10 +6610,13 @@ body.liquidity-modal-open { overflow: hidden; }
       const target = Number(targetValue) || 0;
       const previous = Number(el.dataset.numericValue);
       const start = Number.isFinite(previous) ? previous : 0;
+      const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
 
-      if (Math.abs(start - target) < 0.005) {
+      if (reducedMotion || Math.abs(start - target) < 0.005 || duration <= 0) {
+        el.dataset.animationToken = '';
         el.dataset.numericValue = String(target);
-        el.innerHTML = formatter(target);
+        el.textContent = formatter(target);
+        el.classList.remove('number-rolling');
         return;
       }
 
@@ -5837,11 +6634,11 @@ body.liquidity-modal-open { overflow: hidden; }
         const progress = Math.min(1, (now - startTime) / duration);
         const value = start + (target - start) * ease(progress);
         el.dataset.numericValue = String(value);
-        el.innerHTML = formatter(value);
+        el.textContent = formatter(value);
         if (progress < 1) requestAnimationFrame(tick);
         else {
           el.dataset.numericValue = String(target);
-          el.innerHTML = formatter(target);
+          el.textContent = formatter(target);
           setTimeout(() => el.classList.remove('number-rolling'), 80);
         }
       };
@@ -6580,10 +7377,10 @@ body.liquidity-modal-open { overflow: hidden; }
       }
     }, { passive: true });
 
+    const tabScrollPositions = Object.create(null);
     function switchTab(tabId) {
-      if (activeTabId === tabId && !document.getElementById(`view-${tabId}`)?.classList.contains('hidden')) {
-        return;
-      }
+      if (activeTabId === tabId && !document.getElementById(`view-${tabId}`)?.classList.contains('hidden')) return;
+      if (activeTabId) tabScrollPositions[activeTabId] = window.scrollY || document.documentElement.scrollTop || 0;
       activeTabId = tabId;
 
       document.getElementById('view-airtm').classList.add('hidden');
@@ -6635,6 +7432,7 @@ body.liquidity-modal-open { overflow: hidden; }
         } catch (error) {
           console.error('No se pudo actualizar la pestaña:', tabId, error);
         }
+        requestAnimationFrame(() => window.scrollTo({ top: Number(tabScrollPositions[tabId] || 0), behavior: 'auto' }));
       });
     }
 
@@ -6683,9 +7481,16 @@ body.liquidity-modal-open { overflow: hidden; }
       return Number.isFinite(val) ? val : 0;
     }
 
+    let fixedExpenseModalReturnFocus = null;
+    let fixedExpenseModalEditId = '';
     function openModal(id) {
       const m = document.getElementById(id);
       if (!m) return;
+      if (id === 'modal-add-fixed-expense') {
+        if (!m.contains(document.activeElement)) fixedExpenseModalReturnFocus = document.activeElement;
+        fixedExpenseModalEditId = String(document.querySelector('#form-fixed-expense [name="editId"]')?.value || '');
+        m.setAttribute('aria-hidden', 'false');
+      }
 
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -6963,14 +7768,48 @@ body.liquidity-modal-open { overflow: hidden; }
 
     function closeModal(id) {
       const m = document.getElementById(id);
+      const restoreFixedFocus = id === 'modal-add-fixed-expense';
+      const fixedEditIdToRestore = restoreFixedFocus ? String(document.querySelector('#form-fixed-expense [name="editId"]')?.value || fixedExpenseModalEditId || '') : '';
       if (m) m.classList.add('hidden');
+      if (id === 'modal-add-fixed-expense') {
+        const form = document.getElementById('form-fixed-expense');
+        if (form) form.reset();
+        resetFixedExpenseFormMode();
+        updateFixedExpenseSubcategories();
+      }
       if (id === 'modal-add-expense') {
         document.body.classList.remove('expense-editor-open');
+        const expenseForm = document.getElementById('form-expense');
+        if (expenseForm) {
+          expenseForm.reset();
+          expenseForm.dataset.saving = '0';
+          const title = document.getElementById('expense-modal-title');
+          const submitLabel = document.getElementById('expense-submit-label');
+          if (title) title.textContent = 'Registrar Gasto Personal';
+          if (submitLabel) submitLabel.textContent = 'Guardar gasto';
+          const autoDebit = document.getElementById('expense-autodebit');
+          if (autoDebit) autoDebit.checked = false;
+          clearExpenseCategorySelection();
+          updateExpenseAutoDebitUI();
+        }
         if (m) {
           m.style.removeProperty('--expense-visual-height');
           m.style.removeProperty('--expense-visual-top');
           m.removeAttribute('data-keyboard-open');
         }
+      }
+      if (id === 'modal-add-fixed-expense') {
+        if (m) m.setAttribute('aria-hidden', 'true');
+        const opener = fixedExpenseModalReturnFocus;
+        fixedExpenseModalReturnFocus = null;
+        fixedExpenseModalEditId = '';
+        requestAnimationFrame(() => {
+          const editButton = fixedEditIdToRestore
+            ? Array.from(document.querySelectorAll('#personal-fixed-expenses-list [data-fixed-edit-id]')).find(el => el.dataset.fixedEditId === fixedEditIdToRestore)
+            : null;
+          const target = editButton || (opener?.isConnected ? opener : null);
+          if (target && !target.closest('.hidden')) target.focus({preventScroll:true});
+        });
       }
       if (id === 'modal-quick-balance') {
         const form = document.getElementById('form-banks');
@@ -7090,41 +7929,51 @@ body.liquidity-modal-open { overflow: hidden; }
       'Compras y Otros'
     ];
 
+    const EXPENSE_SUBCATEGORIES = {
+      'Supermercado': ['Fruta y verdura','Carnes y pescado','Despensa','Bebidas','Limpieza','Otros'],
+      'Comida y Ocio': ['Restaurantes','Cafés y snacks','Delivery','Cine y eventos','Salidas','Otros'],
+      'Transporte': ['Transporte público','Combustible','Taxi / VTC','Parking','Mantenimiento','Otros'],
+      'Hogar': ['Alquiler','Suministros','Internet y móvil','Muebles y decoración','Limpieza del hogar','Otros'],
+      'Salud y Deporte': ['Farmacia','Médico y dentista','Gimnasio','Deporte','Cuidado personal','Otros'],
+      'Compras y Otros': ['Ropa y calzado','Tecnología','Suscripciones','Regalos','Viajes','Otros']
+    };
+
+    function updateExpenseSubcategoryOptions(category, selected = '') {
+      const select = document.getElementById('expense-subcategory-select');
+      if (!select) return;
+      select.innerHTML = '';
+      const first = document.createElement('option');
+      first.value = '';
+      first.textContent = category ? 'Sin subcategoría' : 'Elige una categoría principal primero';
+      select.appendChild(first);
+      (EXPENSE_SUBCATEGORIES[category] || []).forEach(label => {
+        const option = document.createElement('option');
+        option.value = label;
+        option.textContent = label;
+        select.appendChild(option);
+      });
+      select.disabled = !category;
+      select.value = selected;
+    }
+
     function selectExpenseCategory(catName) {
       const catInput = document.getElementById('expense-category-input');
       const conceptInput = document.getElementById('expense-concept-input');
       const badge = document.getElementById('expense-selected-cat-badge');
       const buttons = document.querySelectorAll('#expense-categories-grid .expense-cat-block');
-
       const currentCat = catInput ? catInput.value : '';
       const nextCat = currentCat === catName ? '' : catName;
-
       if (catInput) catInput.value = nextCat;
-
-      buttons.forEach(btn => {
-        const isMatch = btn.getAttribute('data-cat') === nextCat;
-        btn.classList.toggle('is-selected', isMatch);
-      });
-
+      buttons.forEach(btn => btn.classList.toggle('is-selected', btn.getAttribute('data-cat') === nextCat));
       if (badge) {
-        if (nextCat) {
-          badge.textContent = nextCat;
-          badge.classList.remove('hidden');
-        } else {
-          badge.textContent = '';
-          badge.classList.add('hidden');
-        }
+        badge.textContent = nextCat;
+        badge.classList.toggle('hidden', !nextCat);
       }
-
+      updateExpenseSubcategoryOptions(nextCat);
       if (conceptInput) {
         const currentConcept = conceptInput.value.trim();
-        if (nextCat) {
-          if (!currentConcept || EXPENSE_PRESET_CATEGORIES.includes(currentConcept)) {
-            conceptInput.value = nextCat;
-          }
-        } else if (EXPENSE_PRESET_CATEGORIES.includes(currentConcept)) {
-          conceptInput.value = '';
-        }
+        if (nextCat && (!currentConcept || EXPENSE_PRESET_CATEGORIES.includes(currentConcept))) conceptInput.value = nextCat;
+        else if (!nextCat && EXPENSE_PRESET_CATEGORIES.includes(currentConcept)) conceptInput.value = '';
       }
     }
 
@@ -7132,13 +7981,462 @@ body.liquidity-modal-open { overflow: hidden; }
       const catInput = document.getElementById('expense-category-input');
       const badge = document.getElementById('expense-selected-cat-badge');
       if (catInput) catInput.value = '';
-      if (badge) {
-        badge.textContent = '';
-        badge.classList.add('hidden');
-      }
-      document.querySelectorAll('#expense-categories-grid .expense-cat-block').forEach(btn => {
-        btn.classList.remove('is-selected');
+      if (badge) { badge.textContent = ''; badge.classList.add('hidden'); }
+      updateExpenseSubcategoryOptions('');
+      document.querySelectorAll('#expense-categories-grid .expense-cat-block').forEach(btn => btn.classList.remove('is-selected'));
+    }
+
+    const PERSONAL_BUDGET_STORAGE_KEY = 'capitalLedger.personalCategoryBudgets.v1';
+    function getPersonalCategoryBudgets() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(PERSONAL_BUDGET_STORAGE_KEY) || '{}');
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+      } catch (_) { return {}; }
+    }
+    let categoryBudgetOpener = null;
+    function ensureCategoryBudgetModalRoot() {
+      const modal = document.getElementById('modal-category-budgets');
+      if (modal && modal.parentElement !== document.body) document.body.appendChild(modal);
+      return modal;
+    }
+    function getPersonalGeneralBudget(cycle) {
+      const cyc = cycle || calculatePersonalCycle();
+      const candidate = Number(cyc?.budget ?? state.personalBudget ?? 600);
+      return Number.isFinite(candidate) && candidate >= 0 ? candidate : 600;
+    }
+    function getExpenseCycleUsageByCategory(cycle) {
+      const cyc = cycle || calculatePersonalCycle();
+      const start = cyc?.cycleStart ? new Date(cyc.cycleStart) : null;
+      const end = cyc?.cycleEnd ? new Date(cyc.cycleEnd) : null;
+      if (end) end.setHours(23, 59, 59, 999);
+      const usage = new Map();
+      const ensure = name => { if (!usage.has(name)) usage.set(name, {spent:0, committed:0}); return usage.get(name); };
+      (state.personalExpenses || []).forEach(exp => {
+        const amount = Number(exp.amount || 0);
+        if (!(amount > 0)) return;
+        const value = String(exp.date || exp.fecha || '');
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00`) : new Date(value);
+        if (start && end && (Number.isNaN(date.getTime()) || date < start || date > end)) return;
+        const category = getExpenseCategoryInfo(exp.concept, exp).category || 'Sin categoría';
+        ensure(category).spent += amount;
       });
+      const paidState = (state.fixedExpensesCycleState || {})[cyc.activeKey] || {};
+      (state.personalFixedExpenses || []).forEach(fixed => {
+        const amount = Math.max(0, Number(fixed.amount || 0));
+        if (!(amount > 0)) return;
+        const paid = !!(paidState[fixed.id] || paidState[String(fixed.id)])?.paid;
+        if (paid) return;
+        const category = getFixedExpenseCategoryInfo(fixed).category || 'Sin categoría';
+        ensure(category).committed += amount;
+      });
+      return usage;
+    }
+
+    function parseBudgetEditorValue(raw) {
+      let value = String(raw ?? '').trim().replace(/[€\s]/g, '');
+      if (!value) return { valid: true, value: 0 };
+      const comma = value.lastIndexOf(',');
+      const dot = value.lastIndexOf('.');
+      if (comma >= 0 && dot >= 0) {
+        value = comma > dot ? value.replace(/\./g, '').replace(',', '.') : value.replace(/,/g, '');
+      } else if (comma >= 0) {
+        value = value.replace(',', '.');
+      }
+      if (!/^\d+(?:\.\d{0,2})?$/.test(value)) return { valid: false, value: 0 };
+      const number = Number(value);
+      return { valid: Number.isFinite(number) && number >= 0 && number <= 1000000, value: number };
+    }
+
+    function openCategoryBudgetEditor() {
+      const modal = ensureCategoryBudgetModalRoot();
+      if (modal && !modal.contains(document.activeElement)) categoryBudgetOpener = document.activeElement;
+      const host = document.getElementById('category-budget-editor-rows');
+      if (!modal || !host) {
+        showToast('No se pudo abrir el editor', 'Recarga la aplicación e inténtalo de nuevo.', false);
+        return;
+      }
+      const cycle = calculatePersonalCycle();
+      const generalBudget = getPersonalGeneralBudget(cycle);
+      const budgets = getPersonalCategoryBudgets();
+      const currentTotal = Object.values(budgets).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+      const usage = getExpenseCycleUsageByCategory(cycle);
+      const iconMap = {'Supermercado':'shopping-basket','Comida y Ocio':'utensils','Transporte':'car-front','Hogar':'house','Salud y Deporte':'heart-pulse','Compras y Otros':'shopping-bag'};
+      const descMap = {'Supermercado':'Compra diaria y despensa','Comida y Ocio':'Restaurantes, cafés y planes','Transporte':'Desplazamientos y vehículo','Hogar':'Casa, facturas y suministros','Salud y Deporte':'Bienestar y actividad física','Compras y Otros':'Compras personales y suscripciones'};
+      modal.dataset.generalBudget = String(generalBudget);
+      host.innerHTML = `
+        <section class="budget-editor-summary">
+          <div class="budget-editor-summary-top"><div><span class="budget-editor-kicker">Tu plan de este ciclo</span><p class="budget-editor-summary-title">Presupuesto general</p></div><strong id="budget-editor-general">${formatEUR(generalBudget)}</strong></div>
+          <div class="budget-editor-stats">
+            <div><span>Distribuido</span><strong id="budget-editor-total">${formatEUR(currentTotal)}</strong></div>
+            <div><span>Sin repartir</span><strong id="budget-editor-unallocated">${formatEUR(generalBudget-currentTotal)}</strong></div>
+          </div>
+          <div class="budget-editor-track"><div id="budget-editor-progress" style="width:${generalBudget>0?Math.min(100,currentTotal/generalBudget*100):0}%"></div></div>
+          <p id="budget-editor-warning" class="budget-editor-warning" role="status" aria-live="polite">Reparte el presupuesto entre tus categorías.</p>
+        </section>
+        <div class="budget-editor-section-heading"><div><h4>Por categoría</h4><p>La suma de los límites no puede superar el presupuesto general.</p></div><span class="budget-editor-cycle-pill"><i data-lucide="calendar-days" class="w-3 h-3"></i> Ciclo actual</span></div>
+        <div class="budget-editor-list">${EXPENSE_PRESET_CATEGORIES.map(cat => {
+          const current = usage.get(cat) || {spent:0,committed:0};
+          const consumed = Number(current.spent||0) + Number(current.committed||0);
+          const budget = Math.max(0, Number(budgets[cat]||0));
+          const pct = budget > 0 ? Math.min(100, consumed / budget * 100) : 0;
+          return `<div class="budget-editor-row" data-budget-row="${escapeHTML(cat)}">
+            <div class="budget-editor-category-icon"><i data-lucide="${iconMap[cat]||'layers-3'}" class="w-4 h-4"></i></div>
+            <div class="budget-editor-category-main">
+              <div class="budget-editor-category-name">${escapeHTML(cat)}</div>
+              <div class="budget-editor-category-desc">${escapeHTML(descMap[cat]||'Gastos de esta categoría')}</div>
+              <div class="budget-editor-category-usage"><span data-budget-usage>${formatEUR(consumed)} usados</span>${current.committed>0?`<span>· ${formatEUR(current.committed)} fijos pendientes</span>`:''}</div>
+              <div class="budget-editor-row-track"><div data-budget-row-progress style="width:${pct}%;"></div></div>
+            </div>
+            <label class="budget-editor-input-wrap"><span class="budget-editor-input-label">LÍMITE</span><span class="budget-editor-input-shell"><span class="budget-editor-euro">€</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-budget-category="${escapeHTML(cat)}" data-budget-spent="${Number(current.spent||0)}" data-budget-committed="${Number(current.committed||0)}" value="${budget>0?budget.toFixed(2):''}" placeholder="Sin límite" aria-label="Límite para ${escapeHTML(cat)}" /></span></label>
+          </div>`;
+        }).join('')}</div>
+        <p class="budget-editor-footer-note"><i data-lucide="info" class="w-3.5 h-3.5 shrink-0"></i><span>Los fijos pendientes cuentan como dinero reservado.</span></p>
+      `;
+      host.querySelectorAll('[data-budget-category]').forEach(input => input.addEventListener('input', updateBudgetEditorTotal));
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+      modal.style.zIndex = '10050';
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('liquidity-modal-open');
+      updateBudgetEditorTotal();
+      refreshIcons(modal);
+      if (window.matchMedia('(min-width:680px)').matches) requestAnimationFrame(() => host.querySelector('[data-budget-category]')?.focus({preventScroll:true}));
+    }
+    function updateBudgetEditorTotal() {
+      const modal = ensureCategoryBudgetModalRoot();
+      const totalEl = document.getElementById('budget-editor-total');
+      const remainingEl = document.getElementById('budget-editor-unallocated');
+      const warningEl = document.getElementById('budget-editor-warning');
+      const progressEl = document.getElementById('budget-editor-progress');
+      const saveButton = modal?.querySelector('[data-budget-save]');
+      if (!totalEl || !modal) return;
+      const inputs = [...document.querySelectorAll('#category-budget-editor-rows [data-budget-category]')];
+      let hasInvalid = false;
+      const total = inputs.reduce((sum, input) => {
+        const parsed = parseBudgetEditorValue(input.value);
+        input.setAttribute('aria-invalid', parsed.valid ? 'false' : 'true');
+        if (!parsed.valid) hasInvalid = true;
+        return sum + (parsed.valid ? parsed.value : 0);
+      }, 0);
+      const generalBudget = Math.max(0, Number(modal.dataset.generalBudget || 0));
+      const remaining = generalBudget - total;
+      totalEl.textContent = formatEUR(total);
+      if (remainingEl) {
+        remainingEl.textContent = formatEUR(remaining);
+        remainingEl.classList.toggle('is-negative', remaining < -0.005);
+        remainingEl.classList.toggle('is-positive', remaining >= -0.005);
+      }
+      if (progressEl) {
+        progressEl.style.width = `${generalBudget > 0 ? Math.min(100, total / generalBudget * 100) : (total > 0 ? 100 : 0)}%`;
+        progressEl.classList.toggle('is-over', total > generalBudget + 0.005);
+      }
+      inputs.forEach(input => {
+        const row = input.closest('[data-budget-row]');
+        if (!row) return;
+        const limit = Math.max(0, Number(input.value) || 0);
+        const consumed = Math.max(0, Number(input.dataset.budgetSpent)||0) + Math.max(0, Number(input.dataset.budgetCommitted)||0);
+        const bar = row.querySelector('[data-budget-row-progress]');
+        const usageLabel = row.querySelector('[data-budget-usage]');
+        const pct = limit > 0 ? Math.min(100, consumed / limit * 100) : 0;
+        if (bar) {
+          bar.style.width = `${pct}%`;
+          bar.classList.toggle('is-over', limit > 0 && consumed > limit + 0.005);
+          bar.classList.toggle('is-empty', limit <= 0);
+        }
+        row.classList.toggle('is-over', limit > 0 && consumed > limit + 0.005);
+        row.classList.toggle('is-unlimited', limit <= 0);
+        if (usageLabel) usageLabel.textContent = limit > 0 && consumed > limit + 0.005 ? `${formatEUR(consumed-limit)} por encima · ${formatEUR(consumed)} usados` : `${formatEUR(consumed)} usados`;
+      });
+      const exceeds = total > generalBudget + 0.005;
+      if (warningEl) {
+        warningEl.textContent = hasInvalid
+          ? 'Revisa el importe de alguna categoría.'
+          : exceeds
+            ? `Excedes el presupuesto general por ${formatEUR(total-generalBudget)}.`
+            : remaining > 0.005
+              ? `${formatEUR(remaining)} sin repartir.`
+              : 'Presupuesto distribuido.';
+        warningEl.classList.toggle('is-error', exceeds || hasInvalid);
+        warningEl.classList.toggle('is-ok', !exceeds && !hasInvalid && remaining <= 0.005);
+      }
+      if (saveButton) {
+        saveButton.disabled = exceeds || hasInvalid;
+        saveButton.setAttribute('aria-disabled', (exceeds || hasInvalid) ? 'true' : 'false');
+        saveButton.title = hasInvalid ? 'Revisa los importes' : exceeds ? 'Reduce los límites para ajustarte al presupuesto general' : '';
+      }
+    }
+    function closeCategoryBudgetEditor() {
+      const modal = ensureCategoryBudgetModalRoot();
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('liquidity-modal-open');
+      const focusTarget = categoryBudgetOpener;
+      categoryBudgetOpener = null;
+      requestAnimationFrame(() => { if (focusTarget?.isConnected && !focusTarget.closest('.hidden')) focusTarget.focus({preventScroll:true}); });
+    }
+    function saveCategoryBudgets() {
+      const modal = ensureCategoryBudgetModalRoot();
+      const inputs = [...document.querySelectorAll('#category-budget-editor-rows [data-budget-category]')];
+      const budgets = {};
+      let total = 0;
+      for (const input of inputs) {
+        const raw = String(input.value || '').trim();
+        if (!raw) { input.removeAttribute('aria-invalid'); continue; }
+        const parsed = parseBudgetEditorValue(raw);
+        if (!parsed.valid) {
+          input.focus(); input.setAttribute('aria-invalid', 'true');
+          showToast('Revisa el límite', 'Usa un importe entre 0 y 1.000.000 € con hasta dos decimales.', false);
+          return;
+        }
+        const val = parsed.value;
+        input.setAttribute('aria-invalid', 'false');
+        if (val > 0) {
+          const clean = Math.round(val * 100) / 100;
+          budgets[input.dataset.budgetCategory] = clean;
+          total += clean;
+        }
+      }
+      const generalBudget = Math.max(0, Number(modal?.dataset.generalBudget || getPersonalGeneralBudget()));
+      if (total > generalBudget + 0.005) {
+        updateBudgetEditorTotal();
+        showToast('Superas el límite general', `Los límites de categoría suman ${formatEUR(total)} y el presupuesto general es ${formatEUR(generalBudget)}.`, false);
+        return;
+      }
+      try {
+        localStorage.setItem(PERSONAL_BUDGET_STORAGE_KEY, JSON.stringify(budgets));
+      } catch (err) {
+        showToast('No se pudieron guardar los límites', 'El navegador no permite guardar datos localmente.', false);
+        return;
+      }
+      closeCategoryBudgetEditor();
+      renderPersonalModule();
+      showToast('Límites guardados', `${formatEUR(total)} asignados de ${formatEUR(generalBudget)}.`, true);
+    }
+    document.addEventListener('keydown', event => {
+      const modal = document.getElementById('modal-category-budgets');
+      if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeCategoryBudgetEditor();
+    });
+    function updateFixedExpenseSubcategories() {
+      const cat = document.getElementById('fixed-expense-category')?.value || '';
+      const select = document.getElementById('fixed-expense-subcategory'); if (!select) return;
+      const options = ['<option value="">Sin subcategoría</option>', ...(EXPENSE_SUBCATEGORIES[cat] || []).map(x => `<option value="${escapeHTML(x)}">${escapeHTML(x)}</option>`)];
+      select.innerHTML = options.join(''); select.disabled = !cat;
+    }
+    document.getElementById('fixed-expense-category')?.addEventListener('change', updateFixedExpenseSubcategories);
+
+    function parseExpenseConcept(concept) {
+      const value = String(concept || '').trim();
+      if (!value) return {category:'', subcategory:'', description:''};
+      for (const category of EXPENSE_PRESET_CATEGORIES) {
+        if (value === category) return {category, subcategory:'', description:''};
+        if (value.startsWith(category + ' › ')) {
+          const tail = value.slice(category.length + 3);
+          const separator = tail.indexOf(' · ');
+          if (separator < 0) return {category, subcategory:tail.trim(), description:''};
+          return {category, subcategory:tail.slice(0,separator).trim(), description:tail.slice(separator+3).trim()};
+        }
+        if (value.startsWith(category + ' · ')) return {category, subcategory:'', description:value.slice(category.length+3).trim()};
+      }
+      return {category:'', subcategory:'', description:value};
+    }
+
+    function getExpenseCategoryInfo(concept, expenseRecord = null) {
+      const expenseId = expenseRecord?.id !== undefined && expenseRecord?.id !== null ? String(expenseRecord.id) : '';
+      if (expenseId && state.fixedExpensesCycleState) {
+        for (const cycleState of Object.values(state.fixedExpensesCycleState)) {
+          for (const [fixedId, paymentInfo] of Object.entries(cycleState || {})) {
+            if (String(paymentInfo?.expenseId || '') !== expenseId) continue;
+            if (paymentInfo?.paidCategory) return { category: paymentInfo.paidCategory, subcategory: paymentInfo.paidSubcategory || 'Sin subcategoría' };
+            const fixed = (state.personalFixedExpenses || []).find(item => String(item.id) === String(fixedId));
+            if (fixed) {
+              const info = getFixedExpenseCategoryInfo(fixed);
+              if (info.category) return { category: info.category, subcategory: info.subcategory || 'Sin subcategoría' };
+            }
+          }
+        }
+      }
+      const parsed = parseExpenseConcept(concept);
+      return { category: parsed.category || 'Sin categoría', subcategory: parsed.subcategory || 'Sin subcategoría' };
+    }
+
+    function getFixedExpenseCategoryInfo(f) {
+      if (f?.category) return { category: f.category, subcategory: f.subcategory || '' };
+      const concept = String(f?.concept || '').toLowerCase();
+      if (concept.includes('alquiler') || concept.includes('internet') || concept.includes('luz') || concept.includes('agua')) return { category: 'Hogar', subcategory: concept.includes('alquiler') ? 'Alquiler' : 'Suministros' };
+      if (concept.includes('gimnasio') || concept.includes('deporte')) return { category: 'Salud y Deporte', subcategory: 'Gimnasio' };
+      if (concept.includes('spotify') || concept.includes('netflix') || concept.includes('icloud') || concept.includes('suscrip')) return { category: 'Compras y Otros', subcategory: 'Suscripciones' };
+      if (concept.includes('seguro') || concept.includes('combustible') || concept.includes('parking')) return { category: 'Transporte', subcategory: 'Otros' };
+      return { category: '', subcategory: '' };
+    }
+
+    let personalSelectedCategory = '';
+
+    function getPersonalExpensesForCycle(cycle) {
+      const cyc = cycle || calculatePersonalCycle();
+      const start = cyc?.cycleStart ? new Date(cyc.cycleStart) : null;
+      const end = cyc?.cycleEnd ? new Date(cyc.cycleEnd) : null;
+      if (end) end.setHours(23, 59, 59, 999);
+      return (state.personalExpenses || []).filter(exp => {
+        const amount = Number(exp.amount || 0);
+        if (!(amount > 0)) return false;
+        if (!start || !end) return true;
+        const value = String(exp.date || exp.fecha || '');
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00`) : new Date(value);
+        return !Number.isNaN(date.getTime()) && date >= start && date <= end;
+      });
+    }
+
+    function showPersonalCategoryOverview() {
+      personalSelectedCategory = '';
+      const overview = document.getElementById('personal-category-overview');
+      const detail = document.getElementById('personal-category-detail');
+      if (overview) overview.classList.remove('hidden');
+      if (detail) { detail.classList.add('hidden'); detail.innerHTML = ''; }
+    }
+
+    function openPersonalCategoryDetail(category) {
+      const name = String(category || '').trim();
+      if (!name) return;
+      personalSelectedCategory = name;
+      renderPersonalCategoryDetail(name, calculatePersonalCycle());
+      const overview = document.getElementById('personal-category-overview');
+      const detail = document.getElementById('personal-category-detail');
+      if (overview) overview.classList.add('hidden');
+      if (detail) detail.classList.remove('hidden');
+    }
+
+    function renderPersonalCategoryDetail(category, cycle) {
+      const host = document.getElementById('personal-category-detail');
+      if (!host) return;
+      const cyc = cycle || calculatePersonalCycle();
+      const expenses = getPersonalExpensesForCycle(cyc)
+        .filter(exp => getExpenseCategoryInfo(exp.concept, exp).category === category)
+        .sort((a,b) => new Date(b.date || b.fecha || 0) - new Date(a.date || a.fecha || 0));
+      const spent = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+      const budgets = getPersonalCategoryBudgets();
+      const budget = Math.max(0, Number(budgets[category] || 0));
+      const paidState = (state.fixedExpensesCycleState || {})[cyc.activeKey] || {};
+      const pendingFixed = (state.personalFixedExpenses || []).filter(f => {
+        const info = getFixedExpenseCategoryInfo(f);
+        return (info.category || 'Sin categoría') === category && Number(f.amount || 0) > 0 && !(paidState[f.id] || paidState[String(f.id)])?.paid;
+      });
+      const committed = pendingFixed.reduce((sum, f) => sum + Math.max(0, Number(f.amount || 0)), 0);
+      const remaining = budget - spent - committed;
+      const percent = budget > 0 ? Math.min(100, (spent + committed) / budget * 100) : 0;
+      const totalCycleSpent = getPersonalExpensesForCycle(cyc).reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+      const share = totalCycleSpent > 0 ? spent / totalCycleSpent * 100 : 0;
+      const categoryIcons = {'Supermercado':'shopping-basket','Comida y Ocio':'utensils','Transporte':'car-front','Hogar':'house','Salud y Deporte':'heart-pulse','Compras y Otros':'shopping-bag','Sin categoría':'circle-dashed'};
+      const statusColor = budget > 0 && remaining < -0.005 ? 'text-apple-red' : budget > 0 && percent >= 75 ? 'text-apple-orange' : 'text-apple-green';
+      const subTotals = new Map();
+      expenses.forEach(exp => {
+        const info = getExpenseCategoryInfo(exp.concept, exp);
+        const sub = info.subcategory || 'Sin subcategoría';
+        subTotals.set(sub, (subTotals.get(sub) || 0) + Number(exp.amount || 0));
+      });
+      const maxSub = Math.max(1, ...Array.from(subTotals.values()));
+      const subHtml = subTotals.size ? [...subTotals.entries()].sort((a,b)=>b[1]-a[1]).map(([sub,amount]) => {
+        const pct = spent > 0 ? amount / spent * 100 : 0;
+        return `<div class="personal-detail-sub-row"><div class="flex items-center justify-between gap-3"><span class="text-xs font-semibold text-apple-gray-800 dark:text-apple-gray-100">${escapeHTML(sub)}</span><span class="text-xs font-bold font-mono text-apple-gray-900 dark:text-white">${formatEUR(amount)}</span></div><div class="personal-detail-track"><div style="width:${Math.max(0,Math.min(100,pct))}%"></div></div><p class="text-[9px] text-apple-gray-400 mt-1">${pct.toLocaleString('es-ES',{maximumFractionDigits:1})}% de ${escapeHTML(category)}</p></div>`;
+      }).join('') : `<div class="personal-insight-empty"><p class="text-xs text-apple-gray-500 dark:text-apple-gray-400">Todavía no hay gastos registrados en esta categoría durante el ciclo.</p><p class="text-[10px] text-apple-gray-400 mt-1">Cuando registres gastos aquí aparecerá el reparto por subcategoría.</p></div>`;
+
+      const expenseRows = expenses.length ? expenses.map(exp => {
+        const parsed = parseExpenseConcept(exp.concept);
+        const title = parsed.description || (parsed.category ? (parsed.subcategory || parsed.category) : (exp.concept || 'Gasto'));
+        const info = getExpenseCategoryInfo(exp.concept, exp);
+        const when = formatExpenseDateTime(exp.date || exp.fecha);
+        return `<div class="personal-detail-expense-row"><div class="min-w-0 flex-1"><p class="text-xs font-bold text-apple-gray-900 dark:text-white truncate" title="${escapeHTML(title)}">${escapeHTML(title)}</p><div class="flex flex-wrap items-center gap-1.5 mt-1"><span class="text-[9px] text-apple-gray-400">${escapeHTML(when)}</span><span class="text-[9px] text-apple-gray-300">·</span><span class="text-[9px] text-apple-gray-500 dark:text-apple-gray-400">${escapeHTML(info.subcategory || 'Sin subcategoría')}</span><span class="text-[9px] text-apple-gray-400">· ${escapeHTML(exp.bank || 'N26')}</span></div></div><div class="flex items-center gap-1.5 shrink-0"><span class="text-xs font-bold font-mono text-apple-red">−${formatEUR(exp.amount)}</span><button type="button" data-category-detail-edit="${escapeHTML(String(exp.id))}" class="p-2 rounded-xl text-apple-blue hover:bg-apple-blue/10" aria-label="Editar gasto ${escapeHTML(title)}" title="Editar gasto"><i data-lucide="pencil-line" class="w-3.5 h-3.5"></i></button></div></div>`;
+      }).join('') : `<div class="personal-insight-empty"><p class="text-xs text-apple-gray-500 dark:text-apple-gray-400">No hay movimientos para mostrar en este ciclo.</p></div>`;
+
+      const fixedHtml = pendingFixed.length ? `<div class="personal-detail-fixed-list">${pendingFixed.map(f => `<div class="flex items-center justify-between gap-3"><div class="min-w-0"><p class="text-xs font-semibold text-apple-gray-800 dark:text-apple-gray-100 truncate">${escapeHTML(f.concept || 'Gasto fijo')}</p><p class="text-[9px] text-apple-gray-400 mt-0.5">Pendiente de pago · día ${escapeHTML(String(f.chargeDay || '—'))}</p></div><span class="text-xs font-bold font-mono text-apple-gray-900 dark:text-white shrink-0">${formatEUR(f.amount)}</span></div>`).join('')}</div>` : `<p class="text-[10px] text-apple-gray-400">No hay gastos fijos pendientes asignados a esta categoría.</p>`;
+      const budgetInfo = budget > 0
+        ? `<div class="personal-detail-budget-progress"><div class="flex items-center justify-between gap-3"><span class="text-[10px] text-apple-gray-500 dark:text-apple-gray-400">Consumido + comprometido</span><strong class="text-xs font-bold ${statusColor}">${Math.round(percent)}%</strong></div><div class="personal-detail-track"><div style="width:${percent}%;background:${remaining < -0.005 ? '#ff453a' : percent >= 75 ? '#ff9f0a' : '#0a84ff'}"></div></div><div class="flex items-center justify-between gap-2 mt-2"><span class="text-[9px] text-apple-gray-400">Límite ${formatEUR(budget)}</span><span class="text-[10px] font-bold ${statusColor}">${remaining < -0.005 ? `Exceso ${formatEUR(Math.abs(remaining))}` : `${formatEUR(remaining)} disponibles`}</span></div></div>`
+        : `<div class="personal-detail-budget-progress"><div class="flex items-center justify-between gap-3"><span class="text-[10px] text-apple-gray-500 dark:text-apple-gray-400">Presupuesto de categoría</span><button type="button" onclick="openCategoryBudgetEditor()" class="personal-budget-edit">Definir límite</button></div><p class="text-[10px] text-apple-gray-400 mt-2">Esta categoría no tiene un límite individual. El presupuesto general sigue aplicándose.</p></div>`;
+
+      host.innerHTML = `
+        <div class="personal-detail-topline"><button type="button" onclick="showPersonalCategoryOverview()" class="personal-detail-back"><i data-lucide="arrow-left" class="w-4 h-4"></i><span>Todas las categorías</span></button><span class="personal-budget-pill">${share.toLocaleString('es-ES',{maximumFractionDigits:1})}% del gasto del ciclo</span></div>
+        <div class="personal-detail-hero"><div class="flex items-start gap-3 min-w-0"><div class="personal-detail-icon"><i data-lucide="${categoryIcons[category]||'layers-3'}" class="w-5 h-5"></i></div><div class="min-w-0 flex-1"><div class="personal-studio-eyebrow">Detalle de categoría</div><h4 class="text-xl sm:text-2xl font-extrabold tracking-tight text-apple-gray-900 dark:text-white mt-1">${escapeHTML(category)}</h4><p class="text-[10px] text-apple-gray-400 mt-1">Distribución del ciclo actual</p></div></div><div class="personal-detail-spent"><span>Gasto registrado</span><strong>${formatEUR(spent)}</strong><small>${expenses.length} movimiento${expenses.length===1?'':'s'}</small></div></div>
+        <div class="personal-detail-metrics"><div><span>Fijos pendientes</span><strong>${formatEUR(committed)}</strong></div><div><span>Parte del gasto</span><strong>${share.toLocaleString('es-ES',{maximumFractionDigits:1})}%</strong></div><div><span>Subcategorías</span><strong>${subTotals.size}</strong></div></div>
+        ${budgetInfo}
+        <section class="personal-detail-section"><div class="flex items-end justify-between gap-3 mb-2"><div><h5 class="text-sm font-extrabold text-apple-gray-900 dark:text-white">¿En qué se reparte?</h5><p class="text-[10px] text-apple-gray-400 mt-1">Cada importe representa su parte del gasto de la categoría.</p></div><span class="text-[9px] text-apple-gray-400">${formatEUR(spent)} total</span></div><div class="personal-detail-sub-list">${subHtml}</div></section>
+        <section class="personal-detail-section"><div class="flex items-end justify-between gap-3 mb-2"><div><h5 class="text-sm font-extrabold text-apple-gray-900 dark:text-white">Movimientos incluidos</h5><p class="text-[10px] text-apple-gray-400 mt-1">Puedes editar cualquier gasto para corregir su categoría.</p></div><span class="text-[9px] font-bold text-apple-gray-500 dark:text-apple-gray-400">${expenses.length}</span></div><div class="personal-detail-expenses">${expenseRows}</div></section>
+        <section class="personal-detail-section"><div class="mb-2"><h5 class="text-sm font-extrabold text-apple-gray-900 dark:text-white">Gastos fijos pendientes</h5><p class="text-[10px] text-apple-gray-400 mt-1">Se muestran aparte para no duplicar los gastos ya registrados.</p></div>${fixedHtml}</section>
+      `;
+      host.querySelectorAll('[data-category-detail-edit]').forEach(button => button.addEventListener('click', () => editExpense(button.dataset.categoryDetailEdit)));
+      refreshIcons(host);
+    }
+
+    function renderPersonalCategoryInsights(cycle) {
+      const host = document.getElementById('personal-category-breakdown');
+      const totalEl = document.getElementById('personal-category-total');
+      const periodEl = document.getElementById('personal-category-period');
+      if (!host) return;
+      const cyc = cycle || calculatePersonalCycle();
+      const expenses = getPersonalExpensesForCycle(cyc);
+      const total = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+      if (totalEl) totalEl.textContent = formatEUR(total);
+      const start = cyc?.cycleStart ? new Date(cyc.cycleStart) : null;
+      const end = cyc?.cycleEnd ? new Date(cyc.cycleEnd) : null;
+      if (periodEl && start && end) periodEl.textContent = 'Ciclo ' + start.toLocaleDateString('es-ES', {day:'numeric', month:'short'}) + ' – ' + end.toLocaleDateString('es-ES', {day:'numeric', month:'short'});
+      const groups = new Map();
+      expenses.forEach(exp => { const info = getExpenseCategoryInfo(exp.concept, exp); if (!groups.has(info.category)) groups.set(info.category, { total:0, subs:new Map(), count:0 }); const group=groups.get(info.category), amount=Number(exp.amount||0); group.total+=amount; group.count++; group.subs.set(info.subcategory,(group.subs.get(info.subcategory)||0)+amount); });
+      const paidState = (state.fixedExpensesCycleState || {})[cyc.activeKey] || {};
+      const fixedByCat = new Map();
+      let pendingFixedTotal = 0;
+      (state.personalFixedExpenses || []).forEach(f => {
+        const fixedInfo = getFixedExpenseCategoryInfo(f);
+        const amount = Math.max(0, Number(f.amount || 0));
+        if (!(amount > 0)) return;
+        const paid = !!(paidState[f.id] || paidState[String(f.id)])?.paid;
+        if (paid) return;
+        pendingFixedTotal += amount;
+        const category = fixedInfo.category || 'Sin categoría';
+        fixedByCat.set(category, (fixedByCat.get(category)||0) + amount);
+      });
+      const budgets = getPersonalCategoryBudgets();
+      const allNames = new Set([...groups.keys(), ...Object.keys(budgets), ...fixedByCat.keys()]);
+      const generalBudget = getPersonalGeneralBudget(cyc);
+      const remaining = Number.isFinite(Number(cyc.availableVariable)) ? Number(cyc.availableVariable) : (generalBudget - total - pendingFixedTotal);
+      const budgetTotalEl = document.getElementById('personal-budget-total'); if (budgetTotalEl) budgetTotalEl.textContent = formatEUR(generalBudget);
+      const remainingEl = document.getElementById('personal-budget-remaining'); if (remainingEl) { remainingEl.textContent = formatEUR(remaining); remainingEl.className = 'text-' + (remaining < -0.005 ? 'apple-red' : 'apple-green'); }
+      const countEl = document.getElementById('personal-category-count'); if (countEl) countEl.textContent = `${allNames.size} categoría${allNames.size===1?'':'s'}`;
+      const allocatedTotal = Object.values(budgets).reduce((a,b) => a + Math.max(0,Number(b)||0), 0);
+      const caption = document.getElementById('personal-budget-caption'); if (caption) caption.textContent = remaining < -0.005 ? 'Presupuesto superado' : `${formatEUR(allocatedTotal)} asignados por categorías`;
+      if (!allNames.size) {
+        host.innerHTML = '<div class="personal-insight-empty"><div class="mx-auto mb-2 w-9 h-9 rounded-2xl bg-apple-blue/10 text-apple-blue flex items-center justify-center"><i data-lucide="chart-no-axes-column" class="w-4 h-4"></i></div><p class="text-xs font-bold text-apple-gray-700 dark:text-apple-gray-200">Tu mapa financiero empieza aquí</p><p class="text-[10px] text-apple-gray-400 mt-1">Registra un gasto o define límites para ver cómo se distribuye tu dinero.</p><button onclick="openCategoryBudgetEditor()" class="personal-budget-edit mt-3">Configurar límites</button></div>';
+        showPersonalCategoryOverview(); refreshIcons(host); return;
+      }
+      const sorted = [...allNames].sort((a,b) => ((groups.get(b)?.total||0)+(fixedByCat.get(b)||0)) - ((groups.get(a)?.total||0)+(fixedByCat.get(a)||0)));
+      host.innerHTML = sorted.map(name => {
+        const group = groups.get(name) || {total:0,subs:new Map(),count:0};
+        const spent = group.total;
+        const budget = Math.max(0, Number(budgets[name]||0));
+        const committed = Number(fixedByCat.get(name)||0);
+        const consumed = spent + committed;
+        const pct = budget > 0 ? consumed / budget * 100 : (total > 0 ? spent / total * 100 : 0);
+        const over = budget > 0 && consumed > budget + 0.005;
+        const near = budget > 0 && pct >= 75;
+        const color = over ? '#ff453a' : near ? '#ff9f0a' : '#0a84ff';
+        const subCount = group.subs.size;
+        const status = budget > 0 ? (over ? `Superado por ${formatEUR(consumed-budget)}` : `${formatEUR(Math.max(0,budget-consumed))} disponible`) : `${pct.toLocaleString('es-ES',{maximumFractionDigits:1})}% del gasto`;
+        const icon = ({'Supermercado':'shopping-basket','Comida y Ocio':'utensils','Transporte':'car-front','Hogar':'house','Salud y Deporte':'heart-pulse','Compras y Otros':'shopping-bag','Sin categoría':'circle-dashed'})[name] || 'layers-3';
+        return `<div class="personal-category-row" role="button" tabindex="0" data-category="${escapeHTML(name)}" aria-label="Ver distribución de ${escapeHTML(name)}" onclick="openPersonalCategoryDetail(this.dataset.category)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPersonalCategoryDetail(this.dataset.category)}"><div class="flex items-start gap-3"><div class="w-9 h-9 rounded-[13px] bg-apple-gray-100 dark:bg-white/5 flex items-center justify-center text-apple-gray-600 dark:text-apple-gray-300 shrink-0"><i data-lucide="${icon}" class="w-4 h-4"></i></div><div class="min-w-0 flex-1"><div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="text-[11px] font-extrabold text-apple-gray-900 dark:text-white truncate">${escapeHTML(name)}</p><p class="text-[9px] mt-1 ${over?'text-apple-red':near?'text-apple-orange':'text-apple-gray-400'}">${status}</p></div><div class="text-right shrink-0"><p class="text-xs font-extrabold font-mono text-apple-gray-900 dark:text-white">${formatEUR(spent)}</p><p class="text-[9px] text-apple-gray-400 mt-1">${budget>0?'de '+formatEUR(budget):pct.toLocaleString('es-ES',{maximumFractionDigits:1})+'% del total'}</p></div></div><div class="personal-category-track mt-2.5"><div style="width:${Math.min(100,Math.max(0,pct))}%;background:${color}"></div></div>${committed>0?`<p class="text-[9px] text-apple-gray-400 mt-2">${formatEUR(committed)} comprometidos en gastos fijos pendientes</p>`:''}<div class="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50"><span class="text-[9px] text-apple-gray-400">${subCount} subcategoría${subCount===1?'':'s'} · ${group.count} movimiento${group.count===1?'':'s'}</span><span class="inline-flex items-center gap-1 text-[9px] font-bold text-apple-blue">Ver distribución <i data-lucide="arrow-up-right" class="w-3 h-3"></i></span></div></div></div></div>`;
+      }).join('');
+      refreshIcons(host);
+      if (personalSelectedCategory && allNames.has(personalSelectedCategory)) {
+        renderPersonalCategoryDetail(personalSelectedCategory, cyc);
+        const overview = document.getElementById('personal-category-overview');
+        const detail = document.getElementById('personal-category-detail');
+        if (overview) overview.classList.add('hidden');
+        if (detail) detail.classList.remove('hidden');
+      } else {
+        personalSelectedCategory = '';
+        const overview = document.getElementById('personal-category-overview');
+        const detail = document.getElementById('personal-category-detail');
+        if (overview) overview.classList.remove('hidden');
+        if (detail) detail.classList.add('hidden');
+      }
     }
 
     function syncExpenseModalVisualViewport() {
@@ -7184,12 +8482,48 @@ body.liquidity-modal-open { overflow: hidden; }
     document.getElementById('expense-bank-select')?.addEventListener('change', updateExpenseAutoDebitUI);
     document.querySelector('#form-expense [name="amount"]')?.addEventListener('input', updateExpenseAutoDebitUI);
 
+    function editExpense(id) {
+      const exp = (state.personalExpenses || []).find(item => String(item.id) === String(id));
+      if (!exp) {
+        showToast('No se encontró el gasto', 'Actualiza la lista e inténtalo de nuevo.', false);
+        return;
+      }
+      const form = document.getElementById('form-expense');
+      if (!form) return;
+      form.reset();
+      form.dataset.saving = '0';
+      // openModal applies the normal new-expense defaults (today and today's rotating bank),
+      // so open it before restoring the saved record values when editing.
+      openModal('modal-add-expense');
+      form.elements.namedItem('editId').value = String(exp.id);
+      form.elements.namedItem('amount').value = Number(exp.amount || 0).toFixed(2);
+      form.elements.namedItem('date').value = String(exp.date || exp.fecha || getLocalDateTimeInputValue(new Date()));
+      form.elements.namedItem('bank').value = exp.bank || 'N26';
+      const autoDebit = document.getElementById('expense-autodebit');
+      if (autoDebit) autoDebit.checked = !!exp.autoDebit;
+      const parsed = parseExpenseConcept(exp.concept);
+      form.elements.namedItem('concept').value = parsed.description || (parsed.category ? '' : (exp.concept || ''));
+      const catInput = document.getElementById('expense-category-input');
+      if (catInput) catInput.value = parsed.category || '';
+      const badge = document.getElementById('expense-selected-cat-badge');
+      if (badge) {
+        badge.textContent = parsed.category || '';
+        badge.classList.toggle('hidden', !parsed.category);
+      }
+      document.querySelectorAll('#expense-categories-grid .expense-cat-block').forEach(btn => btn.classList.toggle('is-selected', btn.getAttribute('data-cat') === parsed.category));
+      updateExpenseSubcategoryOptions(parsed.category || '', parsed.subcategory || '');
+      const title = document.getElementById('expense-modal-title');
+      const submitLabel = document.getElementById('expense-submit-label');
+      if (title) title.textContent = 'Editar gasto registrado';
+      if (submitLabel) submitLabel.textContent = 'Guardar cambios';
+      updateExpenseAutoDebitUI();
+      requestAnimationFrame(() => document.getElementById('expense-amount-input')?.focus({preventScroll:true}));
+    }
+
     async function handleSaveExpense(e) {
       e.preventDefault();
-
       const form = e.target;
       const saveButton = form.querySelector('button[type="submit"]');
-
       if (form.dataset.saving === '1') return;
       form.dataset.saving = '1';
 
@@ -7200,124 +8534,115 @@ body.liquidity-modal-open { overflow: hidden; }
         saveButton.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Guardando...</span>';
         lucide.createIcons();
       }
+      const editId = String(form.elements.namedItem('editId')?.value || '').trim();
+      const existing = editId ? (state.personalExpenses || []).find(item => String(item.id) === editId) : null;
+      if (editId && !existing) {
+        form.dataset.saving = '0';
+        if (saveButton) { saveButton.disabled=false; saveButton.classList.remove('opacity-70'); saveButton.innerHTML=originalButtonHTML; lucide.createIcons(); }
+        showToast('No se encontró el gasto', 'Puede que el registro ya haya sido eliminado. Actualiza los datos.', false);
+        return;
+      }
 
       const parsedAmount = parseLocaleNumber(form.amount.value);
       const selectedCat = (document.getElementById('expense-category-input')?.value || '').trim();
-      let rawConcept = (form.concept.value || '').trim();
-
-      if (!rawConcept && selectedCat) {
-        rawConcept = selectedCat;
-      } else if (rawConcept && selectedCat && rawConcept.toLowerCase() !== selectedCat.toLowerCase() && !rawConcept.toLowerCase().includes(selectedCat.toLowerCase())) {
-        rawConcept = `${selectedCat} · ${rawConcept}`;
-      }
+      const selectedSubcategory = (document.getElementById('expense-subcategory-select')?.value || '').trim();
+      let description = (form.concept.value || '').trim();
+      if (!description && selectedCat) description = '';
+      const categoryLabel = selectedCat ? selectedCat + (selectedSubcategory ? ' › ' + selectedSubcategory : '') : '';
+      let rawConcept = description;
+      if (categoryLabel) rawConcept = description ? `${categoryLabel} · ${description}` : categoryLabel;
+      else if (!rawConcept && existing) rawConcept = existing.concept || '';
 
       const autodebitEl = document.getElementById('expense-autodebit');
       const shouldDebit = !!(autodebitEl && autodebitEl.checked);
       const dateVal = form.date?.value || getLocalDateTimeInputValue(new Date());
-
+      const selectedBank = (document.getElementById('expense-bank-select')?.value || 'N26');
       const expenseObj = {
-        id: 'g_' + Date.now(),
+        id: existing ? existing.id : ('g_' + Date.now()),
         fecha: dateVal,
         monto: parsedAmount,
         concepto: rawConcept,
-        banco: (document.getElementById('expense-bank-select')?.value || 'N26'),
+        banco: selectedBank,
         descontar_cuenta: shouldDebit,
         monto_debitado: shouldDebit ? parsedAmount : 0
       };
 
-      if (!expenseObj.concepto || expenseObj.monto <= 0) {
-        showToast('Revisa el gasto', 'Introduce un monto mayor que 0 y escribe un concepto o toca una categoría.', false);
+      if (!expenseObj.concepto || expenseObj.monto <= 0 || !Number.isFinite(expenseObj.monto)) {
+        showToast('Revisa el gasto', 'Introduce un monto mayor que 0 y escribe un concepto o selecciona una categoría.', false);
         form.dataset.saving = '0';
-        if (saveButton) {
-          saveButton.disabled = false;
-          saveButton.classList.remove('opacity-70');
-          saveButton.innerHTML = originalButtonHTML;
-          lucide.createIcons();
-        }
+        if (saveButton) { saveButton.disabled=false; saveButton.classList.remove('opacity-70'); saveButton.innerHTML=originalButtonHTML; lucide.createIcons(); }
         return;
       }
 
       try {
+        const dbPayload = {fecha:expenseObj.fecha, monto:expenseObj.monto, concepto:expenseObj.concepto, banco:expenseObj.banco, descontar_cuenta:expenseObj.descontar_cuenta, monto_debitado:expenseObj.monto_debitado};
         if (supabaseClient) {
-          const { error } = await supabaseClient.from('gastos').insert(expenseObj);
-          if (error) throw error;
+          const result = existing
+            ? await supabaseClient.from('gastos').update(dbPayload).eq('id', existing.id)
+            : await supabaseClient.from('gastos').insert(expenseObj);
+          if (result.error) throw result.error;
         }
 
-        if (!state.personalExpenses) state.personalExpenses = [];
-        state.personalExpenses = [
-          {
-            id: expenseObj.id,
-            date: expenseObj.fecha,
-            amount: expenseObj.monto,
-            concept: expenseObj.concepto,
-            bank: expenseObj.banco,
-            autoDebit: !!expenseObj.descontar_cuenta,
-            debitAmount: Number(expenseObj.monto_debitado || 0)
-          },
-          ...state.personalExpenses.filter(x => String(x.id) !== String(expenseObj.id))
-        ];
+        const oldDebit = existing && existing.autoDebit ? Math.max(0, Number(existing.debitAmount || existing.amount || 0)) : 0;
+        const oldBank = existing?.bank || '';
+        const newDebit = shouldDebit ? parsedAmount : 0;
+        const bankDeltas = new Map();
+        if (oldDebit > 0 && oldBank) bankDeltas.set(oldBank, (bankDeltas.get(oldBank)||0) + oldDebit);
+        if (newDebit > 0 && selectedBank) bankDeltas.set(selectedBank, (bankDeltas.get(selectedBank)||0) - newDebit);
+        let changedBankBalance = false;
+        bankDeltas.forEach((delta, bank) => {
+          if (state.bancos && state.bancos[bank] !== undefined && Math.abs(delta) > 0.0001) {
+            state.bancos[bank] = Number((Number(state.bancos[bank] || 0) + delta).toFixed(2));
+            changedBankBalance = true;
+          }
+        });
 
-        if (expenseObj.descontar_cuenta && state.bancos[expenseObj.banco] !== undefined) {
-          const currentBalance = Number(state.bancos[expenseObj.banco] || 0);
-          state.bancos[expenseObj.banco] = Number((currentBalance - expenseObj.monto_debitado).toFixed(2));
-          await saveGlobalConfigToCloud();
-        }
+        const updatedRecord = {
+          id: expenseObj.id, date: expenseObj.fecha, amount: expenseObj.monto,
+          concept: expenseObj.concepto, bank: expenseObj.banco,
+          autoDebit: !!expenseObj.descontar_cuenta, debitAmount: Number(expenseObj.monto_debitado || 0)
+        };
+        if (!Array.isArray(state.personalExpenses)) state.personalExpenses = [];
+        state.personalExpenses = existing
+          ? state.personalExpenses.map(item => String(item.id) === String(expenseObj.id) ? updatedRecord : item)
+          : [updatedRecord, ...state.personalExpenses.filter(item => String(item.id) !== String(expenseObj.id))];
+
+        // If this record is linked to a fixed-expense payment, keep its chosen category in the audit metadata too.
+        let changedFixedPaymentCategory = false;
+        Object.values(state.fixedExpensesCycleState || {}).forEach(cycleState => {
+          Object.values(cycleState || {}).forEach(paymentInfo => {
+            if (String(paymentInfo?.expenseId || '') !== String(expenseObj.id)) return;
+            if (selectedCat) {
+              paymentInfo.paidCategory = selectedCat;
+              paymentInfo.paidSubcategory = selectedSubcategory || '';
+            } else {
+              delete paymentInfo.paidCategory;
+              delete paymentInfo.paidSubcategory;
+            }
+            changedFixedPaymentCategory = true;
+          });
+        });
+        if (changedBankBalance || changedFixedPaymentCategory) await saveGlobalConfigToCloud();
 
         renderPersonalModule();
-
-        form.reset();
-        if (autodebitEl) autodebitEl.checked = false;
-        clearExpenseCategorySelection();
-        updateExpenseAutoDebitUI();
-        closeModal('modal-add-expense');
         form.dataset.saving = '0';
-        if (saveButton) {
-          saveButton.disabled = false;
-          saveButton.classList.remove('opacity-70');
-          saveButton.innerHTML = originalButtonHTML;
-          lucide.createIcons();
-        }
-
-        showToast(
-          '✓ Gasto registrado',
-          `-${formatEUR(expenseObj.monto)} · ${expenseObj.concepto}. Actualizando Profit…`,
-          true
-        );
-
+        if (saveButton) { saveButton.disabled=false; saveButton.classList.remove('opacity-70'); saveButton.innerHTML=originalButtonHTML; lucide.createIcons(); }
+        closeModal('modal-add-expense');
+        showToast(existing ? 'Gasto actualizado' : 'Gasto registrado', `${existing ? 'Cambios guardados' : '-' + formatEUR(expenseObj.monto)} · ${rawConcept}. Actualizando análisis…`, true);
         setTimeout(async () => {
           try {
             await refreshProfitAfterExpenseChange();
-            showToast(
-              'Gasto sincronizado',
-              `-${formatEUR(expenseObj.monto)} · Profit actualizado en la nube.`,
-              true
-            );
+            showToast(existing ? 'Análisis actualizado' : 'Gasto sincronizado', existing ? 'El análisis y el historial se han actualizado.' : `-${formatEUR(expenseObj.monto)} · Profit actualizado en la nube.`, true);
           } catch (syncError) {
-            console.error('Error recalculando después de registrar gasto:', syncError);
-            showToast(
-              'Gasto guardado',
-              'El registro está en Supabase, pero la actualización de métricas tardó o falló. Puedes sincronizar de nuevo.',
-              false
-            );
+            console.error('Error recalculando después de guardar gasto:', syncError);
+            showToast('Gasto guardado', 'El registro se guardó, pero la actualización de métricas falló. Puedes sincronizar de nuevo.', false);
           }
         }, 50);
-
       } catch (error) {
         console.error('Error guardando gasto:', error);
         form.dataset.saving = '0';
-
-        showToast(
-          'No se guardó el gasto',
-          error?.message || 'Supabase rechazó el registro.',
-          false
-        );
-
-        if (saveButton) {
-          saveButton.disabled = false;
-          saveButton.classList.remove('opacity-70');
-          saveButton.innerHTML = originalButtonHTML;
-          lucide.createIcons();
-        }
+        showToast('No se guardó el gasto', error?.message || 'No se pudo guardar el registro.', false);
+        if (saveButton) { saveButton.disabled=false; saveButton.classList.remove('opacity-70'); saveButton.innerHTML=originalButtonHTML; lucide.createIcons(); }
       }
     }
 
@@ -7338,23 +8663,119 @@ body.liquidity-modal-open { overflow: hidden; }
       await refreshProfitAfterExpenseChange();
     }
 
+    function editFixedExpense(id) {
+      const f = (state.personalFixedExpenses || []).find(item => String(item.id) === String(id));
+      if (!f) {
+        showToast('No se encontró el gasto fijo', 'Actualiza la lista e inténtalo de nuevo.', false);
+        return;
+      }
+      const cyc = calculatePersonalCycle();
+      const paymentInfo = state.fixedExpensesCycleState?.[cyc.activeKey]?.[f.id] || state.fixedExpensesCycleState?.[cyc.activeKey]?.[String(f.id)];
+      const isPaidThisCycle = !!paymentInfo?.paid;
+      const form = document.getElementById('form-fixed-expense');
+      if (!form) {
+        showToast('No se pudo abrir el editor', 'No se encontró el formulario de gastos fijos.', false);
+        return;
+      }
+      form.reset();
+      form.elements.namedItem('editId').value = String(f.id);
+      form.elements.namedItem('concept').value = f.concept || '';
+      form.elements.namedItem('amount').value = Number(f.amount || 0).toFixed(2);
+      form.elements.namedItem('chargeDay').value = String(f.chargeDay || 1);
+      form.elements.namedItem('bank').value = f.bank || 'N26';
+      const catInfo = getFixedExpenseCategoryInfo(f);
+      form.elements.namedItem('category').value = f.category || catInfo.category || '';
+      updateFixedExpenseSubcategories();
+      form.elements.namedItem('subcategory').value = f.subcategory || catInfo.subcategory || '';
+      const title = document.getElementById('fixed-expense-modal-title');
+      const linkedPaidExpense = paymentInfo?.expenseId ? (state.personalExpenses || []).find(exp => String(exp.id) === String(paymentInfo.expenseId)) : null;
+      const paidCycleAmount = Number(paymentInfo?.paidAmount ?? linkedPaidExpense?.amount ?? f.amount) || 0;
+      const subtitle = document.getElementById('fixed-expense-modal-subtitle');
+      const submit = form.querySelector('button[type="submit"]');
+      if (title) title.textContent = 'Editar gasto fijo';
+      if (subtitle) subtitle.textContent = isPaidThisCycle
+        ? `El pago de ${formatEUR(paidCycleAmount)} de este ciclo se conserva. Los cambios son para los próximos cargos.`
+        : 'Actualiza importe, vencimiento, banco o categoría';
+      if (submit) submit.textContent = isPaidThisCycle ? 'Guardar próximos cargos' : 'Guardar cambios';
+      form.dataset.editPaidThisCycle = isPaidThisCycle ? '1' : '0';
+      openModal('modal-add-fixed-expense');
+      setTimeout(() => form.elements.namedItem('concept')?.focus({preventScroll:true}), 120);
+    }
+
+    function resetFixedExpenseFormMode() {
+      const form = document.getElementById('form-fixed-expense');
+      if (!form) return;
+      form.elements.namedItem('editId').value = '';
+      form.dataset.editPaidThisCycle = '0';
+      const title = document.getElementById('fixed-expense-modal-title');
+      const subtitle = document.getElementById('fixed-expense-modal-subtitle');
+      const submit = form.querySelector('button[type="submit"]');
+      if (title) title.textContent = 'Nuevo Gasto Fijo';
+      if (subtitle) subtitle.textContent = 'Compromiso mensual recurrente';
+      if (submit) submit.textContent = 'Guardar Fijo';
+    }
+
     async function handleSaveFixedExpense(e) {
       e.preventDefault();
       const form = e.target;
+      const saveButton = form.querySelector('button[type="submit"]');
+      if (form.dataset.saving === '1') return;
+      const amount = Number(form.elements.namedItem('amount')?.value);
+      const chargeDay = Number(form.elements.namedItem('chargeDay')?.value);
+      const concept = String(form.elements.namedItem('concept')?.value || '').trim();
+      if (!concept || !Number.isFinite(amount) || amount <= 0 || amount > 1000000 || !Number.isFinite(chargeDay) || chargeDay < 1 || chargeDay > 31) {
+        showToast('Revisa los datos', 'Añade un concepto, un importe mayor que cero y un día entre 1 y 31.', false);
+        return;
+      }
+      const editId = String(form.elements.namedItem('editId')?.value || '').trim();
+      const existing = editId ? (state.personalFixedExpenses || []).find(x => String(x.id) === editId) : null;
+      if (editId && !existing) {
+        showToast('No se encontró el gasto fijo', 'No se guardaron cambios. Actualiza la lista e inténtalo de nuevo.', false);
+        return;
+      }
       const obj = {
-        id: Date.now(),
-        concept: form.concept.value.trim(),
-        amount: parseFloat(form.amount.value) || 0,
-        chargeDay: parseInt(form.chargeDay.value) || 1,
-        bank: form.bank.value
+        id: editId ? existing.id : Date.now(),
+        concept,
+        amount: Math.round(amount * 100) / 100,
+        chargeDay: Math.trunc(chargeDay),
+        bank: form.elements.namedItem('bank')?.value || 'N26',
+        category: form.elements.namedItem('category')?.value || '',
+        subcategory: form.elements.namedItem('subcategory')?.value || ''
       };
-      if (!state.personalFixedExpenses) state.personalFixedExpenses = [];
-      state.personalFixedExpenses.push(obj);
-      await saveGlobalConfigToCloud();
-      renderPersonalModule();
-      form.reset();
-      closeModal('modal-add-fixed-expense');
-      showToast('Gasto Fijo Guardado', `${obj.concept} mensual añadido`, true);
+      const previous = existing ? { ...existing } : null;
+      const paidChangesApplyForward = editId && form.dataset.editPaidThisCycle === '1';
+      if (saveButton) { saveButton.disabled = true; saveButton.classList.add('opacity-60'); }
+      form.dataset.saving = '1';
+      try {
+        if (editId) {
+          const index = (state.personalFixedExpenses || []).findIndex(x => String(x.id) === editId);
+          if (index < 0) throw new Error('No se encontró el gasto fijo en la lista actual.');
+          state.personalFixedExpenses[index] = { ...state.personalFixedExpenses[index], ...obj };
+        } else {
+          if (!state.personalFixedExpenses) state.personalFixedExpenses = [];
+          state.personalFixedExpenses.push(obj);
+        }
+        await saveGlobalConfigToCloud();
+        renderPersonalModule();
+        closeModal('modal-add-fixed-expense');
+        showToast(editId ? 'Gasto fijo actualizado' : 'Gasto fijo guardado',
+          editId
+            ? (paidChangesApplyForward ? 'Se conserva el pago ya realizado; los cambios se aplican a los próximos ciclos.' : 'Los cambios se han guardado.')
+            : `${obj.concept} mensual añadido.`, true);
+      } catch (err) {
+        if (editId && previous) {
+          const index = (state.personalFixedExpenses || []).findIndex(x => String(x.id) === editId);
+          if (index >= 0) state.personalFixedExpenses[index] = previous;
+        } else {
+          state.personalFixedExpenses = (state.personalFixedExpenses || []).filter(x => String(x.id) !== String(obj.id));
+        }
+        console.error('Error guardando gasto fijo:', err);
+        showToast('No se pudo guardar', err?.message || 'Comprueba la conexión e inténtalo de nuevo.', false);
+        renderPersonalModule();
+      } finally {
+        form.dataset.saving = '0';
+        if (saveButton) { saveButton.disabled = false; saveButton.classList.remove('opacity-60'); }
+      }
     }
 
     async function deleteFixedExpense(id) {
@@ -7364,17 +8785,24 @@ body.liquidity-modal-open { overflow: hidden; }
     }
 
     async function handleSaveNewBudget() {
-      const val = parseFloat(document.getElementById('input-new-budget').value);
-      if (!isNaN(val) && val > 0) {
-        const cyc = calculatePersonalCycle();
-        if (!state.cycleBudgets) state.cycleBudgets = {};
-        state.cycleBudgets[cyc.activeKey] = val;
-        state.personalBudget = val;
-        await saveGlobalConfigToCloud();
-        renderPersonalModule();
-        closeModal('modal-edit-budget');
-        showToast('Presupuesto Actualizado', `Nuevo monto asignado: ${formatEUR(val)}`, true);
+      const val = parseLocaleNumber(document.getElementById('input-new-budget')?.value || '');
+      if (!Number.isFinite(val) || val <= 0 || val > 1000000) {
+        showToast('Revisa el presupuesto', 'Introduce un importe mayor que 0 y hasta 1.000.000 €.', false);
+        return;
       }
+      const allocated = Object.values(getPersonalCategoryBudgets()).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+      if (allocated > val + 0.005) {
+        showToast('Presupuesto general insuficiente', `Tienes ${formatEUR(allocated)} asignados por categorías. Reduce esos límites antes de bajar el presupuesto general a ${formatEUR(val)}.`, false);
+        return;
+      }
+      const cyc = calculatePersonalCycle();
+      if (!state.cycleBudgets) state.cycleBudgets = {};
+      state.cycleBudgets[cyc.activeKey] = Math.round(val * 100) / 100;
+      state.personalBudget = Math.round(val * 100) / 100;
+      await saveGlobalConfigToCloud();
+      renderPersonalModule();
+      closeModal('modal-edit-budget');
+      showToast('Presupuesto actualizado', `Límite general: ${formatEUR(val)}.`, true);
     }
 
     async function handleSaveCycleConfig() {
@@ -7938,17 +9366,63 @@ body.liquidity-modal-open { overflow: hidden; }
       }
     }
 
-    function toggleDarkMode() {
-      const html = document.documentElement;
-      const isDark = html.classList.toggle('dark');
-      try {
-        localStorage.setItem('CAPITAL_LEDGER_THEME', isDark ? 'dark' : 'light');
-      } catch (e) {}
+    function applyThemeMode(isDark) {
+      const root = document.documentElement;
+      root.classList.toggle('dark', isDark);
+      root.dataset.themeMode = isDark ? 'dark' : 'light';
+      try { localStorage.setItem('CAPITAL_LEDGER_THEME', isDark ? 'dark' : 'light'); } catch (e) {}
+
+      // Actualiza solo el icono del tema. Recrear todos los iconos Lucide en cada cambio
+      // producía parpadeos y pequeñas pausas en toda la interfaz.
       const icon = document.getElementById('theme-icon');
       if (icon) {
-        icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+        const className = icon.getAttribute('class') || 'w-4 h-4';
+        const shape = isDark
+          ? '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>'
+          : '<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6.5 6.5 0 0 0 8.268 8.268c.344-.215.825-.003.803.401"></path>';
+        icon.outerHTML = `<svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}" aria-hidden="true">${shape}</svg>`;
       }
-      lucide.createIcons();
+      const lightButton = document.getElementById('theme-option-light');
+      const darkButton = document.getElementById('theme-option-dark');
+      if (lightButton) lightButton.setAttribute('aria-pressed', String(!isDark));
+      if (darkButton) darkButton.setAttribute('aria-pressed', String(isDark));
+      const themeColor = document.querySelector('meta[name="theme-color"][data-dynamic-theme]');
+      if (themeColor) themeColor.setAttribute('content', isDark ? '#0b1018' : '#f5f7fb');
+    }
+
+    function setThemeMode(mode) {
+      const root = document.documentElement;
+      const isDark = mode === 'dark';
+      const alreadyThere = root.classList.contains('dark') === isDark;
+      if (alreadyThere) {
+        applyThemeMode(isDark);
+        return;
+      }
+
+      const update = () => {
+        root.classList.add('theme-switching');
+        applyThemeMode(isDark);
+      };
+
+      // Un solo cross-fade del lienzo completo evita que cada tarjeta, texto e icono
+      // haga una transición distinta. En navegadores antiguos usamos un cambio limpio.
+      if (typeof document.startViewTransition === 'function') {
+        try {
+          const transition = document.startViewTransition(update);
+          transition.finished.then(() => root.classList.remove('theme-switching'), () => root.classList.remove('theme-switching'));
+          return;
+        } catch (e) { /* continúa con el modo compatible */ }
+      }
+      update();
+      window.setTimeout(() => root.classList.remove('theme-switching'), 90);
+    }
+
+    function toggleDarkMode() {
+      setThemeMode(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+
+    function syncThemeControls() {
+      applyThemeMode(document.documentElement.classList.contains('dark'));
     }
 
     function exportBackupJSON() {
@@ -8147,6 +9621,7 @@ body.liquidity-modal-open { overflow: hidden; }
     });
 
     window.addEventListener('DOMContentLoaded', () => {
+      syncThemeControls();
       installOfflineSupport();
       try {
         const cached = localStorage.getItem(LOCAL_STORAGE_BACKUP);
@@ -8208,6 +9683,86 @@ body.liquidity-modal-open { overflow: hidden; }
       }
     });
   </script>
+
+
+<style id="personal-studio-v5-fluidity">
+  /* A single balance definition is displayed across the Personal dashboard. */
+  #personal-category-insights,
+  #personal-category-breakdown,
+  #personal-category-detail { contain: layout style; }
+  #modal-category-budgets {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    padding: clamp(10px, 2vw, 22px) !important;
+  }
+  #modal-category-budgets > .apple-card {
+    width: min(100%, 760px) !important;
+    max-width: 760px !important;
+    max-height: min(86dvh, 820px) !important;
+    padding: clamp(14px, 2vw, 21px) !important;
+    border-radius: 23px !important;
+    box-shadow: 0 22px 70px rgba(0,0,0,.20) !important;
+  }
+  #modal-category-budgets #category-budget-title {
+    font-size: clamp(20px, 2.4vw, 26px) !important;
+    line-height: 1.12 !important;
+  }
+  #modal-category-budgets .personal-studio-eyebrow { font-size: 9px !important; }
+  #modal-category-budgets #category-budget-editor-rows { margin-top: 10px !important; }
+  #modal-category-budgets .budget-editor-summary {
+    padding: 14px 16px !important;
+    margin: 9px 0 13px !important;
+    border-radius: 18px !important;
+  }
+  #modal-category-budgets .budget-editor-summary-top > strong { font-size: clamp(23px, 3vw, 32px) !important; }
+  #modal-category-budgets .budget-editor-stats { gap: 8px !important; margin-top: 10px !important; }
+  #modal-category-budgets .budget-editor-stats > div { padding: 9px 11px !important; border-radius: 13px !important; }
+  #modal-category-budgets .budget-editor-track { margin-top: 10px !important; }
+  #modal-category-budgets .budget-editor-warning { font-size: 10px !important; margin-top: 8px !important; }
+  #modal-category-budgets .budget-editor-section-heading { margin: 0 0 9px !important; }
+  #modal-category-budgets .budget-editor-section-heading h4 { font-size: 14px !important; }
+  #modal-category-budgets .budget-editor-section-heading p { font-size: 10px !important; line-height: 1.35 !important; margin-top: 2px !important; }
+  #modal-category-budgets .budget-editor-cycle-pill { padding: 6px 8px !important; font-size: 9px !important; }
+  #modal-category-budgets .budget-editor-list { gap: 8px !important; }
+  #modal-category-budgets .budget-editor-row { padding: 11px !important; gap: 8px 10px !important; border-radius: 15px !important; }
+  #modal-category-budgets .budget-editor-category-icon { width: 34px !important; height: 34px !important; }
+  #modal-category-budgets .budget-editor-category-name { font-size: 12px !important; }
+  #modal-category-budgets .budget-editor-category-desc { font-size: 9px !important; margin-top: 2px !important; }
+  #modal-category-budgets .budget-editor-category-usage { margin-top: 5px !important; font-size: 9px !important; }
+  #modal-category-budgets .budget-editor-row-track { margin-top: 5px !important; }
+  #modal-category-budgets .budget-editor-input-shell { min-height: 39px !important; border-radius: 11px !important; }
+  #modal-category-budgets .budget-editor-input-shell input { min-height: 37px !important; padding: 6px 0 !important; font-size: 14px !important; }
+  #modal-category-budgets .budget-editor-input-wrap { gap: 5px !important; }
+  #modal-category-budgets .budget-editor-footer-note { font-size: 10px !important; margin: 10px 2px 0 !important; line-height: 1.35 !important; }
+  #modal-category-budgets .flex.gap-2.justify-end { padding-top: 10px !important; margin-top: 10px !important; }
+  #modal-category-budgets [data-budget-save] { min-height: 40px !important; }
+  #modal-category-budgets:not(.hidden) > .apple-card { animation: personalBudgetIn .18s cubic-bezier(.2,.8,.2,1) both; }
+  .personal-category-row { transition: transform .16s ease, border-color .16s ease, background-color .16s ease; }
+  .personal-category-row:active { transform: scale(.995); }
+  .budget-editor-row { transition: border-color .16s ease, background-color .16s ease, transform .16s ease; }
+  .budget-editor-row:focus-within { transform: translateY(-1px); }
+  @keyframes personalBudgetIn { from { opacity: 0; transform: translateY(7px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @media (max-width: 620px) {
+    #modal-category-budgets { align-items: center !important; padding: 8px !important; }
+    #modal-category-budgets > .apple-card { width: 100% !important; max-height: 88dvh !important; padding: 15px 13px calc(12px + env(safe-area-inset-bottom,0px)) !important; border-radius: 22px !important; }
+    #modal-category-budgets .budget-editor-summary { padding: 12px !important; }
+    #modal-category-budgets .budget-editor-summary-top > strong { font-size: 24px !important; }
+    #modal-category-budgets .budget-editor-list { grid-template-columns: 1fr !important; gap: 7px !important; }
+    #modal-category-budgets .budget-editor-row { grid-template-columns: 34px minmax(0,1fr) !important; grid-template-areas: 'icon main' 'input input' !important; padding: 10px !important; gap: 8px !important; }
+    #modal-category-budgets .budget-editor-input-wrap { grid-template-columns: 66px minmax(0,1fr) !important; }
+    #modal-category-budgets .budget-editor-section-heading { align-items: center !important; }
+    #modal-category-budgets .budget-editor-section-heading p { max-width: none !important; }
+    #modal-category-budgets .flex.gap-2.justify-end { position: sticky !important; bottom: -12px !important; background: inherit !important; }
+  }
+  @media (min-width: 621px) and (max-height: 850px) {
+    #modal-category-budgets > .apple-card { max-height: 90dvh !important; }
+    #modal-category-budgets .budget-editor-footer-note { display: none !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #modal-category-budgets *, .personal-category-row, .budget-editor-row,
+    .personal-category-track > div { transition: none !important; animation: none !important; }
+  }
+</style>
 
 </body>
 </html>
