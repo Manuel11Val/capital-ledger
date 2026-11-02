@@ -2929,6 +2929,26 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
   }
 </style>
 
+
+<style id="personal-indicator-dot-alignment-fix">
+  /* Los puntos de color deben quedar en línea con el texto de cada indicador.
+     El selector general .personal-budget-stat span los convertía en bloques. */
+  #view-personal #personal-category-insights .personal-budget-stat > span {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  #view-personal #personal-category-insights .personal-budget-stat > span > span {
+    display: inline-block !important;
+    flex: 0 0 8px !important;
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    margin: 0 !important;
+    vertical-align: middle !important;
+  }
+</style>
 </head>
 
 <body class="h-full bg-apple-gray-100 dark:bg-apple-gray-900 text-apple-gray-800 dark:text-apple-gray-100 font-sans select-none selection:bg-apple-blue selection:text-white transition-colors duration-300">
@@ -3274,15 +3294,22 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
               <!-- Top row on mobile: Ring on left + Cycle & Daily Allowance on right. On sm+: Ring on left, full stack on right -->
               <div class="flex items-center gap-3.5 sm:gap-6">
                 <!-- Apple Activity Ring SVG (compact 108px on mobile, 176px on desktop) -->
-                <div class="relative w-28 h-28 sm:w-44 sm:h-44 flex items-center justify-center shrink-0">
-                  <svg class="w-full h-full -rotate-90 transform overflow-visible p-1.5" viewBox="-8 -8 136 136">
-                    <circle cx="60" cy="60" r="50" stroke="currentColor" stroke-width="11" class="text-apple-gray-200 dark:text-apple-gray-800 fill-none" />
-                    <circle id="personal-ring-circle" cx="60" cy="60" r="50" stroke="currentColor" stroke-width="11" stroke-linecap="round" class="text-apple-blue fill-none transition-all duration-1000 ease-out" stroke-dasharray="314.16" stroke-dashoffset="100" />
+                <div class="personal-ring-shell relative flex items-center justify-center shrink-0">
+                  <svg class="personal-ring-svg w-full h-full -rotate-90 transform overflow-visible" viewBox="0 0 120 120" role="img" aria-label="Progreso del presupuesto personal">
+                    <defs>
+                      <linearGradient id="personal-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop id="personal-ring-gradient-start" offset="0%" stop-color="#007AFF" />
+                        <stop id="personal-ring-gradient-end" offset="100%" stop-color="#5AC8FA" />
+                      </linearGradient>
+                    </defs>
+                    <circle cx="60" cy="60" r="56" class="personal-ring-halo" fill="none" stroke="currentColor" stroke-width="1" />
+                    <circle cx="60" cy="60" r="50" stroke="currentColor" stroke-width="13" class="personal-ring-track fill-none" />
+                    <circle id="personal-ring-circle" cx="60" cy="60" r="50" stroke="url(#personal-ring-gradient)" stroke-width="13" stroke-linecap="round" class="fill-none transition-all duration-1000 ease-out" stroke-dasharray="314.16" stroke-dashoffset="100" />
                   </svg>
-                  <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
-                    <span class="text-[8px] sm:text-[10px] uppercase font-bold tracking-wider text-apple-gray-400">Disponible</span>
-                    <span id="personal-disp-eur" class="text-base sm:text-2xl font-black font-mono text-apple-gray-900 dark:text-white whitespace-nowrap leading-tight mt-0.5">€0.00</span>
-                    <span id="personal-ring-percent" class="text-[8px] sm:text-[11px] font-semibold text-apple-blue mt-0.5 truncate max-w-[86px] sm:max-w-none">0% usado</span>
+                  <div class="personal-ring-center absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-1">
+                    <span class="personal-ring-center-label uppercase font-bold tracking-wider text-apple-gray-400">Disponible</span>
+                    <span id="personal-disp-eur" class="personal-ring-center-value font-black font-mono text-apple-gray-900 dark:text-white whitespace-nowrap leading-tight mt-1">€0.00</span>
+                    <span id="personal-ring-percent" class="personal-ring-center-meta font-semibold text-apple-blue mt-1">0% comprometido</span>
                   </div>
                 </div>
 
@@ -6228,13 +6255,18 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
         const offset = circumference - (pct / 100) * circumference;
         circle.style.strokeDashoffset = offset;
 
-        if (pct > 90) {
-          circle.setAttribute('class', 'text-apple-red fill-none transition-all duration-1000 ease-out');
-        } else if (pct > 75) {
-          circle.setAttribute('class', 'text-apple-orange fill-none transition-all duration-1000 ease-out');
-        } else {
-          circle.setAttribute('class', 'text-apple-blue fill-none transition-all duration-1000 ease-out');
-        }
+        // El anillo usa un degradado semántico: azul en ritmo, ámbar al acercarse
+        // al límite y rojo cuando el presupuesto está prácticamente agotado.
+        const ringStart = document.getElementById('personal-ring-gradient-start');
+        const ringEnd = document.getElementById('personal-ring-gradient-end');
+        const ringColors = pct > 90
+          ? ['#FF453A', '#FF6961']
+          : pct > 75
+            ? ['#FF9500', '#FFD166']
+            : ['#007AFF', '#5AC8FA'];
+        if (ringStart) ringStart.setAttribute('stop-color', ringColors[0]);
+        if (ringEnd) ringEnd.setAttribute('stop-color', ringColors[1]);
+        circle.setAttribute('aria-label', `${Math.round(pct)}% del presupuesto comprometido`);
 
         const dispEl = document.getElementById('personal-disp-eur');
         if (dispEl) animateNumericValue(dispEl, cyc.availableVariable, formatEUR, 520);
@@ -10375,6 +10407,1354 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
     });
   })();
 </script>
+
+<!-- ========================================================== -->
+<!-- UPGRADE V11: COPILOT PERSONAL STUDIO, AIRTM USDC COMPACT & UI FIXES -->
+<!-- ========================================================== -->
+<style id="v11-copilot-personal-and-ui-fixes">
+  /* 1. Bloques del Hero en 2 columnas en móvil para que S/. 7926,68 entre holgado */
+  @media (max-width: 639px) {
+    #hero-metrics-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 0.55rem !important;
+    }
+    #hero-metrics-grid .hero-metric-tile {
+      padding: 0.75rem 0.85rem !important;
+      border-radius: 1.1rem !important;
+    }
+    #hero-metrics-grid .stat-metric-number {
+      font-size: clamp(0.98rem, 4.3vw, 1.18rem) !important;
+      letter-spacing: -0.03em !important;
+      overflow: visible !important;
+    }
+    #hero-metrics-grid .hero-metric-sub {
+      display: block !important;
+      font-size: 9px !important;
+      margin-top: 2px !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #hero-profit-tile {
+      grid-column: 1 / -1 !important;
+    }
+  }
+
+  /* 2. Igualar altura exacta entre inputs de Monto y Fecha en todos los modales */
+  #modal-edit-acciones input[type="number"],
+  #modal-edit-acciones input[type="date"],
+  #modal-edit-acciones input[type="text"],
+  #modal-edit-madre input[type="number"],
+  #modal-edit-madre input[type="date"],
+  #modal-edit-madre input[type="text"],
+  #modal-add-loan input[type="number"],
+  #modal-add-loan input[type="date"],
+  #modal-add-loan input[type="text"] {
+    height: 46px !important;
+    min-height: 46px !important;
+    box-sizing: border-box !important;
+    line-height: 1.2 !important;
+    border-radius: 14px !important;
+  }
+
+  /* 3. Simetría en los botones de Tipo de Movimiento (Acciones y Capital Madre) */
+  #modal-edit-acciones .grid.grid-cols-3 > label,
+  #modal-edit-madre .grid.grid-cols-2 > label {
+    min-height: 58px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px 10px !important;
+    border-radius: 15px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 4. Tarjetas superiores de Saldo Actual vs Proyección alineadas al centro */
+  #modal-edit-acciones .bg-apple-purple\/10,
+  #modal-edit-madre .bg-apple-orange\/10 {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 14px 16px !important;
+    border-radius: 18px !important;
+  }
+
+  /* 5. Botones modernos del Modal de Préstamos */
+  .loan-flow-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 11px;
+    border-radius: 15px;
+    border: 1.5px solid rgba(120, 120, 128, 0.2);
+    background: rgba(120, 120, 128, 0.06);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: left;
+    min-height: 54px;
+    user-select: none;
+  }
+  .dark .loan-flow-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .loan-flow-card.is-active[data-flow="YO_PRESTE"] {
+    border-color: #FF9500;
+    background: rgba(255, 149, 0, 0.14);
+    color: #FF9500;
+  }
+  .loan-flow-card.is-active[data-flow="ME_PAGARON"] {
+    border-color: #34C759;
+    background: rgba(52, 199, 89, 0.14);
+    color: #34C759;
+  }
+  .loan-flow-card.is-active[data-flow="ME_PRESTARON"] {
+    border-color: #AF52DE;
+    background: rgba(175, 82, 222, 0.14);
+    color: #AF52DE;
+  }
+  .loan-flow-card.is-active[data-flow="YO_PAGUE"] {
+    border-color: #007AFF;
+    background: rgba(0, 122, 255, 0.14);
+    color: #007AFF;
+  }
+
+  .loan-currency-pill {
+    flex: 1;
+    height: 46px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(120, 120, 128, 0.2);
+    background: rgba(120, 120, 128, 0.06);
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.18s ease;
+    cursor: pointer;
+  }
+  .dark .loan-currency-pill {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .loan-currency-pill.is-active {
+    border-color: #007AFF;
+    background: rgba(0, 122, 255, 0.16);
+    color: #007AFF;
+  }
+  .dark .loan-currency-pill.is-active {
+    border-color: #0A84FF;
+    color: #64D2FF;
+  }
+
+  /* 6. Fila ultracompacta de USDC + Tipo de Cambio en Airtm (Sin textos de relleno) */
+  #airtm-usdc-panel {
+    margin-top: 10px;
+    padding: 8px 11px;
+    border-radius: 14px;
+    background: rgba(52, 199, 89, 0.08);
+    border: 1px solid rgba(52, 199, 89, 0.24);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .dark #airtm-usdc-panel {
+    background: rgba(48, 209, 88, 0.12);
+    border-color: rgba(48, 209, 88, 0.28);
+  }
+  #airtm-usdc-panel.hidden {
+    display: none !important;
+  }
+
+  /* 7. Rediseño Copilot Money / Apple Card para la pestaña Personal */
+  #view-personal {
+    padding-bottom: 110px !important;
+  }
+  /* Evitar que el anillo o texto del centro se encimen con el borde del círculo */
+  #personal-hero-card .relative.w-28.h-28,
+  #personal-hero-card .sm\:w-44.sm\:h-44 {
+    padding: 4px;
+  }
+  #personal-disp-eur {
+    font-size: clamp(14px, 3.8vw, 22px) !important;
+    letter-spacing: -0.04em !important;
+  }
+  @media (min-width: 640px) {
+    #personal-disp-eur {
+      font-size: 24px !important;
+    }
+  }
+
+  /* Barra maestra segmentada (Variables + Fijos + Libre) estilo Copilot */
+  .copilot-master-bar-wrap {
+    margin: 14px 0 16px;
+    padding: 13px 15px;
+    border-radius: 18px;
+    background: rgba(120, 120, 128, 0.05);
+    border: 1px solid rgba(120, 120, 128, 0.11);
+  }
+  .dark .copilot-master-bar-wrap {
+    background: rgba(255, 255, 255, 0.035);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  .copilot-segmented-track {
+    height: 10px;
+    width: 100%;
+    border-radius: 999px;
+    background: rgba(120, 120, 128, 0.14);
+    overflow: hidden;
+    display: flex;
+    gap: 2px;
+    padding: 1.5px;
+  }
+  .dark .copilot-segmented-track {
+    background: rgba(255, 255, 255, 0.09);
+  }
+  .copilot-seg {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Tarjetas de categoría estilo Copilot/Monzo */
+  #personal-category-breakdown {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  @media (min-width: 768px) {
+    #personal-category-breakdown {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 12px !important;
+    }
+  }
+  @media (min-width: 1120px) {
+    #personal-category-breakdown {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+  }
+
+  .copilot-cat-card {
+    padding: 13px 14px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(120, 120, 128, 0.13);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.025);
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .dark .copilot-cat-card {
+    background: rgba(28, 34, 45, 0.85);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  }
+  .copilot-cat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 122, 255, 0.35);
+    box-shadow: 0 10px 24px rgba(0, 122, 255, 0.08);
+  }
+  .copilot-cat-dual-track {
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(120, 120, 128, 0.15);
+    overflow: hidden;
+    display: flex;
+    gap: 1.5px;
+    margin-top: 10px;
+  }
+  .dark .copilot-cat-dual-track {
+    background: rgba(255, 255, 255, 0.09);
+  }
+
+  /* Tarjetas derechas del panel de escritorio interactivas */
+  .desktop-dist-card {
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(120, 120, 128, 0.12);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .dark .desktop-dist-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  .desktop-dist-card:hover,
+  .desktop-dist-card.is-highlighted {
+    border-color: #007AFF;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 122, 255, 0.1);
+  }
+</style>
+
+<script id="v11-logic-upgrade">
+(function() {
+  const AIRTM_META_KEY = 'CAPITAL_LEDGER_AIRTM_USDC_META_V1';
+
+  function loadAirtmMeta() {
+    try {
+      const raw = localStorage.getItem(AIRTM_META_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) {}
+    return { usdc: 0, rateUsdcPerEur: 0, rateEurPerUsdc: 0, updatedAt: '' };
+  }
+
+  function saveAirtmMeta(meta) {
+    state.airtmUsdcMeta = meta;
+    try {
+      localStorage.setItem(AIRTM_META_KEY, JSON.stringify(meta));
+    } catch (e) {}
+  }
+
+  state.airtmUsdcMeta = state.airtmUsdcMeta || loadAirtmMeta();
+
+  // 1. Panel minimalista y directo de USDC dentro de #modal-quick-balance (sin textos largos)
+  function ensureAirtmUsdcPanel() {
+    const hero = document.getElementById('bank-editor-hero');
+    if (!hero) return;
+    let panel = document.getElementById('airtm-usdc-panel');
+    if (panel) return;
+
+    panel = document.createElement('div');
+    panel.id = 'airtm-usdc-panel';
+    panel.className = 'hidden';
+    panel.innerHTML = `
+      <div class="flex items-center gap-2 flex-1 min-w-0">
+        <span class="px-2 py-1 rounded-lg bg-apple-green/20 text-apple-green text-[11px] font-black font-mono shrink-0">USDC</span>
+        <input id="airtm-usdc-input" type="text" inputmode="decimal" autocomplete="off" placeholder="Saldo USDC..."
+               class="w-full bg-transparent text-base font-extrabold font-mono text-apple-gray-900 dark:text-white placeholder-apple-gray-400/70 focus:outline-none">
+      </div>
+      <div class="text-right font-mono shrink-0 pl-2 border-l border-apple-green/25">
+        <span id="airtm-usdc-rate-badge" class="block text-xs font-black text-apple-green leading-tight">1€ = — USDC</span>
+        <small id="airtm-usdc-inverse-detail" class="block text-[9px] font-semibold text-apple-gray-400 mt-0.5">TC del momento</small>
+      </div>
+    `;
+    hero.insertAdjacentElement('afterend', panel);
+  }
+
+  function updateAirtmUsdcCalculation() {
+    const eurInput = document.getElementById('bank-interactive-input');
+    const usdcInput = document.getElementById('airtm-usdc-input');
+    const badge = document.getElementById('airtm-usdc-rate-badge');
+    const invDetail = document.getElementById('airtm-usdc-inverse-detail');
+    if (!eurInput || !usdcInput) return;
+
+    const eur = parseLocaleNumber(eurInput.value);
+    const usdc = parseLocaleNumber(usdcInput.value);
+
+    if (eur > 0 && usdc > 0) {
+      const usdcPerEur = usdc / eur;
+      const eurPerUsdc = eur / usdc;
+      if (badge) badge.textContent = `1€ = ${usdcPerEur.toFixed(3)} USDC`;
+      if (invDetail) invDetail.textContent = `1 USDC = ${eurPerUsdc.toFixed(3)} €`;
+    } else {
+      if (badge) badge.textContent = '1€ = — USDC';
+      if (invDetail) invDetail.textContent = 'TC del momento';
+    }
+  }
+
+  function refreshAirtmSubtitleDisplay() {
+    const meta = state.airtmUsdcMeta || loadAirtmMeta();
+    const shareAirtm = document.getElementById('stat-airtm-share');
+    if (shareAirtm && meta && meta.usdc > 0 && meta.rateUsdcPerEur > 0) {
+      shareAirtm.textContent = `${meta.usdc.toFixed(2)} USDC · 1€=${meta.rateUsdcPerEur.toFixed(3)}`;
+    }
+    const cards = document.querySelectorAll('#bank-cards-grid .vault-bank-card');
+    cards.forEach(card => {
+      const nameEl = card.querySelector('.vault-bank-name');
+      if (nameEl && nameEl.textContent.trim() === 'Airtm' && meta && meta.usdc > 0 && meta.rateUsdcPerEur > 0) {
+        let badge = card.querySelector('.airtm-usdc-chip');
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.className = 'airtm-usdc-chip mt-1 text-[9px] font-mono font-bold text-apple-green truncate';
+          card.appendChild(badge);
+        }
+        badge.textContent = `${meta.usdc.toFixed(2)} USDC (${meta.rateUsdcPerEur.toFixed(3)})`;
+      }
+    });
+  }
+
+  const origRenderAirtmModule = window.renderAirtmModule;
+  if (typeof origRenderAirtmModule === 'function') {
+    window.renderAirtmModule = function() {
+      const res = origRenderAirtmModule.apply(this, arguments);
+      refreshAirtmSubtitleDisplay();
+      return res;
+    };
+  }
+
+  const origSaveGlobalConfig = window.saveGlobalConfigToCloud;
+  if (typeof origSaveGlobalConfig === 'function') {
+    window.saveGlobalConfigToCloud = async function() {
+      await origSaveGlobalConfig.apply(this, arguments);
+      try {
+        if (supabaseClient && state.airtmUsdcMeta) {
+          await supabaseClient.from('app_config').upsert({
+            key: 'airtm_usdc_meta',
+            value: state.airtmUsdcMeta
+          });
+        }
+      } catch (e) {}
+    };
+  }
+
+  const origSyncAll = window.syncAllFromCloud;
+  if (typeof origSyncAll === 'function') {
+    window.syncAllFromCloud = async function() {
+      const res = await origSyncAll.apply(this, arguments);
+      try {
+        if (supabaseClient) {
+          const { data } = await supabaseClient.from('app_config').select('*').eq('key', 'airtm_usdc_meta').maybeSingle();
+          if (data && data.value) {
+            saveAirtmMeta(data.value);
+            refreshAirtmSubtitleDisplay();
+          }
+        }
+      } catch (e) {}
+      return res;
+    };
+  }
+
+  const origOpenModal = window.openModal;
+  if (typeof origOpenModal === 'function') {
+    window.openModal = function(id) {
+      ensureAirtmUsdcPanel();
+      origOpenModal.apply(this, arguments);
+      if (id === 'modal-quick-balance') {
+        const selected = state.quickBalanceBank || 'Airtm';
+        const panel = document.getElementById('airtm-usdc-panel');
+        const usdcInput = document.getElementById('airtm-usdc-input');
+        const eurInput = document.getElementById('bank-interactive-input');
+        if (panel) {
+          if (selected === 'Airtm') {
+            panel.classList.remove('hidden');
+            const meta = state.airtmUsdcMeta || loadAirtmMeta();
+            if (usdcInput) {
+              usdcInput.value = meta && meta.usdc > 0 ? Number(meta.usdc).toFixed(2) : '';
+              usdcInput.oninput = updateAirtmUsdcCalculation;
+            }
+            if (eurInput) {
+              const prevHandler = eurInput.oninput;
+              eurInput.oninput = function(ev) {
+                if (typeof prevHandler === 'function') prevHandler.call(this, ev);
+                updateAirtmUsdcCalculation();
+              };
+            }
+            updateAirtmUsdcCalculation();
+          } else {
+            panel.classList.add('hidden');
+          }
+        }
+      }
+      if (id === 'modal-add-loan') {
+        syncModernLoanUI();
+      }
+    };
+  }
+
+  const origHandleSaveBanks = window.handleSaveBanks;
+  if (typeof origHandleSaveBanks === 'function') {
+    window.handleSaveBanks = async function(e) {
+      const selected = state.quickBalanceBank;
+      const eurInput = document.getElementById('bank-interactive-input');
+      const usdcInput = document.getElementById('airtm-usdc-input');
+      if (selected === 'Airtm' && eurInput && usdcInput) {
+        const eur = parseLocaleNumber(eurInput.value);
+        const usdc = parseLocaleNumber(usdcInput.value);
+        if (usdc > 0 && eur > 0) {
+          saveAirtmMeta({
+            usdc: Number(usdc.toFixed(2)),
+            eurSnapshot: Number(eur.toFixed(2)),
+            rateUsdcPerEur: Number((usdc / eur).toFixed(6)),
+            rateEurPerUsdc: Number((eur / usdc).toFixed(6)),
+            updatedAt: new Date().toISOString()
+          });
+        } else if (usdc === 0) {
+          saveAirtmMeta({ usdc: 0, rateUsdcPerEur: 0, rateEurPerUsdc: 0, updatedAt: new Date().toISOString() });
+        }
+      }
+      const res = await origHandleSaveBanks.apply(this, arguments);
+      refreshAirtmSubtitleDisplay();
+      return res;
+    };
+  }
+
+  // 2. Modernizar el Modal de Préstamos (#modal-add-loan)
+  function upgradeLoanModalDOM() {
+    const form = document.getElementById('form-loan');
+    if (!form || form.dataset.upgradedV10 === '1') return;
+    form.dataset.upgradedV10 = '1';
+
+    form.innerHTML = `
+      <input type="hidden" name="editId" id="loan-edit-id" value="">
+      <select name="type" id="loan-hidden-type" class="hidden">
+        <option value="YO_PRESTE">YO_PRESTE</option>
+        <option value="ME_PAGARON">ME_PAGARON</option>
+        <option value="ME_PRESTARON">ME_PRESTARON</option>
+        <option value="YO_PAGUE">YO_PAGUE</option>
+      </select>
+      <select name="currency" id="loan-hidden-currency" class="hidden">
+        <option value="EUR">EUR</option>
+        <option value="PEN">PEN</option>
+        <option value="USD">USD</option>
+      </select>
+
+      <div>
+        <label class="block text-xs font-semibold text-apple-gray-500 mb-1.5">Persona / Contacto</label>
+        <input type="text" required name="person" list="contacts-datalist" placeholder="Nombre de la persona..."
+               class="w-full px-3.5 py-2.5 text-sm font-semibold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+        <datalist id="contacts-datalist">
+          <option value="Amor"><option value="Kily"><option value="Madre"><option value="Coco">
+          <option value="Denis"><option value="Tata"><option value="Onel"><option value="UNIVERSIDAD">
+          <option value="Lesly"><option value="emely"><option value="PayPal">
+        </datalist>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-apple-gray-500 mb-1.5">Tipo de Flujo</label>
+        <div class="grid grid-cols-2 gap-2" id="loan-flow-cards-grid">
+          <button type="button" data-flow="YO_PRESTE" class="loan-flow-card is-active">
+            <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0 text-apple-orange"></i>
+            <div class="min-w-0">
+              <span class="text-xs font-bold block leading-tight">Le presté (+)</span>
+              <span class="text-[9px] text-apple-gray-400 block truncate">Aumenta lo que me debe</span>
+            </div>
+          </button>
+          <button type="button" data-flow="ME_PAGARON" class="loan-flow-card">
+            <i data-lucide="arrow-down-left" class="w-4 h-4 shrink-0 text-apple-green"></i>
+            <div class="min-w-0">
+              <span class="text-xs font-bold block leading-tight">Me devolvió (-)</span>
+              <span class="text-[9px] text-apple-gray-400 block truncate">Reduce lo que me debe</span>
+            </div>
+          </button>
+          <button type="button" data-flow="ME_PRESTARON" class="loan-flow-card">
+            <i data-lucide="plus-circle" class="w-4 h-4 shrink-0 text-apple-purple"></i>
+            <div class="min-w-0">
+              <span class="text-xs font-bold block leading-tight">Me prestó (+)</span>
+              <span class="text-[9px] text-apple-gray-400 block truncate">Aumenta lo que le debo</span>
+            </div>
+          </button>
+          <button type="button" data-flow="YO_PAGUE" class="loan-flow-card">
+            <i data-lucide="check-circle-2" class="w-4 h-4 shrink-0 text-apple-blue"></i>
+            <div class="min-w-0">
+              <span class="text-xs font-bold block leading-tight">Le pagué (-)</span>
+              <span class="text-[9px] text-apple-gray-400 block truncate">Reduce lo que le debo</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-apple-gray-500 mb-1.5">Moneda de la Operación</label>
+        <div class="flex items-center gap-2" id="loan-currency-pills-group">
+          <button type="button" data-curr="EUR" class="loan-currency-pill is-active">€ EUR</button>
+          <button type="button" data-curr="PEN" class="loan-currency-pill">S/. PEN</button>
+          <button type="button" data-curr="USD" class="loan-currency-pill">$ USD</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5">
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-semibold text-apple-gray-500">Monto</label>
+            <button type="button" id="btn-fill-remaining-debt" onclick="fillRemainingDebtInLoanModal()" class="hidden text-[10px] font-bold text-apple-green hover:underline">
+              Saldar todo
+            </button>
+          </div>
+          <input type="number" step="0.01" required name="amount" placeholder="0.00" inputmode="decimal"
+                 class="w-full px-3 py-2 text-lg font-bold font-mono rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none focus:border-apple-blue">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-apple-gray-500 mb-1">Fecha</label>
+          <input type="date" required name="date" id="input-loan-date"
+                 class="w-full px-2.5 py-2 text-xs font-semibold rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-apple-gray-500 mb-1">Detalle / Motivo</label>
+        <input type="text" name="notes" placeholder="Ej: Adelanto, compras, transferencia..."
+               class="w-full px-3 py-2 text-xs rounded-xl bg-apple-gray-100 dark:bg-apple-gray-800 border border-apple-gray-300 dark:border-apple-gray-700 focus:outline-none">
+      </div>
+
+      <div class="pt-3 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50 flex justify-end gap-2.5">
+        <button type="button" onclick="closeModal('modal-add-loan')" class="px-4 py-2 rounded-xl text-xs font-semibold text-apple-gray-500">
+          Cancelar
+        </button>
+        <button type="submit" id="btn-save-loan-submit" class="ios-tap px-5 py-2.5 rounded-xl text-xs font-bold bg-apple-blue text-white shadow-ios-sm flex items-center gap-1.5">
+          <span id="btn-save-loan-label">Guardar Movimiento</span>
+        </button>
+      </div>
+    `;
+
+    form.querySelectorAll('.loan-flow-card').forEach(btn => {
+      btn.addEventListener('click', () => {
+        form.type.value = btn.dataset.flow;
+        syncModernLoanUI();
+        if (typeof syncLoanModalRemainingHelper === 'function') syncLoanModalRemainingHelper();
+      });
+    });
+
+    form.querySelectorAll('.loan-currency-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        form.currency.value = btn.dataset.curr;
+        syncModernLoanUI();
+        if (typeof syncLoanModalRemainingHelper === 'function') syncLoanModalRemainingHelper();
+      });
+    });
+
+    const personField = form.querySelector('[name="person"]');
+    if (personField) {
+      personField.addEventListener('input', () => {
+        if (typeof syncLoanModalRemainingHelper === 'function') syncLoanModalRemainingHelper();
+      });
+      personField.addEventListener('change', () => {
+        if (typeof syncLoanModalRemainingHelper === 'function') syncLoanModalRemainingHelper();
+      });
+    }
+
+    refreshIcons(form);
+  }
+
+  function syncModernLoanUI() {
+    const form = document.getElementById('form-loan');
+    if (!form) return;
+    const curType = form.type?.value || 'YO_PRESTE';
+    const curCurr = form.currency?.value || 'EUR';
+
+    form.querySelectorAll('.loan-flow-card').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.flow === curType);
+    });
+    form.querySelectorAll('.loan-currency-pill').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.curr === curCurr);
+    });
+  }
+
+  const origOpenLoanModal = window.openLoanModal;
+  if (typeof origOpenLoanModal === 'function') {
+    window.openLoanModal = function() {
+      upgradeLoanModalDOM();
+      const res = origOpenLoanModal.apply(this, arguments);
+      syncModernLoanUI();
+      return res;
+    };
+  }
+
+  const origOpenRelationPaymentModal = window.openRelationPaymentModal;
+  if (typeof origOpenRelationPaymentModal === 'function') {
+    window.openRelationPaymentModal = function() {
+      upgradeLoanModalDOM();
+      const res = origOpenRelationPaymentModal.apply(this, arguments);
+      syncModernLoanUI();
+      return res;
+    };
+  }
+
+  // 3. REDISEÑO INTUITIVO ESTILO COPILOT MONEY / MONZO PARA "TU DINERO, EN PERSPECTIVA"
+  // Unifica las cifras para que no haya contradicciones (13,99 € vs 340,79 €) y separa claramente:
+  // - Gastado Real (Pagado: Variables + Fijos ya pagados)
+  // - Fijos por Pagar (Reserva comprometida)
+  // - Disponible Libre (de un Tope General claro)
+  const CAT_COLORS = {
+    'Hogar': '#5856D6',
+    'Supermercado': '#34C759',
+    'Comida y Ocio': '#FF9500',
+    'Transporte': '#007AFF',
+    'Salud y Deporte': '#FF2D55',
+    'Compras y Otros': '#AF52DE',
+    'Sin categoría': '#8E8E93'
+  };
+  const CAT_ICONS = {
+    'Supermercado': 'shopping-cart',
+    'Comida y Ocio': 'utensils',
+    'Transporte': 'bus',
+    'Hogar': 'home',
+    'Salud y Deporte': 'dumbbell',
+    'Compras y Otros': 'shopping-bag',
+    'Sin categoría': 'tag'
+  };
+
+  function setupCopilotSummaryHeader() {
+    const summaryWrap = document.querySelector('#personal-category-insights .personal-budget-summary');
+    if (!summaryWrap || summaryWrap.dataset.copilotUpgraded === '1') return;
+    summaryWrap.dataset.copilotUpgraded = '1';
+
+    // Convertir de 3 a 4 indicadores claros y autoexplicativos
+    summaryWrap.className = 'grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-4 mb-3';
+    summaryWrap.innerHTML = `
+      <div class="personal-budget-stat">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-apple-blue"></span>Pagado</span>
+        <strong id="copilot-stat-paid" class="text-apple-gray-900 dark:text-white">€0,00</strong>
+        <small id="copilot-sub-paid" class="block text-[9px] text-apple-gray-400 mt-0.5 truncate">Variables + fijos pagados</small>
+      </div>
+      <div class="personal-budget-stat">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-apple-orange"></span>Fijos pendientes</span>
+        <strong id="copilot-stat-committed" class="text-apple-orange">€0,00</strong>
+        <small id="copilot-sub-committed" class="block text-[9px] text-apple-gray-400 mt-0.5 truncate">Reservado del ciclo</small>
+      </div>
+      <div class="personal-budget-stat">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-apple-green"></span>Disponible libre</span>
+        <strong id="copilot-stat-free" class="text-apple-green">€0,00</strong>
+        <small id="copilot-sub-free" class="block text-[9px] text-apple-gray-400 mt-0.5 truncate">Para gastar sin desvíos</small>
+      </div>
+      <div class="personal-budget-stat cursor-pointer hover:border-apple-blue/40 transition" onclick="openModal('modal-edit-budget')" title="Editar presupuesto del ciclo">
+        <span class="flex items-center justify-between"><span>Presupuesto</span><i data-lucide="pencil" class="w-2.5 h-2.5 text-apple-blue"></i></span>
+        <strong id="copilot-stat-budget" class="text-apple-blue">€0,00</strong>
+        <small id="copilot-sub-budget" class="block text-[9px] text-apple-gray-400 mt-0.5 truncate">Tope total del ciclo</small>
+      </div>
+    `;
+
+    // Añadir barra maestra segmentada justo debajo de las 4 tarjetas (visible en móvil y escritorio)
+    const masterBar = document.createElement('div');
+    masterBar.id = 'copilot-master-bar-container';
+    masterBar.className = 'copilot-master-bar-wrap';
+    masterBar.innerHTML = `
+      <div class="flex items-center justify-between text-[10px] font-bold mb-1.5 gap-2">
+        <span id="copilot-master-status-left" class="text-apple-gray-700 dark:text-apple-gray-200">0% del presupuesto utilizado</span>
+        <span id="copilot-master-status-right" class="font-mono text-apple-blue">€0,00 / €0,00</span>
+      </div>
+      <div class="copilot-segmented-track">
+        <div id="copilot-seg-paid" class="copilot-seg bg-apple-blue" style="width: 0%" title="Ya pagado"></div>
+        <div id="copilot-seg-committed" class="copilot-seg bg-apple-orange" style="width: 0%" title="Fijos pendientes"></div>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-2 mt-2 text-[9px] text-apple-gray-400">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-apple-blue"></span><strong id="copilot-leg-paid" class="text-apple-gray-700 dark:text-apple-gray-200">€0,00</strong> pagados</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-apple-orange"></span><strong id="copilot-leg-comm" class="text-apple-gray-700 dark:text-apple-gray-200">€0,00</strong> en fijos por pagar</span>
+        </div>
+        <span id="copilot-leg-daily" class="font-mono font-semibold text-apple-green">Ritmo: €0,00/día</span>
+      </div>
+    `;
+    summaryWrap.insertAdjacentElement('afterend', masterBar);
+  }
+
+  window.renderPersonalCategoryInsights = function(cycle) {
+    setupCopilotSummaryHeader();
+    const host = document.getElementById('personal-category-breakdown');
+    const periodEl = document.getElementById('personal-category-period');
+    if (!host) return;
+
+    const cyc = cycle || calculatePersonalCycle();
+    const start = cyc?.cycleStart ? new Date(cyc.cycleStart) : null;
+    const end = cyc?.cycleEnd ? new Date(cyc.cycleEnd) : null;
+    if (periodEl && start && end) {
+      const cycleStatus = cyc.isCurrent ? `${cyc.daysRemaining} días restantes` : 'Ciclo histórico';
+      periodEl.textContent = `Ciclo ${start.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} – ${end.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} · ${cycleStatus}`;
+    }
+
+    // Gastos reales registrados en el ciclo (incluye variables + fijos ya pagados)
+    const expenses = getPersonalExpensesForCycle(cyc);
+    const totalPaid = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+
+    const groups = new Map();
+    expenses.forEach(exp => {
+      const info = getExpenseCategoryInfo(exp.concept, exp);
+      const cat = info.category || 'Sin categoría';
+      if (!groups.has(cat)) groups.set(cat, { total: 0, subs: new Map(), count: 0 });
+      const g = groups.get(cat);
+      const amt = Number(exp.amount || 0);
+      g.total += amt;
+      g.count++;
+      g.subs.set(info.subcategory || 'General', (g.subs.get(info.subcategory || 'General') || 0) + amt);
+    });
+
+    // Gastos fijos pendientes por pagar en el ciclo
+    const paidState = (state.fixedExpensesCycleState || {})[cyc.activeKey] || {};
+    const fixedByCat = new Map();
+    let pendingFixedTotal = 0;
+    (state.personalFixedExpenses || []).forEach(f => {
+      const amount = Math.max(0, Number(f.amount || 0));
+      if (!(amount > 0)) return;
+      const isPaid = !!(paidState[f.id] || paidState[String(f.id)])?.paid;
+      if (isPaid) return;
+      pendingFixedTotal += amount;
+      const cat = getFixedExpenseCategoryInfo(f).category || 'Hogar';
+      fixedByCat.set(cat, (fixedByCat.get(cat) || 0) + amount);
+    });
+
+    const generalBudget = Math.max(1, getPersonalGeneralBudget(cyc));
+    const totalComprometido = totalPaid + pendingFixedTotal;
+    const freeRemaining = generalBudget - totalComprometido;
+
+    // Actualizar las 4 tarjetas superiores coherentes con el Hero Card
+    const elPaid = document.getElementById('copilot-stat-paid');
+    const subPaid = document.getElementById('copilot-sub-paid');
+    const elComm = document.getElementById('copilot-stat-committed');
+    const subComm = document.getElementById('copilot-sub-committed');
+    const elFree = document.getElementById('copilot-stat-free');
+    const subFree = document.getElementById('copilot-sub-free');
+    const elBudget = document.getElementById('copilot-stat-budget');
+    const subBudget = document.getElementById('copilot-sub-budget');
+
+    if (elPaid) elPaid.textContent = formatEUR(totalPaid);
+    if (subPaid) subPaid.textContent = `${expenses.length} mov. (${formatEUR(cyc.totalSpent)} var. + ${formatEUR(cyc.totalFixedPaid)} fijos)`;
+    if (elComm) elComm.textContent = formatEUR(pendingFixedTotal);
+    if (subComm) subComm.textContent = `${cyc.countPending} fijo${cyc.countPending === 1 ? '' : 's'} por pagar`;
+    if (elFree) {
+      elFree.textContent = formatEUR(freeRemaining);
+      elFree.className = freeRemaining < -0.005 ? 'text-apple-red' : 'text-apple-green';
+    }
+    if (subFree) subFree.textContent = `${formatEUR(cyc.dailyAllowance)} / día disponible`;
+    if (elBudget) elBudget.textContent = formatEUR(generalBudget);
+
+    const budgets = getPersonalCategoryBudgets(cyc.activeKey);
+    const allocatedTotal = Object.values(budgets).reduce((a, b) => a + Math.max(0, Number(b) || 0), 0);
+    if (subBudget) subBudget.textContent = allocatedTotal > 0 ? `${formatEUR(allocatedTotal)} en límites` : 'Toca para editar tope';
+
+    // Actualizar Barra Maestra Segmentada
+    const paidPct = Math.min(100, Math.max(0, (totalPaid / generalBudget) * 100));
+    const commPct = Math.min(Math.max(0, 100 - paidPct), Math.max(0, (pendingFixedTotal / generalBudget) * 100));
+    const totalPct = Math.round((totalComprometido / generalBudget) * 100);
+
+    const segPaid = document.getElementById('copilot-seg-paid');
+    const segComm = document.getElementById('copilot-seg-committed');
+    if (segPaid) segPaid.style.width = `${paidPct.toFixed(1)}%`;
+    if (segComm) segComm.style.width = `${commPct.toFixed(1)}%`;
+
+    const stLeft = document.getElementById('copilot-master-status-left');
+    const stRight = document.getElementById('copilot-master-status-right');
+    const legPaid = document.getElementById('copilot-leg-paid');
+    const legComm = document.getElementById('copilot-leg-comm');
+    const legDaily = document.getElementById('copilot-leg-daily');
+
+    if (stLeft) stLeft.textContent = `${totalPct}% comprometido del ciclo (${Math.max(0, 100 - totalPct)}% libre)`;
+    if (stRight) stRight.textContent = `${formatEUR(totalComprometido)} de ${formatEUR(generalBudget)}`;
+    if (legPaid) legPaid.textContent = formatEUR(totalPaid);
+    if (legComm) legComm.textContent = formatEUR(pendingFixedTotal);
+    if (legDaily) legDaily.textContent = `Límite sano: ${formatEUR(cyc.dailyAllowance)}/día`;
+
+    const allNames = new Set([...groups.keys(), ...Object.keys(budgets), ...fixedByCat.keys()]);
+    const countEl = document.getElementById('personal-category-count');
+    if (countEl) countEl.textContent = `${allNames.size} categoría${allNames.size === 1 ? '' : 's'}`;
+    const caption = document.getElementById('personal-budget-caption');
+    if (caption) {
+      caption.textContent = 'Barra sólida = ya pagado · Barra ámbar = fijo reservado · Toca una tarjeta para ver movimientos';
+    }
+
+    if (!allNames.size) {
+      host.innerHTML = `<div class="personal-insight-empty col-span-full"><p class="text-xs font-bold text-apple-gray-700 dark:text-apple-gray-200">Sin movimientos en este ciclo</p><p class="text-[10px] text-apple-gray-400 mt-1">Registra un gasto con el botón "+ Nuevo Gasto" o configura tus límites por categoría.</p></div>`;
+      showPersonalCategoryOverview();
+      refreshIcons(host);
+      return;
+    }
+
+    const sorted = [...allNames].sort((a, b) => {
+      const totB = (groups.get(b)?.total || 0) + (fixedByCat.get(b) || 0);
+      const totA = (groups.get(a)?.total || 0) + (fixedByCat.get(a) || 0);
+      return totB - totA;
+    });
+
+    host.innerHTML = sorted.map(name => {
+      const group = groups.get(name) || { total: 0, subs: new Map(), count: 0 };
+      const spent = group.total;
+      const committed = Number(fixedByCat.get(name) || 0);
+      const consumed = spent + committed;
+      const limit = Math.max(0, Number(budgets[name] || 0));
+      const baseColor = CAT_COLORS[name] || '#0A84FF';
+      const icon = CAT_ICONS[name] || 'layers';
+
+      const refBase = limit > 0 ? limit : Math.max(1, totalComprometido);
+      const spentBarPct = Math.min(100, (spent / refBase) * 100);
+      const commBarPct = Math.min(Math.max(0, 100 - spentBarPct), (committed / refBase) * 100);
+      const over = limit > 0 && consumed > limit + 0.005;
+      const shareOfCycle = totalComprometido > 0 ? Math.round((consumed / totalComprometido) * 100) : 0;
+
+      const statusPill = limit > 0
+        ? (over
+            ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-apple-red/12 text-apple-red">Exceso +${formatEUR(consumed - limit)}</span>`
+            : `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-apple-green/12 text-apple-green">Quedan ${formatEUR(limit - consumed)}</span>`)
+        : `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-apple-gray-200/70 dark:bg-white/10 text-apple-gray-500 dark:text-apple-gray-300">${shareOfCycle}% del ciclo</span>`;
+
+      return `
+        <div class="copilot-cat-card" role="button" tabindex="0" data-category="${escapeHTML(name)}"
+             onclick="openPersonalCategoryDetail(this.dataset.category)">
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-2xl flex items-center justify-center shrink-0" style="background:${baseColor}1F; color:${baseColor}">
+                  <i data-lucide="${icon}" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-xs font-extrabold text-apple-gray-900 dark:text-white truncate">${escapeHTML(name)}</p>
+                  <p class="text-[10px] text-apple-gray-400 mt-0.5 truncate">
+                    ${group.count} mov.${committed > 0 ? ` · +${formatEUR(committed)} fijo` : ''}
+                  </p>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-sm font-black font-mono text-apple-gray-900 dark:text-white leading-tight">${formatEUR(consumed)}</p>
+                <p class="text-[9px] font-mono text-apple-gray-400 mt-0.5">${limit > 0 ? `de ${formatEUR(limit)}` : 'Sin tope fijo'}</p>
+              </div>
+            </div>
+
+            <div class="copilot-cat-dual-track">
+              <div style="width:${spentBarPct.toFixed(1)}%; background:${over ? '#FF3B30' : baseColor}" title="Gastado: ${formatEUR(spent)}"></div>
+              ${committed > 0 ? `<div style="width:${commBarPct.toFixed(1)}%; background:#FF9500" title="Fijo reservado: ${formatEUR(committed)}"></div>` : ''}
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-apple-gray-200/50 dark:border-white/5">
+            ${statusPill}
+            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-apple-blue">
+              Detalle <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Actualizar también el panel expandido de escritorio (lg+)
+    if (typeof renderDesktopCategoryAnalytics === 'function') {
+      try {
+        renderDesktopCategoryAnalytics(cyc, groups, fixedByCat, budgets);
+      } catch (e) {}
+    }
+
+    refreshIcons(document.getElementById('personal-category-insights'));
+
+    if (personalSelectedCategory && allNames.has(personalSelectedCategory)) {
+      renderPersonalCategoryDetail(personalSelectedCategory, cyc);
+      document.getElementById('personal-category-overview')?.classList.add('hidden');
+      document.getElementById('personal-category-detail')?.classList.remove('hidden');
+    } else {
+      personalSelectedCategory = '';
+      document.getElementById('personal-category-overview')?.classList.remove('hidden');
+      document.getElementById('personal-category-detail')?.classList.add('hidden');
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      ensureAirtmUsdcPanel();
+      upgradeLoanModalDOM();
+      refreshAirtmSubtitleDisplay();
+      if (typeof window.renderPersonalCategoryInsights === 'function') window.renderPersonalCategoryInsights();
+    });
+  } else {
+    ensureAirtmUsdcPanel();
+    upgradeLoanModalDOM();
+    refreshAirtmSubtitleDisplay();
+    if (typeof window.renderPersonalCategoryInsights === 'function') window.renderPersonalCategoryInsights();
+  }
+})();
+</script>
+
+
+
+<!-- ================================================================ -->
+<!-- PERSONAL ONLY · PREMIUM FINANCE DASHBOARD REFRESH v12             -->
+<!-- Inspired by modern personal-finance patterns; calculations intact. -->
+<!-- ================================================================ -->
+<style id="personal-finance-visual-refresh-v12">
+  /* This layer is intentionally scoped to Personal and its own editors. */
+  #view-personal {
+    padding-bottom: 116px !important;
+    row-gap: clamp(15px, 1.8vw, 22px) !important;
+  }
+
+  /* Main budget hero: stronger hierarchy, layered light/dark surfaces. */
+  #personal-hero-card {
+    position: relative !important;
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid rgba(104, 135, 177, .17) !important;
+    background:
+      radial-gradient(ellipse at 8% 4%, rgba(10,132,255,.12), transparent 42%),
+      radial-gradient(ellipse at 94% 88%, rgba(48,209,88,.075), transparent 38%),
+      linear-gradient(145deg, rgba(255,255,255,.99), rgba(244,248,253,.96)) !important;
+    box-shadow: 0 18px 46px rgba(23, 42, 70, .075),
+                0 2px 8px rgba(23, 42, 70, .025),
+                inset 0 1px 0 rgba(255,255,255,.95) !important;
+  }
+  #personal-hero-card::before {
+    content: "";
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    right: -115px;
+    top: -145px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(10,132,255,.11), transparent 68%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  #personal-hero-card > div:first-child { position: relative; z-index: 1; }
+  .dark #personal-hero-card {
+    border-color: rgba(120,170,230,.15) !important;
+    background:
+      radial-gradient(ellipse at 8% 4%, rgba(10,132,255,.19), transparent 43%),
+      radial-gradient(ellipse at 94% 88%, rgba(48,209,88,.09), transparent 38%),
+      linear-gradient(145deg, rgba(34,37,44,.98), rgba(20,22,27,.99)) !important;
+    box-shadow: 0 22px 54px rgba(0,0,0,.34),
+                0 2px 10px rgba(0,0,0,.22),
+                inset 0 1px 0 rgba(255,255,255,.055) !important;
+  }
+  .dark #personal-hero-card::before {
+    background: radial-gradient(circle, rgba(10,132,255,.18), transparent 68%);
+  }
+
+  /* Much larger, clearer progress ring on phone, tablet and desktop. */
+  #personal-hero-card .personal-ring-shell {
+    width: clamp(144px, 17vw, 196px) !important;
+    height: clamp(144px, 17vw, 196px) !important;
+    padding: 0 !important;
+    flex: 0 0 auto !important;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(10,132,255,.075) 0%, rgba(10,132,255,.025) 58%, transparent 72%);
+    filter: drop-shadow(0 8px 16px rgba(10,132,255,.10));
+    animation: personalRingEnter .72s cubic-bezier(.2,.8,.2,1) both;
+  }
+  #personal-hero-card .personal-ring-shell::before {
+    content: "";
+    position: absolute;
+    inset: 8%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,.72), rgba(255,255,255,0) 72%);
+    pointer-events: none;
+  }
+  .dark #personal-hero-card .personal-ring-shell {
+    background: radial-gradient(circle, rgba(10,132,255,.15) 0%, rgba(10,132,255,.045) 58%, transparent 74%);
+    filter: drop-shadow(0 8px 18px rgba(0,0,0,.24));
+  }
+  .dark #personal-hero-card .personal-ring-shell::before {
+    background: radial-gradient(circle, rgba(255,255,255,.07), rgba(255,255,255,0) 72%);
+  }
+  #personal-hero-card .personal-ring-svg {
+    position: relative;
+    z-index: 1;
+    display: block;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  #personal-hero-card .personal-ring-halo {
+    color: rgba(10,132,255,.30);
+    opacity: .5;
+  }
+  .dark #personal-hero-card .personal-ring-halo { color: rgba(100,190,255,.42); }
+  #personal-hero-card .personal-ring-track {
+    color: rgba(120,135,155,.17);
+  }
+  .dark #personal-hero-card .personal-ring-track { color: rgba(255,255,255,.105); }
+  #personal-hero-card #personal-ring-circle {
+    filter: drop-shadow(0 0 4px rgba(10,132,255,.28));
+    transition: stroke-dashoffset .95s cubic-bezier(.22,1,.36,1), filter .35s ease !important;
+  }
+  #personal-hero-card .personal-ring-center {
+    z-index: 2;
+  }
+  #personal-hero-card .personal-ring-center-label {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+    letter-spacing: .12em !important;
+    color: #818995 !important;
+  }
+  #personal-hero-card #personal-disp-eur {
+    display: block;
+    max-width: 100%;
+    font-size: clamp(17px, 4.3vw, 22px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -.055em !important;
+    font-weight: 850 !important;
+    text-shadow: 0 1px 0 rgba(255,255,255,.35);
+  }
+  #personal-hero-card .personal-ring-center-meta {
+    max-width: 118px !important;
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+    letter-spacing: .005em;
+    white-space: normal !important;
+    color: #0879e8 !important;
+  }
+  .dark #personal-hero-card .personal-ring-center-label { color: #9ca6b5 !important; }
+  .dark #personal-hero-card .personal-ring-center-meta { color: #64baff !important; }
+  .dark #personal-hero-card #personal-disp-eur { text-shadow: 0 1px 12px rgba(10,132,255,.12); }
+
+  /* Cycle controls and daily allowance read as one compact information group. */
+  #personal-hero-card #personal-days-remaining-pill,
+  #personal-hero-card #personal-days-remaining-pill-mobile {
+    border: 1px solid rgba(10,132,255,.15);
+    background: rgba(10,132,255,.09) !important;
+    font-weight: 750 !important;
+  }
+  #personal-hero-card #select-active-cycle,
+  #personal-hero-card #select-active-cycle-mobile {
+    min-height: 34px;
+    border-radius: 11px !important;
+    border-color: rgba(120,130,145,.18) !important;
+    background-color: rgba(120,130,145,.075) !important;
+  }
+  #personal-hero-card #personal-daily-allowance-mobile,
+  #personal-hero-card #personal-daily-allowance {
+    letter-spacing: -.035em;
+    font-variant-numeric: tabular-nums;
+  }
+  #personal-hero-card #personal-projection-banner {
+    border: 1px solid rgba(120,130,145,.10);
+    background: rgba(120,130,145,.055) !important;
+    border-radius: 14px !important;
+    min-height: 38px;
+  }
+  .dark #personal-hero-card #personal-projection-banner {
+    border-color: rgba(255,255,255,.065);
+    background: rgba(255,255,255,.045) !important;
+  }
+  #personal-hero-card .grid.grid-cols-3 > div {
+    min-width: 0;
+    border: 1px solid rgba(120,130,145,.10);
+    background: rgba(120,130,145,.055) !important;
+    border-radius: 14px !important;
+    transition: border-color .2s ease, transform .2s ease, background .2s ease;
+  }
+  #personal-hero-card .grid.grid-cols-3 > div:first-child { border-color: rgba(10,132,255,.17); }
+  #personal-hero-card .grid.grid-cols-3 > div:active { transform: scale(.985); }
+  .dark #personal-hero-card .grid.grid-cols-3 > div {
+    border-color: rgba(255,255,255,.07);
+    background: rgba(255,255,255,.045) !important;
+  }
+  .dark #personal-hero-card .grid.grid-cols-3 > div:first-child { border-color: rgba(100,190,255,.19); }
+
+  /* The Personal insights panel gets a more intentional dashboard hierarchy. */
+  #view-personal #personal-category-insights {
+    padding: clamp(15px, 2.2vw, 24px) !important;
+    border: 1px solid rgba(110,130,160,.16) !important;
+    border-radius: 25px !important;
+    background:
+      radial-gradient(ellipse at 100% 0%, rgba(10,132,255,.055), transparent 38%),
+      linear-gradient(145deg, rgba(255,255,255,.98), rgba(246,248,252,.96)) !important;
+    box-shadow: 0 16px 42px rgba(20,30,50,.055), inset 0 1px 0 rgba(255,255,255,.9) !important;
+  }
+  .dark #view-personal #personal-category-insights {
+    border-color: rgba(255,255,255,.085) !important;
+    background:
+      radial-gradient(ellipse at 100% 0%, rgba(10,132,255,.11), transparent 40%),
+      linear-gradient(145deg, rgba(34,36,42,.97), rgba(23,24,29,.98)) !important;
+    box-shadow: 0 18px 46px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.035) !important;
+  }
+  #view-personal #personal-category-insights .personal-studio-top {
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 3px;
+  }
+  #view-personal #personal-category-insights .personal-studio-eyebrow {
+    font-size: 9px !important;
+    letter-spacing: .16em !important;
+    color: #8490a0 !important;
+  }
+  #view-personal #personal-category-insights .personal-studio-top h3 {
+    font-size: clamp(17px, 2vw, 21px) !important;
+    letter-spacing: -.045em !important;
+    line-height: 1.12 !important;
+  }
+  #view-personal #personal-category-insights .personal-budget-edit {
+    min-height: 38px;
+    padding: 0 13px !important;
+    border-radius: 13px !important;
+    font-size: 10px !important;
+    box-shadow: 0 3px 10px rgba(10,132,255,.055);
+  }
+  #view-personal #personal-category-insights .personal-budget-summary {
+    gap: 9px !important;
+    margin: 16px 0 13px !important;
+  }
+  #view-personal #personal-category-insights .personal-budget-stat {
+    position: relative;
+    min-height: 86px;
+    padding: 12px 13px !important;
+    border-radius: 17px !important;
+    border: 1px solid rgba(120,130,145,.13) !important;
+    background: rgba(255,255,255,.66) !important;
+    box-shadow: 0 3px 12px rgba(20,30,50,.022), inset 0 1px 0 rgba(255,255,255,.8);
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  #view-personal #personal-category-insights .personal-budget-stat:active { transform: scale(.99); }
+  #view-personal #personal-category-insights .personal-budget-stat span {
+    font-size: 9px !important;
+    line-height: 1.25 !important;
+    letter-spacing: .045em !important;
+  }
+  #view-personal #personal-category-insights .personal-budget-stat strong {
+    margin-top: 8px !important;
+    font-size: clamp(16px, 1.8vw, 21px) !important;
+    letter-spacing: -.045em !important;
+    line-height: 1.08 !important;
+  }
+  #view-personal #personal-category-insights .personal-budget-stat small {
+    display: block;
+    margin-top: 5px !important;
+    font-size: 9px !important;
+    line-height: 1.25 !important;
+    color: #9299a4 !important;
+  }
+  .dark #view-personal #personal-category-insights .personal-budget-stat {
+    border-color: rgba(255,255,255,.075) !important;
+    background: rgba(255,255,255,.045) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+  }
+  .dark #view-personal #personal-category-insights .personal-budget-stat small { color: #9299a6 !important; }
+  #view-personal #personal-category-insights .personal-budget-stat:nth-child(1) { border-top-color: rgba(10,132,255,.38) !important; }
+  #view-personal #personal-category-insights .personal-budget-stat:nth-child(2) { border-top-color: rgba(255,149,0,.42) !important; }
+  #view-personal #personal-category-insights .personal-budget-stat:nth-child(3) { border-top-color: rgba(52,199,89,.42) !important; }
+  #view-personal #personal-category-insights .personal-budget-stat:nth-child(4) { border-top-color: rgba(88,86,214,.38) !important; }
+
+  /* Clearer budget-consumption strip and legend. */
+  #view-personal #copilot-master-bar-container {
+    margin: 11px 0 17px !important;
+    padding: 14px 15px !important;
+    border-radius: 19px !important;
+    border: 1px solid rgba(120,130,145,.12) !important;
+    background: rgba(120,130,145,.045) !important;
+  }
+  .dark #view-personal #copilot-master-bar-container {
+    border-color: rgba(255,255,255,.07) !important;
+    background: rgba(255,255,255,.035) !important;
+  }
+  #view-personal .copilot-segmented-track {
+    height: 12px !important;
+    background: rgba(120,130,145,.16) !important;
+    padding: 1px !important;
+    gap: 2px !important;
+  }
+  .dark #view-personal .copilot-segmented-track { background: rgba(255,255,255,.10) !important; }
+  #view-personal .copilot-seg { min-width: 0; }
+  #view-personal #copilot-master-status-left {
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+  }
+  #view-personal #copilot-master-status-right {
+    font-size: 10px !important;
+    white-space: nowrap;
+  }
+  #view-personal #copilot-leg-daily { font-size: 9px !important; }
+
+  /* Category cards: readable amounts, more obvious progress, calmer surfaces. */
+  #view-personal #personal-category-breakdown {
+    gap: 10px !important;
+  }
+  #view-personal .copilot-cat-card {
+    min-width: 0;
+    padding: 14px 15px !important;
+    border-radius: 19px !important;
+    border: 1px solid rgba(120,130,145,.13) !important;
+    background: rgba(255,255,255,.78) !important;
+    box-shadow: 0 4px 14px rgba(20,30,50,.025), inset 0 1px 0 rgba(255,255,255,.8) !important;
+  }
+  .dark #view-personal .copilot-cat-card {
+    border-color: rgba(255,255,255,.075) !important;
+    background: rgba(255,255,255,.045) !important;
+    box-shadow: 0 5px 18px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.025) !important;
+  }
+  #view-personal .copilot-cat-card:hover {
+    border-color: rgba(10,132,255,.34) !important;
+    box-shadow: 0 9px 24px rgba(10,132,255,.075) !important;
+  }
+  #view-personal .copilot-cat-card .w-9.h-9 {
+    width: 41px !important;
+    height: 41px !important;
+    border-radius: 15px !important;
+  }
+  #view-personal .copilot-cat-card p.text-xs { font-size: 12px !important; }
+  #view-personal .copilot-cat-card p.text-sm { font-size: 15px !important; letter-spacing: -.035em; }
+  #view-personal .copilot-cat-dual-track {
+    height: 9px !important;
+    margin-top: 12px !important;
+    background: rgba(120,130,145,.15) !important;
+  }
+  .dark #view-personal .copilot-cat-dual-track { background: rgba(255,255,255,.095) !important; }
+  #view-personal #personal-category-count { padding: 6px 9px !important; }
+
+  /* The desktop analytical donut gets the same visual weight as the hero ring. */
+  #view-personal #personal-desktop-analytics-panel {
+    border-radius: 20px !important;
+    border-color: rgba(120,130,145,.12) !important;
+    background: rgba(120,130,145,.045) !important;
+    gap: 16px !important;
+  }
+  .dark #view-personal #personal-desktop-analytics-panel {
+    border-color: rgba(255,255,255,.065) !important;
+    background: rgba(255,255,255,.025) !important;
+  }
+  #view-personal #personal-desktop-analytics-panel .relative.w-36.h-36 {
+    width: clamp(150px, 14vw, 176px) !important;
+    height: clamp(150px, 14vw, 176px) !important;
+  }
+  #view-personal #personal-desktop-analytics-panel #desktop-donut-center-value {
+    font-size: 17px !important;
+    letter-spacing: -.045em;
+  }
+  #view-personal #personal-desktop-analytics-panel #desktop-donut-center-label,
+  #view-personal #personal-desktop-analytics-panel #desktop-donut-center-sub { font-size: 9px !important; }
+
+  /* Mobile: ring remains dominant without squeezing cycle controls. */
+  @media (max-width: 639px) {
+    #view-personal { gap: 15px !important; }
+    #view-personal > .grid:first-child { gap: 12px !important; }
+    #personal-hero-card { padding: 14px 13px !important; border-radius: 23px !important; }
+    #personal-hero-card .personal-ring-shell {
+      width: clamp(140px, 39vw, 154px) !important;
+      height: clamp(140px, 39vw, 154px) !important;
+    }
+    #personal-hero-card .personal-ring-center-label { font-size: 9px !important; }
+    #personal-hero-card #personal-disp-eur { font-size: clamp(16px, 4.6vw, 19px) !important; }
+    #personal-hero-card .personal-ring-center-meta { font-size: 8px !important; max-width: 112px !important; }
+    #personal-hero-card .flex.items-center.gap-3\.5.sm\:gap-6 { gap: 11px !important; }
+    #personal-hero-card .grid.grid-cols-3 { gap: 6px !important; }
+    #personal-hero-card .grid.grid-cols-3 > div { padding: 8px 7px !important; }
+    #personal-hero-card .grid.grid-cols-3 > div p { font-size: 11px !important; }
+    #personal-hero-card .grid.grid-cols-3 > div span { font-size: 8px !important; }
+    #personal-hero-card #personal-daily-allowance-mobile {
+      font-size: 13px !important;
+      letter-spacing: -.045em;
+    }
+    #view-personal #personal-category-insights { padding: 15px 13px !important; border-radius: 22px !important; }
+    #view-personal #personal-category-insights .personal-studio-top h3 { font-size: 17px !important; }
+    #view-personal #personal-category-insights .personal-budget-summary { gap: 7px !important; margin: 13px 0 11px !important; }
+    #view-personal #personal-category-insights .personal-budget-stat { min-height: 78px; padding: 10px 10px !important; border-radius: 15px !important; }
+    #view-personal #personal-category-insights .personal-budget-stat span { font-size: 8.5px !important; }
+    #view-personal #personal-category-insights .personal-budget-stat strong { margin-top: 7px !important; font-size: clamp(15px, 4.2vw, 18px) !important; }
+    #view-personal #personal-category-insights .personal-budget-stat small { font-size: 8px !important; }
+    #view-personal #copilot-master-bar-container { padding: 11px 10px !important; margin: 9px 0 14px !important; }
+    #view-personal #copilot-master-bar-container > div:first-child { align-items: flex-start !important; }
+    #view-personal #copilot-master-status-left { max-width: 58%; }
+    #view-personal #copilot-master-bar-container > div:last-child { align-items: flex-start !important; }
+    #view-personal .copilot-cat-card { padding: 12px 12px !important; border-radius: 17px !important; }
+    #view-personal .copilot-cat-card .w-9.h-9 { width: 37px !important; height: 37px !important; border-radius: 13px !important; }
+    #view-personal .copilot-cat-card .text-sm { font-size: 14px !important; }
+    #view-personal .copilot-cat-dual-track { height: 8px !important; }
+    #personal-fixed-card { border-radius: 22px !important; }
+  }
+  @media (max-width: 380px) {
+    #personal-hero-card .personal-ring-shell { width: 138px !important; height: 138px !important; }
+    #personal-hero-card #personal-disp-eur { font-size: 15px !important; }
+    #personal-hero-card .personal-ring-center-meta { max-width: 102px !important; }
+  }
+  @media (min-width: 640px) and (max-width: 1023px) {
+    #personal-hero-card .personal-ring-shell { width: 174px !important; height: 174px !important; }
+    #personal-hero-card #personal-disp-eur { font-size: 25px !important; }
+  }
+  @media (min-width: 1024px) {
+    #personal-hero-card .personal-ring-shell { width: 192px !important; height: 192px !important; }
+    #personal-hero-card #personal-disp-eur { font-size: 26px !important; }
+  }
+  @keyframes personalRingEnter {
+    from { opacity: .45; transform: scale(.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #personal-hero-card .personal-ring-shell { animation: none !important; }
+    #personal-hero-card #personal-ring-circle,
+    #view-personal .copilot-cat-card,
+    #view-personal .personal-budget-stat { transition: none !important; }
+  }
+</style>
 
 </body>
 </html>
