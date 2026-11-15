@@ -3053,10 +3053,13 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
           <div class="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-4 sm:gap-6">
             <div class="space-y-2 sm:space-y-2.5 flex-1 min-w-0">
               <div class="flex items-center justify-between sm:justify-start gap-2.5">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-apple-gray-900/5 dark:bg-white/10 backdrop-blur-md">
+                <button type="button" id="btn-toggle-main-privacy" onclick="toggleMainCapitalPrivacy()" aria-pressed="false" title="Toca para ocultar o mostrar el saldo principal" class="hero-kicker-privacy-pill ios-tap inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-apple-gray-900/5 dark:bg-white/10 backdrop-blur-md hover:bg-apple-gray-900/10 dark:hover:bg-white/15 transition cursor-pointer">
                   <span class="w-2 h-2 rounded-full bg-apple-green shrink-0 shadow-sm shadow-apple-green/60"></span>
                   <span class="text-[10px] sm:text-[11px] font-extrabold tracking-wider uppercase text-apple-gray-600 dark:text-apple-gray-300 whitespace-nowrap">Patrimonio Operativo Neto</span>
-                </div>
+                  <span id="hero-privacy-icon-slot" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-apple-blue/12 dark:bg-white/15 text-apple-blue dark:text-white ml-1 shadow-sm transition-transform">
+                    <i data-lucide="eye" class="w-3 h-3 stroke-[2.4]"></i>
+                  </span>
+                </button>
                 <span id="airtm-status-badge" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-apple-green/15 text-apple-green ring-1 ring-apple-green/25">
                   Supabase Live
                 </span>
@@ -3097,9 +3100,9 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
 
           <!-- Apple Banking Portfolio Allocation Bar -->
           <div class="relative z-10 mt-5 sm:mt-6 pt-4 border-t border-apple-gray-200/50 dark:border-apple-gray-700/50">
-            <div class="flex items-center justify-between text-[10px] font-semibold text-apple-gray-400 mb-1.5">
-              <span class="uppercase tracking-wider font-bold">Distribución de Liquidez y Activos</span>
-              <span id="wealth-allocation-summary" class="font-mono text-[10px] text-apple-gray-500 dark:text-apple-gray-400">100% consolidado</span>
+            <div class="flex items-baseline justify-between gap-2 text-[10px] font-semibold text-apple-gray-400 mb-2">
+              <span class="uppercase tracking-wider font-bold truncate">Distribución de Liquidez y Activos</span>
+              <span id="wealth-allocation-summary" class="font-mono text-[10px] font-bold text-apple-gray-600 dark:text-apple-gray-300 text-right whitespace-nowrap shrink-0">100% consolidado</span>
             </div>
             <div class="wealth-allocation-bar" aria-hidden="true">
               <div id="alloc-seg-airtm" class="wealth-segment bg-apple-green" style="width: 25%" title="Airtm"></div>
@@ -3130,7 +3133,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
                 </span>
               </div>
               <p id="stat-total-bancos" class="stat-metric-number text-lg sm:text-xl font-extrabold font-mono text-apple-gray-900 dark:text-white mt-1.5 leading-tight whitespace-nowrap tracking-tight" style="font-variant-numeric: tabular-nums;">€0.00</p>
-              <span id="stat-bancos-eur-share" class="hero-metric-sub text-[9px] text-apple-gray-400 block mt-0.5">11 cuentas SEPA</span>
+              <span id="stat-bancos-eur-share" class="hero-metric-sub text-[9px] text-apple-gray-400 block mt-0.5">12 cuentas EUR</span>
             </div>
 
             <div class="hero-metric-tile p-3 sm:p-3.5 rounded-2xl" data-accent="bancos-pen">
@@ -3155,15 +3158,15 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
               <span id="stat-acciones-count" class="hero-metric-sub text-[9px] text-apple-gray-400 block mt-0.5">0 movs • Editar</span>
             </div>
 
-            <div class="hero-metric-tile p-3 sm:p-3.5 rounded-2xl" data-accent="prestamos">
+            <div onclick="jumpToDebtorsSection()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();jumpToDebtorsSection()}" class="ios-tap hero-metric-tile p-3 sm:p-3.5 rounded-2xl cursor-pointer transition group" data-accent="prestamos" title="Ir directo a Deudores">
               <div class="flex items-center justify-between gap-1.5">
                 <span class="text-[9px] sm:text-[10px] font-bold text-apple-gray-400 truncate uppercase tracking-wider">Préstamos</span>
-                <span class="hero-metric-icon bg-apple-indigo/12 text-apple-indigo">
+                <span class="hero-metric-icon bg-apple-indigo/12 text-apple-indigo group-hover:scale-105 transition">
                   <i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i>
                 </span>
               </div>
               <p id="stat-loans-to-capital" class="stat-metric-number text-lg sm:text-xl font-extrabold font-mono text-apple-indigo mt-1.5 leading-tight whitespace-nowrap tracking-tight" style="font-variant-numeric: tabular-nums;">€0.00</p>
-              <span class="hero-metric-sub text-[9px] text-apple-gray-400 block mt-0.5">Por cobrar neto</span>
+              <span class="hero-metric-sub text-[9px] text-apple-gray-400 block mt-0.5">Por cobrar • Ver deudores</span>
             </div>
 
             <div onclick="openModal('modal-edit-madre')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('modal-edit-madre')}" class="ios-tap hero-metric-tile p-3 sm:p-3.5 rounded-2xl cursor-pointer transition group" data-accent="madre">
@@ -3203,7 +3206,8 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
             </h2>
             <span class="text-[10px] font-medium text-apple-gray-400 whitespace-nowrap flex items-center gap-1">
               <i data-lucide="touchpad" class="w-3 h-3 opacity-60"></i>
-              <span>Toca cualquier cuenta para editar su saldo</span>
+              <span class="sm:hidden">Toca para editar</span>
+              <span class="hidden sm:inline">Toca cualquier cuenta para editar su saldo</span>
             </span>
           </div>
 
@@ -3260,6 +3264,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
                   <th class="py-3 px-2 text-right">ING</th>
                   <th class="py-3 px-2 text-right">Vivid</th>
                   <th class="py-3 px-2 text-right text-apple-blue font-bold">Sabadell</th>
+                  <th class="py-3 px-2 text-right text-apple-pink font-bold">Monzo</th>
                   <th class="py-3 px-2 text-right">BCP (S/.)</th>
                   <th class="py-3 px-2 text-right">Interb. (S/.)</th>
                   <th class="py-3 px-2 text-right">Por Cobrar</th>
@@ -3584,7 +3589,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
 
           <!-- Contacts Directory -->
-          <div class="apple-card min-w-0 rounded-3xl p-3.5 sm:p-5 shadow-ios-card">
+          <div id="debtors-directory-card" class="apple-card min-w-0 rounded-3xl p-3.5 sm:p-5 shadow-ios-card transition-shadow duration-300">
             <div class="flex items-center justify-between mb-3 gap-3">
               <h3 class="text-xs font-bold uppercase tracking-wider text-apple-gray-400">Deudas</h3>
               <div class="flex items-center gap-2 shrink-0">
@@ -3809,6 +3814,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
             <option value="Airtm">Airtm</option>
             <option value="Trade">Trade Republic</option>
             <option value="Vivid">Vivid</option>
+            <option value="Monzo">Monzo</option>
           </select>
           <p id="pay-fixed-bank-preview" class="text-[10px] text-apple-blue font-semibold mt-1 px-1">Saldo disponible en N26: €0.00</p>
         </div>
@@ -4081,6 +4087,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
                   <option class="bg-white dark:bg-[#1c1c1e]" value="Wise">Wise</option>
                   <option class="bg-white dark:bg-[#1c1c1e]" value="ING">ING</option>
                   <option class="bg-white dark:bg-[#1c1c1e]" value="Vivid">Vivid</option>
+                  <option class="bg-white dark:bg-[#1c1c1e]" value="Monzo">Monzo</option>
                   <option class="bg-white dark:bg-[#1c1c1e]" value="Trade">Trade</option>
                   <option class="bg-white dark:bg-[#1c1c1e]" value="Airtm">Airtm</option>
                   <option class="bg-white dark:bg-[#1c1c1e]" value="Otro">Otro</option>
@@ -4195,6 +4202,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
             <option value="Sabadell">Sabadell</option>
             <option value="Wise">Wise</option>
             <option value="ING">ING</option>
+            <option value="Monzo">Monzo</option>
           </select>
         </div>
 
@@ -4667,7 +4675,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
       bancos: {
         'Airtm': 920.00, 'N26': 137.00, 'Openbank': 0.00, 'BBVA': 5.00, 'Imagin': 83.00, 'Santander': 202.00,
         'Bunq': 8.00, 'Trade': 58.00, 'Wise': 193.00, 'ING': 316.00, 'Vivid': 30.00,
-        'Sabadell': 0.00, 'BCP': 314.00, 'Interbank': 401.00
+        'Sabadell': 0.00, 'Monzo': 0.00, 'BCP': 314.00, 'Interbank': 401.00
       },
       personalBudget: 600.00,
       personalCategoryBudgets: {},
@@ -4703,7 +4711,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
           bancos: {
             'Airtm': 920.0, 'N26': 137.0, 'Openbank': 0.0, 'BBVA': 5.0, 'Imagin': 83.0, 'Santander': 202.0,
             'Bunq': 8.0, 'Trade': 58.0, 'Wise': 193.0, 'ING': 316.0, 'Vivid': 30.0,
-            'Sabadell': 0.0, 'BCP': 314.0, 'Interbank': 401.0
+            'Sabadell': 0.0, 'Monzo': 0.0, 'BCP': 314.0, 'Interbank': 401.0
           },
           porCobrarEur: 1539.62,
           accionesEur: 300.0,
@@ -4756,6 +4764,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
       ING: 'ing.es',
       Vivid: 'vivid.money',
       Sabadell: 'bancsabadell.com',
+      Monzo: 'monzo.com',
       Interbank: 'interbank.pe',
       BCP: 'bcp.com.pe'
     };
@@ -4825,10 +4834,10 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
     }
 
     function formatEUR(val) {
-      return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(val || 0);
+      return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', useGrouping: 'always' }).format(Number(val) || 0);
     }
     function formatPEN(val) {
-      return `S/. ${(val || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      return `S/. ${new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: 'always' }).format(Number(val) || 0)}`;
     }
     function formatUSD(val) {
       return `$ ${(val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -4892,7 +4901,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
     // Orden visual fijo: Airtm siempre aparece primero en Bóvedas/Cuentas y editores.
     const BANK_ORDER = [
       'Airtm', 'N26', 'Openbank', 'BBVA', 'Imagin', 'Santander', 'Bunq',
-      'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell', 'BCP', 'Interbank'
+      'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell', 'Monzo', 'BCP', 'Interbank'
     ];
 
     function getOrderedBankNames(source = state.bancos) {
@@ -4908,6 +4917,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
       if (!state.bancos) state.bancos = {};
       if (state.bancos['Openbank'] === undefined) state.bancos['Openbank'] = 0;
       if (state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0;
+      if (state.bancos['Monzo'] === undefined) state.bancos['Monzo'] = 0;
       return state.bancos;
     }
 
@@ -4946,6 +4956,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
             hasCloudMainState = true;
             state.bancos = mainState.value.bancos || state.bancos;
             if (state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0.00;
+            if (state.bancos['Monzo'] === undefined) state.bancos['Monzo'] = 0.00;
             if (state.bancos['Openbank'] === undefined) state.bancos['Openbank'] = 0.00;
             state.acciones = mainState.value.acciones !== undefined ? mainState.value.acciones : state.acciones;
             state.accionesLog = mainState.value.accionesLog || state.accionesLog || [];
@@ -5036,6 +5047,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
               'ING': parseFloat(a.ing) || 0,
               'Vivid': parseFloat(a.vivid) || 0,
               'Sabadell': parseFloat(a.sabadell) || 0,
+              'Monzo': parseFloat(a.monzo) || 0,
               'BCP': parseFloat(a.bcp) || 0,
               'Interbank': parseFloat(a.interbank) || 0
             },
@@ -5055,6 +5067,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
               state.acciones = Number(latest.accionesEur || 0);
               state.capitalSolesMadre = Number(latest.capitalSolesMadre || state.capitalSolesMadre || 1365);
               if (state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0;
+      if (state.bancos['Monzo'] === undefined) state.bancos['Monzo'] = 0;
               if (state.bancos['Openbank'] === undefined) state.bancos['Openbank'] = 0;
 
               // Creamos también main_state para que a partir de ahora PC,
@@ -5221,7 +5234,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
     // Airtm es una cuenta operativa separada y NO forma parte
     // de la suma de bancos EUR. BCP + Interbank son PEN.
     // ==========================================================
-    const EURO_BANK_KEYS = ['N26', 'Openbank', 'BBVA', 'Imagin', 'Santander', 'Bunq', 'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell'];
+    const EURO_BANK_KEYS = ['N26', 'Openbank', 'BBVA', 'Imagin', 'Santander', 'Bunq', 'Trade', 'Wise', 'ING', 'Vivid', 'Sabadell', 'Monzo'];
     const PEN_BANK_KEYS = ['BCP', 'Interbank'];
 
     function getBankBalance(bankName, source = state.bancos) {
@@ -5377,9 +5390,9 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
       const shareAirtm = document.getElementById('stat-airtm-share');
       if (shareAirtm) shareAirtm.innerText = `${Math.round((Math.max(0, airtm) / positiveTotal) * 100)}% del activo`;
       const shareEur = document.getElementById('stat-bancos-eur-share');
-      if (shareEur) shareEur.innerText = `${Math.round((Math.max(0, totalBancos) / positiveTotal) * 100)}% en 11 cuentas`;
+      if (shareEur) shareEur.innerText = `${Math.round((Math.max(0, totalBancos) / positiveTotal) * 100)}% en 12 cuentas`;
       const allocSummary = document.getElementById('wealth-allocation-summary');
-      if (allocSummary) allocSummary.innerText = `Liquidez inmediata: ${formatEUR(airtm + totalBancos)}`;
+      if (allocSummary) allocSummary.innerText = `Liquidez: ${formatEUR(airtm + totalBancos)}`;
 
       // Alerta de fijos pendientes en el balance general
       const alertBadge = document.getElementById('airtm-fijos-alert-badge');
@@ -5476,6 +5489,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
           'ING': 'from-orange-500 to-amber-600',
           'Vivid': 'from-violet-600 to-purple-800',
           'Sabadell': 'from-sky-700 to-blue-900',
+          'Monzo': 'from-rose-500 to-orange-500',
           'BCP': 'from-blue-800 to-sky-900',
           'Interbank': 'from-emerald-600 to-teal-800'
         };
@@ -5666,7 +5680,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
       if (countPill) countPill.innerText = `${list.length} snapshots`;
 
       if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="21" class="py-8 text-center text-xs text-apple-gray-400">Sin snapshots registrados en la base de datos</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="22" class="py-8 text-center text-xs text-apple-gray-400">Sin snapshots registrados en la base de datos</td></tr>`;
         return;
       }
 
@@ -5767,6 +5781,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
           <td class="py-3 px-2 text-right">${b['ING'] !== undefined ? formatEUR(b['ING']) : '—'}</td>
           <td class="py-3 px-2 text-right">${b['Vivid'] !== undefined ? formatEUR(b['Vivid']) : '—'}</td>
           <td class="py-3 px-2 text-right text-apple-blue font-bold">${b['Sabadell'] !== undefined ? formatEUR(b['Sabadell']) : '—'}</td>
+          <td class="py-3 px-2 text-right text-apple-pink font-bold">${b['Monzo'] !== undefined ? formatEUR(b['Monzo']) : '—'}</td>
           <td class="py-3 px-2 text-right">${b['BCP'] !== undefined ? formatPEN(b['BCP']) : '—'}</td>
           <td class="py-3 px-2 text-right">${b['Interbank'] !== undefined ? formatPEN(b['Interbank']) : '—'}</td>
           <td class="py-3 px-2 text-right text-apple-blue">${formatEUR(item.porCobrarEur || 0)}</td>
@@ -5914,6 +5929,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
         ing: state.bancos['ING'] || 0,
         vivid: state.bancos['Vivid'] || 0,
         sabadell: state.bancos['Sabadell'] || 0,
+        monzo: state.bancos['Monzo'] || 0,
         bcp: state.bancos['BCP'] || 0,
         interbank: state.bancos['Interbank'] || 0,
         por_cobrar: calculateConsolidatedLoansNetEUR(),
@@ -5927,7 +5943,12 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
       };
 
       if (supabaseClient) {
-        const { error } = await supabaseClient.from('arqueos').insert(newSnap);
+        let { error } = await supabaseClient.from('arqueos').insert(newSnap);
+        if (error && String(error.message || '').toLowerCase().includes('monzo')) {
+          const { monzo, ...snapCompat } = newSnap;
+          const retry = await supabaseClient.from('arqueos').insert(snapCompat);
+          error = retry.error;
+        }
         if (error) throw error;
       } else {
         state.arqueoHistory.unshift({
@@ -5935,7 +5956,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
           gastosDia: newSnap.gasto_personal_dia, profitHoy: newSnap.profit, fxPen: state.fxRates?.PEN || 3.88,
           fxUsd: state.fxRates?.USD || 1.08, bancos: {
             Airtm:newSnap.airtm,N26:newSnap.n26,Openbank:newSnap.openbank,BBVA:newSnap.bbva,Imagin:newSnap.imagin,Santander:newSnap.santander,
-            Bunq:newSnap.bunq,Trade:newSnap.trade,Wise:newSnap.wise,ING:newSnap.ing,Vivid:newSnap.vivid,Sabadell:newSnap.sabadell,
+            Bunq:newSnap.bunq,Trade:newSnap.trade,Wise:newSnap.wise,ING:newSnap.ing,Vivid:newSnap.vivid,Sabadell:newSnap.sabadell,Monzo:newSnap.monzo,
             BCP:newSnap.bcp,Interbank:newSnap.interbank
           }, porCobrarEur:newSnap.por_cobrar, accionesEur:newSnap.acciones, capitalSolesMadre:newSnap.capital_soles
         });
@@ -7593,7 +7614,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
           Santander:'from-red-600 to-rose-800', Bunq:'from-pink-500 to-purple-600',
           Trade:'from-zinc-700 to-black', Wise:'from-lime-500 to-emerald-600',
           ING:'from-orange-500 to-amber-600', Vivid:'from-violet-600 to-purple-800',
-          Sabadell:'from-sky-700 to-blue-900', BCP:'from-blue-800 to-sky-900',
+          Sabadell:'from-sky-700 to-blue-900', Monzo:'from-rose-500 to-orange-500', BCP:'from-blue-800 to-sky-900',
           Interbank:'from-emerald-600 to-teal-800'
         };
 
@@ -9654,7 +9675,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
 
               latestImported = {
                 timestamp: ts,
-                bancos: { Airtm: airtm, N26: n26, Openbank: openbank, BBVA: bbva, Imagin: imagin, Santander: santan, Bunq: bunq, Trade: trade, Wise: wise, ING: ing, Vivid: vivid, Sabadell: 0, BCP: bcp, Interbank: interbank },
+                bancos: { Airtm: airtm, N26: n26, Openbank: openbank, BBVA: bbva, Imagin: imagin, Santander: santan, Bunq: bunq, Trade: trade, Wise: wise, ING: ing, Vivid: vivid, Sabadell: 0, Monzo: 0, BCP: bcp, Interbank: interbank },
                 acciones: parseFloat(row[25]) || 0,
                 capitalSolesMadre: parseFloat(row[27]) || 1365
               };
@@ -9732,6 +9753,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
         if (cached) {
           state = JSON.parse(cached);
           if (state.bancos && state.bancos['Sabadell'] === undefined) state.bancos['Sabadell'] = 0.00;
+          if (state.bancos && state.bancos['Monzo'] === undefined) state.bancos['Monzo'] = 0.00;
           if (state.bancos && state.bancos['Openbank'] === undefined) state.bancos['Openbank'] = 0.00;
           if (!state.fixedExpensesCycleState) state.fixedExpensesCycleState = {};
         }
@@ -10728,14 +10750,13 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
     panel.id = 'airtm-usdc-panel';
     panel.className = 'hidden';
     panel.innerHTML = `
-      <div class="flex items-center gap-2 flex-1 min-w-0">
-        <span class="px-2 py-1 rounded-lg bg-apple-green/20 text-apple-green text-[11px] font-black font-mono shrink-0">USDC</span>
-        <input id="airtm-usdc-input" type="text" inputmode="decimal" autocomplete="off" placeholder="Saldo USDC..."
+      <div class="flex items-center gap-2.5 flex-1 min-w-0">
+        <span class="px-2.5 py-1 rounded-xl bg-apple-green/20 text-apple-green text-[11px] font-black font-mono shrink-0 tracking-tight">USDC</span>
+        <input id="airtm-usdc-input" type="text" inputmode="decimal" autocomplete="off" placeholder="Saldo en USDC..."
                class="w-full bg-transparent text-base font-extrabold font-mono text-apple-gray-900 dark:text-white placeholder-apple-gray-400/70 focus:outline-none">
       </div>
-      <div class="text-right font-mono shrink-0 pl-2 border-l border-apple-green/25">
-        <span id="airtm-usdc-rate-badge" class="block text-xs font-black text-apple-green leading-tight">1€ = — USDC</span>
-        <small id="airtm-usdc-inverse-detail" class="block text-[9px] font-semibold text-apple-gray-400 mt-0.5">TC del momento</small>
+      <div class="text-right font-mono shrink-0 pl-3 border-l border-apple-green/25 flex items-center">
+        <span id="airtm-usdc-rate-badge" class="block text-xs font-black text-apple-green leading-tight whitespace-nowrap">1 USDC = — €</span>
       </div>
     `;
     hero.insertAdjacentElement('afterend', panel);
@@ -10752,35 +10773,24 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
     const usdc = parseLocaleNumber(usdcInput.value);
 
     if (eur > 0 && usdc > 0) {
-      const usdcPerEur = usdc / eur;
       const eurPerUsdc = eur / usdc;
-      if (badge) badge.textContent = `1€ = ${usdcPerEur.toFixed(3)} USDC`;
-      if (invDetail) invDetail.textContent = `1 USDC = ${eurPerUsdc.toFixed(3)} €`;
+      if (badge) badge.textContent = `1 USDC = ${eurPerUsdc.toFixed(3)} €`;
     } else {
-      if (badge) badge.textContent = '1€ = — USDC';
-      if (invDetail) invDetail.textContent = 'TC del momento';
+      if (badge) badge.textContent = '1 USDC = — €';
     }
   }
 
   function refreshAirtmSubtitleDisplay() {
     const meta = state.airtmUsdcMeta || loadAirtmMeta();
+    const eurRate = meta && meta.rateEurPerUsdc > 0
+      ? Number(meta.rateEurPerUsdc)
+      : (meta && meta.usdc > 0 && meta.eurSnapshot > 0 ? Number(meta.eurSnapshot) / Number(meta.usdc) : 0);
     const shareAirtm = document.getElementById('stat-airtm-share');
-    if (shareAirtm && meta && meta.usdc > 0 && meta.rateUsdcPerEur > 0) {
-      shareAirtm.textContent = `${meta.usdc.toFixed(2)} USDC · 1€=${meta.rateUsdcPerEur.toFixed(3)}`;
+    if (shareAirtm && meta && meta.usdc > 0 && eurRate > 0) {
+      shareAirtm.textContent = `${meta.usdc.toFixed(2)} USDC · 1 USDC = ${eurRate.toFixed(3)} €`;
     }
-    const cards = document.querySelectorAll('#bank-cards-grid .vault-bank-card');
-    cards.forEach(card => {
-      const nameEl = card.querySelector('.vault-bank-name');
-      if (nameEl && nameEl.textContent.trim() === 'Airtm' && meta && meta.usdc > 0 && meta.rateUsdcPerEur > 0) {
-        let badge = card.querySelector('.airtm-usdc-chip');
-        if (!badge) {
-          badge = document.createElement('div');
-          badge.className = 'airtm-usdc-chip mt-1 text-[9px] font-mono font-bold text-apple-green truncate';
-          card.appendChild(badge);
-        }
-        badge.textContent = `${meta.usdc.toFixed(2)} USDC (${meta.rateUsdcPerEur.toFixed(3)})`;
-      }
-    });
+    // Eliminar cualquier chip inferior en la bóveda de Airtm para mantener las 15 tarjetas con idéntica altura
+    document.querySelectorAll('#bank-cards-grid .airtm-usdc-chip').forEach(el => el.remove());
   }
 
   const origRenderAirtmModule = window.renderAirtmModule;
@@ -11755,6 +11765,592 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
     #view-personal .personal-budget-stat { transition: none !important; }
   }
 </style>
+
+
+<!-- ===================================================================== -->
+<!-- CAPITAL & LEDGER · ENGINE UNIFICADO v17 (MONZO + 3-COL MOBILE CLARITY) -->
+<!-- ===================================================================== -->
+<style id="capital-unified-polish-v17">
+  /* 1. Estilo refinado del Editor de Bóveda al editar datos y panel único USDC -> EUR */
+  #modal-quick-balance .bank-editor-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px !important;
+    padding: 15px !important;
+    transition: border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                background 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #modal-quick-balance .bank-editor-hero.is-airtm-mode {
+    background:
+      radial-gradient(circle at 95% 5%, rgba(0, 122, 255, 0.14), transparent 48%),
+      radial-gradient(circle at 5% 95%, rgba(52, 199, 89, 0.12), transparent 48%),
+      linear-gradient(145deg, rgba(244, 248, 255, 0.96), rgba(255, 255, 255, 0.98)) !important;
+    border: 1px solid rgba(0, 122, 255, 0.24) !important;
+    box-shadow: 0 10px 28px -10px rgba(0, 122, 255, 0.12) !important;
+  }
+  .dark #modal-quick-balance .bank-editor-hero.is-airtm-mode {
+    background:
+      radial-gradient(circle at 95% 5%, rgba(10, 132, 255, 0.22), transparent 48%),
+      radial-gradient(circle at 5% 95%, rgba(48, 209, 88, 0.14), transparent 48%),
+      linear-gradient(145deg, rgba(28, 36, 50, 0.96), rgba(22, 24, 30, 0.98)) !important;
+    border-color: rgba(100, 180, 255, 0.24) !important;
+    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.45) !important;
+  }
+
+  #airtm-usdc-panel {
+    margin-top: 10px !important;
+    padding: 10px 13px !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, rgba(52, 199, 89, 0.10), rgba(0, 122, 255, 0.06)) !important;
+    border: 1px solid rgba(52, 199, 89, 0.28) !important;
+    box-shadow: 0 4px 14px rgba(52, 199, 89, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .dark #airtm-usdc-panel {
+    background: linear-gradient(135deg, rgba(48, 209, 88, 0.14), rgba(10, 132, 255, 0.08)) !important;
+    border-color: rgba(48, 209, 88, 0.32) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  }
+  #airtm-usdc-panel:focus-within {
+    border-color: #34C759 !important;
+    box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.18), 0 6px 18px rgba(52, 199, 89, 0.10) !important;
+  }
+
+  /* 2. Píldora minimalista de días sin RECIBIR dinero */
+  .vault-header-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .vault-idle-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 5.5px;
+    border-radius: 999px;
+    font-size: 8.5px;
+    font-weight: 750;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    background: rgba(142, 142, 147, 0.12);
+    color: #8e8e93;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .dark .vault-idle-pill {
+    background: rgba(255, 255, 255, 0.08);
+    color: #98989d;
+  }
+  .vault-idle-pill.is-active-today {
+    background: rgba(52, 199, 89, 0.13);
+    color: #28a745;
+  }
+  .dark .vault-idle-pill.is-active-today {
+    background: rgba(48, 209, 88, 0.16);
+    color: #30d158;
+  }
+  .vault-idle-pill.is-stale {
+    background: rgba(255, 149, 0, 0.14);
+    color: #d97706;
+  }
+  .dark .vault-idle-pill.is-stale {
+    background: rgba(255, 159, 10, 0.18);
+    color: #ff9f0a;
+  }
+  .vault-idle-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.9;
+  }
+
+  /* 3. Cuadrícula Minimalista de 3 Columnas en Móvil (<640px):
+     Oculta exclusivamente el nombre del banco en móvil, dejando el logo oficial más grande
+     a la izquierda y la píldora de días sin recibir dinero a la derecha. */
+  @media (max-width: 639px) {
+    #bank-cards-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 0.5rem !important;
+    }
+    #bank-cards-grid .vault-bank-card {
+      padding: 0.65rem 0.68rem !important;
+      border-radius: 1.1rem !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      min-height: 82px !important;
+    }
+    #bank-cards-grid .vault-bank-card > div:first-child {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 4px !important;
+    }
+    #bank-cards-grid .vault-bank-card .bank-mini-logo {
+      width: 28px !important;
+      height: 28px !important;
+      border-radius: 8.5px !important;
+    }
+    /* Ocultar el nombre del banco únicamente en móvil para aprovechar todo el espacio */
+    #bank-cards-grid .vault-bank-card .vault-bank-name {
+      display: none !important;
+    }
+    #bank-cards-grid .vault-bank-card > div:nth-child(2) {
+      margin-top: 8px !important;
+    }
+    #bank-cards-grid .vault-bank-card .vault-bank-balance {
+      font-size: 13.5px !important;
+      line-height: 1.15 !important;
+      letter-spacing: -0.03em !important;
+    }
+    #bank-cards-grid .vault-bank-card .vault-delta-badge {
+      display: none !important;
+    }
+    #bank-cards-grid .vault-bank-card .airtm-usdc-chip {
+      font-size: 7.8px !important;
+      margin-top: 2px !important;
+      letter-spacing: -0.02em !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: clip !important;
+    }
+    /* Ajuste de columnas iniciales en la tabla de Arqueos en móvil para que Variación no quede cortada */
+    #arqueo-table-scroll table th:nth-child(1),
+    #arqueo-table-scroll table td:nth-child(1),
+    #arqueo-table-scroll table th:nth-child(2),
+    #arqueo-table-scroll table td:nth-child(2),
+    #arqueo-table-scroll table th:nth-child(3),
+    #arqueo-table-scroll table td:nth-child(3) {
+      padding-left: 0.45rem !important;
+      padding-right: 0.45rem !important;
+      font-size: 10.5px !important;
+    }
+    .table-scroll-shell::after {
+      width: 14px !important;
+    }
+  }
+
+  /* 4. Modo Privacidad integrado en la píldora "PATRIMONIO OPERATIVO NETO" y en el propio saldo */
+  #stat-airtm-capital-total {
+    cursor: pointer;
+    transition: filter 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.28s ease,
+                transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #stat-airtm-capital-total:active {
+    transform: scale(0.985);
+  }
+  #stat-airtm-capital-total.is-privacy-masked {
+    filter: blur(15px);
+    opacity: 0.52;
+    user-select: none;
+  }
+  .hero-kicker-privacy-pill.is-active {
+    background: rgba(0, 122, 255, 0.12) !important;
+    box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.25);
+  }
+  .dark .hero-kicker-privacy-pill.is-active {
+    background: rgba(10, 132, 255, 0.18) !important;
+    box-shadow: inset 0 0 0 1px rgba(100, 210, 255, 0.28);
+  }
+  .hero-kicker-privacy-pill.is-active #hero-privacy-icon-slot {
+    color: #007AFF !important;
+  }
+  .dark .hero-kicker-privacy-pill.is-active #hero-privacy-icon-slot {
+    color: #64D2FF !important;
+  }
+
+  /* 5. Compactación vertical del bloque Patrimonio Operativo Neto (#hero-capital-card),
+     ajuste proporcional de la línea de evolución (sparkline) y margen inferior de scroll */
+  #hero-capital-card {
+    padding: 1.15rem 1.35rem !important;
+  }
+  #hero-capital-card .hero-sparkline-backdrop {
+    top: 32px !important;
+    height: 118px !important;
+    opacity: 0.88 !important;
+  }
+  .dark #hero-capital-card .hero-sparkline-backdrop {
+    opacity: 0.95 !important;
+  }
+  #hero-capital-card .relative.z-10.mt-5.sm\:mt-6 {
+    margin-top: 0.85rem !important;
+    padding-top: 0.7rem !important;
+  }
+  #hero-metrics-grid {
+    margin-top: 0.65rem !important;
+    gap: 0.5rem !important;
+  }
+  #hero-metrics-grid .hero-metric-tile {
+    padding: 0.6rem 0.75rem !important;
+  }
+  #hero-metrics-grid .stat-metric-number {
+    margin-top: 0.25rem !important;
+  }
+
+  @media (max-width: 639px) {
+    #hero-capital-card {
+      padding: 0.88rem 0.95rem !important;
+      border-radius: 1.35rem !important;
+    }
+    #hero-capital-card #stat-airtm-capital-total {
+      font-size: clamp(31px, 8.2vw, 39px) !important;
+      line-height: 0.96 !important;
+    }
+    /* En móvil reducimos los márgenes verticales de los semáforos y barra de liquidez */
+    #hero-capital-card .space-y-2 {
+      row-gap: 0.3rem !important;
+    }
+    #hero-capital-card .pt-1.flex.flex-wrap {
+      padding-top: 0.15rem !important;
+      gap: 0.35rem !important;
+    }
+    #hero-capital-card #airtm-mother-badge,
+    #hero-capital-card #airtm-fijos-alert-badge {
+      padding: 0.2rem 0.6rem !important;
+      font-size: 10.5px !important;
+    }
+    #hero-capital-card .relative.z-10.mt-5.sm\:mt-6 {
+      margin-top: 0.68rem !important;
+      padding-top: 0.55rem !important;
+    }
+    #hero-capital-card .wealth-allocation-bar {
+      height: 7px !important;
+    }
+    /* Línea de evolución (sparkline) perfectamente encajada en el hueco superior derecho del Hero compacto */
+    #hero-capital-card .hero-sparkline-backdrop {
+      top: 38px !important;
+      left: 16% !important;
+      right: -4px !important;
+      height: 92px !important;
+      opacity: 0.86 !important;
+      mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.35) 18%, rgba(0,0,0,0.95) 45%, #000 78%),
+                  linear-gradient(180deg, rgba(0,0,0,0.12) 0%, #000 22%, #000 80%, transparent 100%) !important;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.35) 18%, rgba(0,0,0,0.95) 45%, #000 78%) !important;
+    }
+    .dark #hero-capital-card .hero-sparkline-backdrop {
+      opacity: 0.94 !important;
+    }
+    /* Cuadrícula interna del Hero más baja y compacta */
+    #hero-metrics-grid {
+      margin-top: 0.55rem !important;
+      padding-top: 0 !important;
+      gap: 0.42rem !important;
+    }
+    #hero-metrics-grid .hero-metric-tile {
+      padding: 0.52rem 0.68rem !important;
+      border-radius: 0.95rem !important;
+    }
+    #hero-metrics-grid .hero-metric-icon {
+      width: 24px !important;
+      height: 24px !important;
+      border-radius: 7.5px !important;
+    }
+    #hero-metrics-grid .stat-metric-number {
+      font-size: clamp(0.92rem, 4vw, 1.08rem) !important;
+      margin-top: 0.2rem !important;
+      line-height: 1.12 !important;
+    }
+    #hero-metrics-grid .hero-metric-sub {
+      font-size: 8.5px !important;
+      margin-top: 1px !important;
+    }
+    #hero-profit-tile {
+      padding: 0.45rem 0.72rem !important;
+    }
+    /* Espacio inferior extra al hacer scroll hasta el final para que la barra flotante nunca tape la tabla */
+    main {
+      padding-bottom: calc(6.8rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    #view-airtm,
+    #view-prestamos {
+      padding-bottom: 1.5rem !important;
+    }
+  }
+
+
+  @keyframes debtorsCardPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.45); border-color: rgba(0, 122, 255, 0.65); }
+    50%  { box-shadow: 0 0 0 6px rgba(0, 122, 255, 0.14); border-color: rgba(0, 122, 255, 0.55); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0); }
+  }
+  .debtors-focus-pulse {
+    animation: debtorsCardPulse 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+</style>
+
+<script id="capital-unified-logic-v17">
+(function initCapitalUnifiedV17() {
+  const BANK_INFLOW_KEY = 'CAPITAL_LEDGER_BANK_LAST_INFLOW_V1';
+  const MAIN_PRIVACY_KEY = 'CAPITAL_LEDGER_HIDE_MAIN_BALANCE_V1';
+
+  // Garantizar que Monzo exista siempre con saldo 0.00 por defecto si aún no estaba en el estado
+  if (typeof state === 'object' && state && state.bancos) {
+    if (state.bancos['Monzo'] === undefined) {
+      state.bancos['Monzo'] = 0.00;
+    }
+  }
+
+  function loadJsonStorage(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function saveJsonStorage(key, val) {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch (e) {}
+  }
+
+  function getBankLastInflowMap() {
+    const stored = loadJsonStorage(BANK_INFLOW_KEY, {});
+    const latestInflowDates = { ...stored };
+
+    const registerInflowDate = (bank, dateStr) => {
+      if (!bank || !dateStr) return;
+      const cleanDate = String(dateStr).slice(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) return;
+      if (!latestInflowDates[bank] || cleanDate > latestInflowDates[bank]) {
+        latestInflowDates[bank] = cleanDate;
+      }
+    };
+
+    const sortedArq = [...(state.arqueoHistory || [])]
+      .sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')));
+
+    for (let i = 0; i < sortedArq.length; i++) {
+      const curr = sortedArq[i];
+      const prev = i > 0 ? sortedArq[i - 1] : null;
+      const dateOnly = String(curr.timestamp || '').slice(0, 10);
+      const banksObj = curr.bancos || {};
+
+      Object.keys(banksObj).forEach(bankName => {
+        const currVal = Number(banksObj[bankName] || 0);
+        const prevVal = prev && prev.bancos ? Number(prev.bancos[bankName] || 0) : null;
+        if (prevVal !== null && (currVal - prevVal) >= 0.01) {
+          registerInflowDate(bankName, dateOnly);
+        } else if (prevVal === null && currVal > 0 && !latestInflowDates[bankName]) {
+          registerInflowDate(bankName, dateOnly);
+        }
+      });
+    }
+
+    if (sortedArq.length > 0 && state.bancos) {
+      const latestSnap = sortedArq[sortedArq.length - 1];
+      const todayIso = getLocalDateISO(new Date());
+      Object.keys(state.bancos).forEach(bankName => {
+        const liveVal = Number(state.bancos[bankName] || 0);
+        const snapVal = latestSnap.bancos ? Number(latestSnap.bancos[bankName] || 0) : 0;
+        if ((liveVal - snapVal) >= 0.01) {
+          registerInflowDate(bankName, todayIso);
+        }
+      });
+    }
+
+    return latestInflowDates;
+  }
+
+  function markBankReceivedMoneyToday(bankName) {
+    if (!bankName) return;
+    const today = getLocalDateISO(new Date());
+    const stored = loadJsonStorage(BANK_INFLOW_KEY, {});
+    stored[bankName] = today;
+    saveJsonStorage(BANK_INFLOW_KEY, stored);
+  }
+
+  function computeDaysWithoutInflow(lastDateStr) {
+    if (!lastDateStr) return null;
+    const parts = String(lastDateStr).slice(0, 10).split('-').map(Number);
+    if (parts.length !== 3) return null;
+    const last = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+    return Math.max(0, Math.round((today - last) / 86400000));
+  }
+
+  function injectBankIdleCounters() {
+    const cards = document.querySelectorAll('#bank-cards-grid .vault-bank-card');
+    if (!cards.length) return;
+    const lastInflowMap = getBankLastInflowMap();
+
+    cards.forEach(card => {
+      const nameEl = card.querySelector('.vault-bank-name');
+      if (!nameEl) return;
+      const bankName = nameEl.textContent.trim();
+      const days = computeDaysWithoutInflow(lastInflowMap[bankName]);
+
+      const headerRow = card.firstElementChild;
+      if (!headerRow) return;
+
+      let rightWrap = headerRow.querySelector('.vault-header-right');
+      if (!rightWrap) {
+        rightWrap = document.createElement('div');
+        rightWrap.className = 'vault-header-right';
+        const existingArrow = headerRow.querySelector('.vault-delta-badge');
+        if (existingArrow) {
+          rightWrap.appendChild(existingArrow);
+        }
+        headerRow.appendChild(rightWrap);
+      }
+
+      let pill = rightWrap.querySelector('.vault-idle-pill');
+      if (!pill) {
+        pill = document.createElement('span');
+        pill.className = 'vault-idle-pill';
+        rightWrap.appendChild(pill);
+      }
+
+      if (days === null) {
+        pill.className = 'vault-idle-pill';
+        pill.innerHTML = `<span class="vault-idle-dot"></span><span>—</span>`;
+        pill.title = 'Cuenta nueva / sin ingresos registrados aún';
+      } else if (days === 0) {
+        pill.className = 'vault-idle-pill is-active-today';
+        pill.innerHTML = `<span class="vault-idle-dot"></span><span>Hoy</span>`;
+        pill.title = 'Recibió dinero hoy';
+      } else if (days >= 7) {
+        pill.className = 'vault-idle-pill is-stale';
+        pill.innerHTML = `<span class="vault-idle-dot"></span><span>${days}d</span>`;
+        pill.title = `${days} días sin recibir dinero`;
+      } else {
+        pill.className = 'vault-idle-pill';
+        pill.innerHTML = `<span class="vault-idle-dot"></span><span>${days}d</span>`;
+        pill.title = `Último ingreso hace ${days} día${days === 1 ? '' : 's'}`;
+      }
+    });
+  }
+
+  function isMainBalanceHidden() {
+    return localStorage.getItem(MAIN_PRIVACY_KEY) === '1';
+  }
+
+  function applyMainBalancePrivacyState() {
+    const statCap = document.getElementById('stat-airtm-capital-total');
+    const btn = document.getElementById('btn-toggle-main-privacy');
+    const iconSlot = document.getElementById('hero-privacy-icon-slot');
+    const hidden = isMainBalanceHidden();
+
+    if (statCap) {
+      statCap.classList.toggle('is-privacy-masked', hidden);
+      statCap.title = hidden ? 'Toca para mostrar el saldo' : 'Toca para ocultar el saldo';
+      if (!statCap.dataset.privacyTapBound) {
+        statCap.dataset.privacyTapBound = '1';
+        statCap.addEventListener('click', () => window.toggleMainCapitalPrivacy());
+      }
+    }
+    if (btn) {
+      btn.classList.toggle('is-active', hidden);
+      btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+    }
+    if (iconSlot) {
+      iconSlot.innerHTML = hidden
+        ? '<i data-lucide="eye-off" class="w-3 h-3 stroke-[2.4]"></i>'
+        : '<i data-lucide="eye" class="w-3 h-3 stroke-[2.4]"></i>';
+      refreshIcons(iconSlot);
+    }
+  }
+
+  
+  window.jumpToDebtorsSection = function() {
+    if (typeof window.triggerHaptic === 'function') window.triggerHaptic('light');
+    if (typeof window.switchTab === 'function') {
+      window.switchTab('prestamos');
+    }
+    if (typeof window.setDebtorsDirectoryView === 'function') {
+      window.setDebtorsDirectoryView('active');
+    }
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const card = document.getElementById('debtors-directory-card') || document.getElementById('debtors-directory-list');
+        if (card) {
+          const headerOffset = 76;
+          const rect = card.getBoundingClientRect();
+          const targetY = Math.max(0, (window.scrollY || window.pageYOffset || 0) + rect.top - headerOffset);
+          window.scrollTo({ top: targetY, behavior: 'smooth' });
+          card.classList.remove('debtors-focus-pulse');
+          void card.offsetWidth;
+          card.classList.add('debtors-focus-pulse');
+          setTimeout(() => card.classList.remove('debtors-focus-pulse'), 950);
+        }
+      }, 65);
+    });
+  };
+
+  window.toggleMainCapitalPrivacy = function() {
+    const nextState = !isMainBalanceHidden();
+    try {
+      localStorage.setItem(MAIN_PRIVACY_KEY, nextState ? '1' : '0');
+    } catch (e) {}
+    if (typeof window.triggerHaptic === 'function') window.triggerHaptic('selection');
+    applyMainBalancePrivacyState();
+  };
+
+  const _prevOpenModal = window.openModal;
+  if (typeof _prevOpenModal === 'function') {
+    window.openModal = function(id) {
+      _prevOpenModal.apply(this, arguments);
+      if (id === 'modal-quick-balance') {
+        const selected = state.quickBalanceBank || 'Airtm';
+        const hero = document.getElementById('bank-editor-hero');
+        const kicker = document.getElementById('quick-balance-kicker');
+        const isAirtm = selected === 'Airtm';
+        if (hero) hero.classList.toggle('is-airtm-mode', isAirtm);
+        if (isAirtm && kicker) {
+          kicker.textContent = 'BÓVEDA AIRTM · USDC → EUR';
+        }
+      }
+    };
+  }
+
+  const _prevHandleSaveBanks = window.handleSaveBanks;
+  if (typeof _prevHandleSaveBanks === 'function') {
+    window.handleSaveBanks = async function(e) {
+      const selected = state.quickBalanceBank;
+      const mainInput = document.getElementById('bank-interactive-input');
+      const prevBal = selected && state.bancos ? Number(state.bancos[selected] || 0) : 0;
+      const nextBal = mainInput ? parseLocaleNumber(mainInput.value) : prevBal;
+
+      if (selected && (nextBal - prevBal) >= 0.01) {
+        markBankReceivedMoneyToday(selected);
+      }
+
+      const res = await _prevHandleSaveBanks.apply(this, arguments);
+      injectBankIdleCounters();
+      return res;
+    };
+  }
+
+  const _prevRenderAirtm = window.renderAirtmModule;
+  if (typeof _prevRenderAirtm === 'function') {
+    window.renderAirtmModule = function() {
+      if (state.bancos && state.bancos['Monzo'] === undefined) {
+        state.bancos['Monzo'] = 0.00;
+      }
+      const res = _prevRenderAirtm.apply(this, arguments);
+      applyMainBalancePrivacyState();
+      injectBankIdleCounters();
+      return res;
+    };
+  }
+
+  requestAnimationFrame(() => {
+    if (typeof renderAirtmModule === 'function') {
+      renderAirtmModule();
+    } else {
+      applyMainBalancePrivacyState();
+      injectBankIdleCounters();
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
